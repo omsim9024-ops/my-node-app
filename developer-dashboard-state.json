@@ -1,0 +1,15 @@
+{
+  "maintenanceMode": true,
+  "selectedTenantId": 15,
+  "featureFlags": {
+    "systemHealthMonitoring": true,
+    "realtimeAnalytics": true,
+    "securityPanel": true,
+    "databaseManagement": true,
+    "errorDebugConsole": true,
+    "userActivityTracker": true,
+    "apiMonitoring": true,
+    "performanceInsights": true,
+    "versionControlPanel": true
+  }
+}

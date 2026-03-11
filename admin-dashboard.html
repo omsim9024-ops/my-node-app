@@ -1,0 +1,3251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+     <link rel="icon" href="cnhs_logo.png" type="image/png" id="schoolFavicon" />
+    <link rel="stylesheet" href="admin-dashboard.css?v=20260304-4" />
+    <link rel="stylesheet" href="messaging.css" />
+  </head>
+  <body>
+    <script src="theme-manager.js"></script>
+    <!-- Header Bar -->
+    <header class="header">
+      <div class="header-left">
+        <button class="hamburger" id="hamburgerBtn">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="logo-section">
+          <img src="cnhs_logo.png" alt="School Logo" class="logo" id="schoolLogo" />
+          <div class="logo-text">
+            <h1 id="schoolName">School Enrollment System</h1>
+            <p>School Enrollment System</p>
+          </div>
+        </div>
+      </div>
+
+        <!-- Subject Assignment Modal (Assign subjects & sections to a teacher) -->
+        <div id="subjectAssignmentModal" class="modal" aria-hidden="true">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Assign Subjects & Sections</h2>
+              <button class="modal-close" id="closeSubjectAssignmentModal" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body">
+              <form id="subjectAssignmentForm" onsubmit="event.preventDefault(); event.stopPropagation(); if (typeof window.submitSubjectAssignmentsModal === 'function') { window.submitSubjectAssignmentsModal(); } return false;">
+                <input type="hidden" id="subjectAssignTeacherId" />
+                <div class="form-group">
+                  <label>Teacher</label>
+                  <div style="background:#f5f5f5;padding:12px;border-radius:6px;margin-bottom:12px;">
+                    <p><strong>Name:</strong> <span id="subjectAssignTeacherName">--</span></p>
+                    <p><strong>Email:</strong> <span id="subjectAssignTeacherEmail">--</span></p>
+                  </div>
+                </div>
+
+                <div style="margin-bottom:10px; display:flex; gap:8px; align-items:center;">
+                  <button type="button" id="subjectAddRowBtn" class="btn btn-sm btn-secondary">+ Add Subject Row</button>
+                  <div style="margin-left:auto; color:#666; font-weight:600;">Using active school year</div>
+                </div>
+
+                <div id="subjectModalSubjectLoadsContainer">
+                  <p class="no-data">No subject rows added. Click "+ Add Subject Row" to begin.</p>
+                </div>
+
+                <div class="form-actions" style="margin-top:12px;">
+                  <button type="button" id="subjectAssignCancelBtn" class="btn btn-secondary">Cancel</button>
+                  <button type="submit" id="subjectAssignSaveBtn" class="btn btn-primary" onclick="event.preventDefault(); event.stopPropagation(); if (typeof window.submitSubjectAssignmentsModal === 'function') { window.submitSubjectAssignmentsModal(); } return false;">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separate SHS Modal for Assign Subjects & Sections -->
+        <div id="subjectAssignmentModalSHS" class="modal" aria-hidden="true">
+          <div class="modal-content modal-subject-assignment">
+            <div class="modal-header modal-header-gradient">
+              <div class="modal-header-left">
+                <h2>Assign Subjects & Sections</h2>
+                <p class="modal-subtitle">Senior High Program</p>
+              </div>
+              <button class="modal-close" id="closeSubjectAssignmentModalSHS" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body">
+              <form id="subjectAssignmentFormSHS" onsubmit="event.preventDefault(); event.stopPropagation(); if (typeof window.submitSubjectAssignmentsModalSHS === 'function') { window.submitSubjectAssignmentsModalSHS(); } return false;">
+                <input type="hidden" id="subjectAssignTeacherIdSHS" />
+                <div class="form-group">
+                  <label class="form-label-main">Teacher Information</label>
+                  <div class="teacher-info-card">
+                    <div class="teacher-info-row">
+                      <span class="teacher-info-label">Name:</span>
+                      <span class="teacher-info-value" id="subjectAssignTeacherNameSHS">--</span>
+                    </div>
+                    <div class="teacher-info-row">
+                      <span class="teacher-info-label">Email:</span>
+                      <span class="teacher-info-value" id="subjectAssignTeacherEmailSHS">--</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="subject-assignment-controls">
+                  <button type="button" id="subjectAddRowBtnSHS" class="btn btn-add-row">
+                    <span class="btn-icon">+</span>
+                    Add Subject & Section
+                  </button>
+                  <div class="school-year-badge">
+                    <span class="badge-label">School Year:</span>
+                    <span class="badge-value">Active</span>
+                  </div>
+                </div>
+
+                <div class="subject-assignments-section">
+                  <div id="subjectModalSubjectLoadsContainerSHS" class="subject-loads-container">
+                    <div class="no-assignments-state">
+                      <p class="no-data-icon">📚</p>
+                      <p class="no-data">No subject assignments yet</p>
+                      <p class="no-data-hint">Click "Add Subject & Section" to begin</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-actions modal-form-actions">
+                  <button type="button" id="subjectAssignCancelBtnSHS" class="btn btn-secondary">Cancel</button>
+                  <button type="submit" id="subjectAssignSaveBtnSHS" class="btn btn-primary" onclick="event.preventDefault(); event.stopPropagation(); if (typeof window.submitSubjectAssignmentsModalSHS === 'function') { window.submitSubjectAssignmentsModalSHS(); } return false;">Save Assignments</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      <div class="header-right">
+        <button class="header-icon notification-btn" id="adminNotificationBtn" title="Notifications">
+          🔔
+          <span class="notification-badge" id="notificationBadge">3</span>
+        </button>
+
+        <button class="header-icon settings-btn" id="adminSettingsBtn" title="Settings">⚙️</button>
+
+        <button class="header-icon theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark Mode" data-theme="light">
+          🌙
+        </button>
+
+        <button class="header-icon chat-btn" id="chatBtn" title="Messages">💬<span class="chat-badge" id="chatBadge" style="display:none">0</span></button>
+
+        <div class="profile-dropdown">
+          <button class="profile-btn" id="profileBtn">
+            <span class="avatar">👤</span>
+            <span class="profile-name" id="adminName">Admin</span>
+          </button>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" class="dropdown-item">My Profile</a>
+            <a href="#" class="dropdown-item">Account Settings</a>
+            <hr />
+            <a href="#" class="dropdown-item logout" id="logoutBtn">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-menu">
+        <a href="#dashboard" class="menu-item active" data-section="dashboard">
+          <span class="menu-icon">📊</span>
+          <span class="menu-label">Dashboard</span>
+        </a>
+        <a href="#school-years" class="menu-item" data-section="school-years">
+          <span class="menu-icon">📅</span>
+          <span class="menu-label">School Years</span>
+        </a>
+        <div class="menu-group" id="studentManagementGroup">
+          <button
+            class="menu-item menu-toggle"
+            aria-expanded="false"
+            data-section="students"
+          >
+            <span class="menu-icon">👥</span>
+            <span class="menu-label">Student Management</span>
+            <span class="chevron">▸</span>
+          </button>
+          <div class="submenu" aria-hidden="true">
+            <a
+              href="#directory"
+              class="menu-item submenu-item"
+              data-section="directory"
+            >
+              <span class="menu-icon">📋</span>
+              <span class="menu-label">Student Directory</span>
+            </a>
+            <a
+              href="#enrollment"
+              class="menu-item submenu-item"
+              data-section="enrollment"
+            >
+              <span class="menu-icon">📝</span>
+              <span class="menu-label">Enrollment</span>
+            </a>
+           
+            <a
+              href="#sections"
+              class="menu-item submenu-item"
+              data-section="sections"
+            >
+              <span class="menu-icon">🏫</span>
+              <span class="menu-label">Sections</span>
+            </a>
+            <a
+              href="#section-assignment"
+              class="menu-item submenu-item"
+              data-section="section-assignment"
+            >
+              <span class="menu-icon">👥</span>
+              <span class="menu-label">Section Assignment</span>
+            </a>
+          </div>
+        </div>
+        <div class="menu-group" id="reportsGroup">
+          <button
+            class="menu-item menu-toggle"
+            aria-expanded="false"
+            data-section="reports"
+          >
+            <span class="menu-icon">📈</span>
+            <span class="menu-label">Reports &amp; Analytics</span>
+            <span class="chevron">▸</span>
+          </button>
+          <div class="submenu" aria-hidden="true">
+            <a
+              href="#standard-reports"
+              class="menu-item submenu-item"
+              data-section="standard-reports"
+            >
+              <span class="menu-icon">📄</span>
+              <span class="menu-label">Standard Reports</span>
+            </a>
+           
+            <a
+              href="#data-visualization"
+              class="menu-item submenu-item"
+              data-section="data-visualization"
+            >
+              <span class="menu-icon">📊</span>
+              <span class="menu-label">Data Visualization</span>
+            </a>
+          </div>
+        </div>
+        <div class="menu-group" id="teachersGroup">
+          <button
+            class="menu-item menu-toggle"
+            aria-expanded="false"
+            data-section="teachers"
+          >
+            <span class="menu-icon">👨‍🏫</span>
+            <span class="menu-label">Teachers</span>
+            <span class="chevron">▸</span>
+          </button>
+          <div class="submenu" aria-hidden="true">
+            <a
+              href="#teacher-registration"
+              class="menu-item submenu-item"
+              data-section="teacher-registration"
+            >
+              <span class="menu-icon">📝</span>
+              <span class="menu-label">Teachers</span>
+            </a>
+          </div>
+        </div>
+
+       
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div id="topActiveSchoolYearBanner" class="top-active-school-year-banner" aria-live="polite">
+        Active School Year: --
+      </div>
+
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="section active">
+        <div class="section-header">
+          <h2>Dashboard</h2>
+          <p class="section-subtitle">Welcome to the admin panel</p>
+        </div>
+
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h3>Total Students</h3>
+              <p class="stat-value" id="totalStudents">--</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+              <h3>Pending Enrollments</h3>
+              <p class="stat-value" id="pendingEnrollments">--</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <h3>Approved Enrollments</h3>
+              <p class="stat-value" id="approvedEnrollments">--</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+              <h3>Rejected Enrollments</h3>
+              <p class="stat-value" id="rejectedEnrollments">--</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-content">
+          <div class="content-card">
+            <div class="card-header">
+              <h3>Recent Enrollments</h3>
+              <a href="#" id="recentEnrollmentsToggle" class="view-all">View All →</a>
+            </div>
+            <div style="overflow-x: auto;">
+              <table class="enrollments-table" style="width: 100%; border-collapse: collapse; background: white;">
+                <thead style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                  <tr>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">LRN</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Student Name</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Grade Level</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Section</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Track</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Elective/s</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Status</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Date Submitted</th>
+                  </tr>
+                </thead>
+                <tbody id="recentEnrollments">
+                  <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td colspan="8" style="padding: 40px; text-align: center; color: #999;">Loading enrollments...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- School Years Section -->
+      <section id="school-years" class="section">
+        <div class="section-header">
+          <h2>School Years</h2>
+          <p class="section-subtitle">Manage school years and set active year</p>
+        </div>
+
+        <!-- Active School Year Display -->
+        <div class="content-card active-year-card">
+          <div class="active-year-header">
+            <h3>📅 Active School Year</h3>
+          </div>
+          <div id="activeSchoolYearDisplay" class="active-year-display">
+            <div class="no-data">No active school year set. Create one below.</div>
+          </div>
+        </div>
+
+        <!-- Create School Year Form -->
+        <div class="content-card">
+          <div class="card-header">
+            <h3>Create New School Year</h3>
+          </div>
+          <form id="schoolYearForm" class="school-year-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="schoolYearName">School Year (e.g., 2025-2026):</label>
+                <input 
+                  type="text" 
+                  id="schoolYearName" 
+                  placeholder="2025-2026" 
+                  required 
+                  pattern="^\d{4}-\d{4}$"
+                  title="Format: YYYY-YYYY"
+                />
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input 
+                  type="date" 
+                  id="startDate" 
+                  required 
+                />
+              </div>
+              <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input 
+                  type="date" 
+                  id="endDate" 
+                  required 
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              ➕ Create School Year
+            </button>
+          </form>
+        </div>
+
+        <!-- School Years List -->
+        <div class="content-card">
+          <div class="card-header">
+            <h3>All School Years</h3>
+          </div>
+          <div class="school-years-table-container">
+            <table class="school-years-table">
+              <thead>
+                <tr>
+                  <th>School Year</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="schoolYearsTableBody">
+                <tr>
+                  <td colspan="5" class="no-data">Loading school years...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Students Section -->
+      <section id="students" class="section">
+        <div class="section-header">
+          <h2>Student Management</h2>
+          <p class="section-subtitle">Manage student accounts and profiles</p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Student management tools coming soon...</p>
+        </div>
+      </section>
+
+      <!-- Directory Section -->
+      <section id="directory" class="section">
+        <div class="section-header">
+          <h2>Student Directory</h2>
+          <p class="section-subtitle">Search and view student information</p>
+        </div>
+        <div class="content-card">
+          <!-- Filters -->
+          <div class="dir-filters">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label>Search Name/LRN:</label>
+                <input
+                  type="text"
+                  id="dirSearchInput"
+                  placeholder="Enter name or LRN..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="filter-group">
+                <label>Grade:</label>
+                <select id="dirFilterGrade" class="filter-select">
+                  <option value="">All</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Gender:</label>
+                <select id="dirFilterGender" class="filter-select">
+                  <option value="">All</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Track:</label>
+                <select id="dirFilterTrack" class="filter-select">
+                  <option value="">All</option>
+                  <option value="academic">Academic</option>
+                  <option value="techpro">TechPro</option>
+                  <option value="doorway">Doorway</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-row filter-row-quad">
+              <div class="filter-group">
+                <label>Enrollment Status:</label>
+                <select id="dirFilterStatus" class="filter-select">
+                  <option value="">All</option>
+                  <option value="approved">Approved</option>
+                  <option value="pending">Pending</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Disability:</label>
+                <select id="dirFilterDisability" class="filter-select">
+                  <option value="">All</option>
+                  <option value="blind">Blind</option>
+                  <option value="deaf">Deaf</option>
+                  <option value="autism">Autism Spectrum</option>
+                  <option value="cerebral-palsy">Cerebral Palsy</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>IP Group:</label>
+                <select id="dirFilterIP" class="filter-select">
+                  <option value="">All</option>
+                  <option value="aeta">Aeta</option>
+                  <option value="ifugao">Ifugao</option>
+                  <option value="maranao">Maranao</option>
+                  <option value="tboli">T'boli</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>4Ps Member:</label>
+                <select id="dirFilter4Ps" class="filter-select">
+                  <option value="">All</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-row">
+              <button id="dirResetBtn" class="btn btn-secondary">
+                Reset Filters
+              </button>
+              <button id="dirReloadBtn" class="btn btn-primary">
+                🔄 Reload from Server
+              </button>
+            </div>
+          </div>
+
+          <!-- Student List Table -->
+          <div class="dir-table-container">
+            <table class="dir-table">
+              <thead>
+                <tr>
+                  <th>Student LRN</th>
+                  <th>Full Name</th>
+                  <th>Gender</th>
+                  <th>Grade</th>
+                  <th>Track</th>
+                  <th>School Year</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dirTableBody">
+                <tr>
+                  <td colspan="8" class="no-data">Loading students...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="dir-pagination">
+            <button id="dirPrevBtn" class="btn btn-secondary">
+              ← Previous
+            </button>
+            <span id="dirPageInfo">Page 1</span>
+            <button id="dirNextBtn" class="btn btn-secondary">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Student Profile Modal -->
+      <div id="studentProfileModal" class="modal" aria-hidden="true">
+        <div class="modal-content student-profile-modal">
+          <div class="modal-header">
+            <h2 id="profileStudentName">Student Profile</h2>
+            <button
+              class="modal-close"
+              id="closeProfileModal"
+              aria-label="Close"
+            >
+              &times;
+            </button>
+          </div>
+          <div class="profile-tabs">
+            <button class="tab-btn active" data-tab="personal">
+              👤 Personal
+            </button>
+            <button class="tab-btn" data-tab="academic">🎓 Academic</button>
+            <button class="tab-btn" data-tab="social">👥 Social</button>
+            <button class="tab-btn" data-tab="documents">📎 Documents</button>
+            <button class="tab-btn" data-tab="history">🕒 History</button>
+          </div>
+          <div class="profile-content">
+            <div id="tab-personal" class="tab-pane active">
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Full Name:</label><span id="infoFullName">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Student LRN:</label><span id="infoStudentID">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Gender:</label><span id="infoGender">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Birthdate:</label><span id="infoBirthdate">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Place of Birth:</label
+                  ><span id="infoPlaceOfBirth">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Mother Tongue:</label
+                  ><span id="infoMotherTongue">--</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Current Address:</label
+                  ><span id="infoAddress">--</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Permanent Address:</label
+                  ><span id="infoPermanentAddress">--</span>
+                </div>
+              </div>
+            </div>
+            <div id="tab-academic" class="tab-pane">
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Grade Level:</label><span id="infoGrade">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Track:</label><span id="infoTrack">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Status:</label
+                  ><span id="infoEnrollmentStatus">--</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Electives:</label><span id="infoElectives">--</span>
+                </div>
+              </div>
+            </div>
+            <div id="tab-social" class="tab-pane">
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Disability:</label><span id="infoDisability">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Indigenous Group:</label
+                  ><span id="infoIPGroup">--</span>
+                </div>
+                <div class="info-item">
+                  <label>4Ps Member:</label><span id="info4Ps">--</span>
+                </div>
+              </div>
+            </div>
+            <div id="tab-documents" class="tab-pane">
+              <div id="documentsContainer">
+                <p class="no-data">No documents submitted.</p>
+              </div>
+            </div>
+            <div id="tab-history" class="tab-pane">
+              <div id="historyContent">
+                <p class="no-data">No enrollment history available.</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="footer-actions">
+              <button id="profileCloseBtn" class="btn btn-secondary">
+                Close
+              </button>
+              <button id="profileEditBtn" class="btn btn-primary">✏ Edit</button>
+              <button id="profileRejectBtn" class="btn btn-reject">
+                ✕ Reject
+              </button>
+              <button id="profileApproveBtn" class="btn btn-approve">
+                ✓ Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enrollment Section -->
+      <section id="enrollment" class="section">
+        <div class="section-header">
+          <h2>Enrollment Management</h2>
+          <p class="section-subtitle">Review and manage student enrollments</p>
+        </div>
+        <div class="content-card">
+          <!-- Search and Filter Bar -->
+          <div
+            style="
+              display: flex;
+              gap: 15px;
+              margin-bottom: 20px;
+              flex-wrap: wrap;
+              align-items: center;
+            "
+          >
+            <input
+              type="text"
+              id="enrollmentSearchInput"
+              placeholder="Search by student name or email..."
+              style="
+                flex: 1;
+                min-width: 250px;
+                padding: 10px 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+              "
+            />
+            <button
+              id="clearSearchBtn"
+              class="btn btn-secondary"
+              style="height: fit-content"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div class="enrollments-filter">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="approved">Approved</button>
+            <button class="filter-btn" data-filter="rejected">Rejected</button>
+          </div>
+          <div id="enrollmentsTable" class="table-container">
+            <p class="no-data">Loading enrollments...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Attendance Section -->
+      <section id="attendance" class="section">
+        <div class="section-header">
+          <h2>Attendance</h2>
+          <p class="section-subtitle">Student attendance records</p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Attendance tracking coming soon...</p>
+        </div>
+      </section>
+
+      <!-- Reports & Analytics Sections -->
+      <section id="standard-reports" class="section">
+        <div class="section-header">
+          <h2>📊 Analytics & Reports</h2>
+          <p class="section-subtitle">Official school reports and analytics</p>
+        </div>
+
+        <!-- Approval Status Notice -->
+        <div class="approval-notice">
+          <span class="notice-icon">ℹ️</span>
+          <span class="notice-text"
+            ><strong>Note:</strong> These reports include only
+            <strong>approved students</strong>. Pending and rejected enrollments
+            are excluded.</span
+          >
+        </div>
+
+        <!-- Report Customization Panel -->
+        <div class="report-customization-panel">
+          <button class="btn btn-tertiary" id="toggleCustomization">⚙️ Customize Report</button>
+          <div class="customization-options" id="customizationOptions" style="display: none;">
+            <div class="customization-section">
+              <h4>Header Customization</h4>
+              <div class="form-group">
+                <label for="schoolName">School Name:</label>
+                <input type="text" id="schoolName" placeholder="Compostela National High School" value="Compostela National High School">
+              </div>
+              <div class="form-group">
+                <label for="schoolAddress">School Address:</label>
+                <input type="text" id="schoolAddress" placeholder="Address" value="">
+              </div>
+              <div class="form-group">
+                <label for="reportTitle">Report Title:</label>
+                <input type="text" id="reportTitle" placeholder="Official School Report" value="Official School Report">
+              </div>
+              <div class="form-group">
+                <label for="reportDate">Include Date:</label>
+                <input type="checkbox" id="reportDate" checked>
+              </div>
+              <div class="form-group">
+                <label for="includeSchoolLogo">Include School Logo:</label>
+                <input type="checkbox" id="includeSchoolLogo" checked>
+              </div>
+            </div>
+            <div class="customization-section">
+              <h4>Footer Customization</h4>
+              <div class="form-group">
+                <label for="footerText">Footer Text:</label>
+                <input type="text" id="footerText" placeholder="Official Document" value="Official Document">
+              </div>
+              <div class="form-group">
+                <label for="showPageNumbers">Show Page Numbers:</label>
+                <input type="checkbox" id="showPageNumbers" checked>
+              </div>
+            </div>
+            <div class="customization-actions">
+              <button class="btn btn-primary" id="applyCustomization">Apply Settings</button>
+              <button class="btn btn-secondary" id="resetCustomization">Reset to Defaults</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Navigation Tabs -->
+        <div class="report-tabs">
+          <button class="report-tab active" data-report="demographics">
+            👥 Demographics
+          </button>
+          <button class="report-tab" data-report="disability">
+            ♿ Disability
+          </button>
+          <button class="report-tab" data-report="indigenous">
+            🌾 Indigenous
+          </button>
+          <button class="report-tab" data-report="4ps">🧾 4Ps</button>
+          <button class="report-tab" data-report="mothertongue">
+            🗣️ Mother Tongue
+          </button>
+          <button class="report-tab" data-report="track">🎓 Track</button>
+          <button class="report-tab" data-report="electives">
+            📚 Electives
+          </button>
+        </div>
+
+        <!-- Demographics Report -->
+        <div class="report-content active" id="report-demographics">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>👥 Student Demographics</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printDemo">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportDemoExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Gender Summary -->
+            <div class="report-subsection">
+              <h4>Gender Summary</h4>
+              <div class="report-grid">
+                <div class="stat-item clickable" onclick="showStatModal('demographics', 'Total Male Students')">
+                  <span class="stat-label">Total Male Students</span>
+                  <span class="stat-value" id="totalMale">--</span>
+                </div>
+                <div class="stat-item clickable" onclick="showStatModal('demographics', 'Total Female Students')">
+                  <span class="stat-label">Total Female Students</span>
+                  <span class="stat-value" id="totalFemale">--</span>
+                </div>
+                <div class="stat-item clickable" onclick="showStatModal('demographics', 'Total Overall Students')">
+                  <span class="stat-label">Total Overall Students</span>
+                  <span class="stat-value" id="totalGenderStudents">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Grade</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="genderTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disability Report -->
+        <div class="report-content" id="report-disability">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>♿ Disability Reports</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printDisability">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportDisabilityExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Students With Disability -->
+            <div class="report-subsection">
+              <h4>Students With Disability</h4>
+              <div class="report-grid">
+                <div class="stat-item clickable" onclick="showStatModal('disability', 'Total Students with Disability')">
+                  <span class="stat-label">Total Students with Disability</span>
+                  <span class="stat-value" id="totalDisability">--</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Percentage of Population</span>
+                  <span class="stat-value" id="disabilityPercentage">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Disability Type</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="disabilityTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indigenous People Report -->
+        <div class="report-content" id="report-indigenous">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🌾 Indigenous People (IP) Membership</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printIP">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportIPExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- IP Membership -->
+            <div class="report-subsection">
+              <h4>IP Membership Report</h4>
+              <div class="report-grid">
+                <div class="stat-item clickable" onclick="showStatModal('ip', 'Male IP Students')">
+                  <span class="stat-label">Male IP Students</span>
+                  <span class="stat-value" id="maleIP">--</span>
+                </div>
+                <div class="stat-item clickable" onclick="showStatModal('ip', 'Female IP Students')">
+                  <span class="stat-label">Female IP Students</span>
+                  <span class="stat-value" id="femaleIP">--</span>
+                </div>
+                <div class="stat-item clickable" onclick="showStatModal('ip', 'Total IP Students (Overall)')">
+                  <span class="stat-label">Total IP Students (Overall)</span>
+                  <span class="stat-value" id="totalIP">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>IP Group</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ipTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4Ps Report -->
+        <div class="report-content" id="report-4ps">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🧾 4Ps Membership</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="print4Ps">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="export4PsExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- 4Ps Beneficiaries -->
+            <div class="report-subsection">
+              <h4>4Ps Beneficiaries</h4>
+              <div class="report-grid">
+                <div class="stat-item clickable" onclick="showStatModal('4ps', 'Male 4Ps Students')">
+                  <span class="stat-label">Male 4Ps Students</span>
+                  <span class="stat-value" id="male4Ps">--</span>
+                </div>
+                <div class="stat-item clickable" onclick="showStatModal('4ps', 'Female 4Ps Students')">
+                  <span class="stat-label">Female 4Ps Students</span>
+                  <span class="stat-value" id="female4Ps">--</span>
+                </div>
+                <div class="stat-item clickable" onclick="showStatModal('4ps', 'Total 4Ps Students')">
+                  <span class="stat-label">Total 4Ps Students</span>
+                  <span class="stat-value" id="total4Ps">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Grade</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="4psTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mother Tongue Report -->
+        <div class="report-content" id="report-mothertongue">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🗣️ Mother Tongue Distribution</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printMTong">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportMTongExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Mother Tongue Distribution -->
+            <div class="report-subsection">
+              <h4>Mother Tongue Distribution</h4>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Mother Tongue</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="motherTongueTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Track Report -->
+        <div class="report-content" id="report-track">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🎓 Track & Program Enrollment</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printTrack">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportTrackExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Track Summary -->
+            <div class="report-subsection">
+              <h4>Track Summary</h4>
+              <p class="track-note">Academic, TechPro, and Doorway Programs</p>
+              
+              <!-- Academic Track -->
+              <div style="margin-bottom: 20px;">
+                <h5 style="color: #1e5631; margin-bottom: 12px; font-size: 14px;">Academic Track</h5>
+                <div class="report-grid">
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Male Academic Track Students')">
+                    <span class="stat-label">Male Academic</span>
+                    <span class="stat-value" id="maleAcademic">--</span>
+                  </div>
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Female Academic Track Students')">
+                    <span class="stat-label">Female Academic</span>
+                    <span class="stat-value" id="femaleAcademic">--</span>
+                  </div>
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Total Academic Track Students')">
+                    <span class="stat-label">Academic Total</span>
+                    <span class="stat-value" id="academicTotal">--</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TechPro Track -->
+              <div style="margin-bottom: 20px;">
+                <h5 style="color: #1e5631; margin-bottom: 12px; font-size: 14px;">TechPro Track</h5>
+                <div class="report-grid">
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Male TechPro Track Students')">
+                    <span class="stat-label">Male TechPro</span>
+                    <span class="stat-value" id="maleTechpro">--</span>
+                  </div>
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Female TechPro Track Students')">
+                    <span class="stat-label">Female TechPro</span>
+                    <span class="stat-value" id="femaleTechpro">--</span>
+                  </div>
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Total TechPro Track Students')">
+                    <span class="stat-label">TechPro Total</span>
+                    <span class="stat-value" id="techproTotal">--</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Doorway Track -->
+              <div style="margin-bottom: 20px;">
+                <h5 style="color: #1e5631; margin-bottom: 12px; font-size: 14px;">Doorway Track</h5>
+                <div class="report-grid">
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Male Doorway Track Students')">
+                    <span class="stat-label">Male Doorway</span>
+                    <span class="stat-value" id="maleDoorway">--</span>
+                  </div>
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Female Doorway Track Students')">
+                    <span class="stat-label">Female Doorway</span>
+                    <span class="stat-value" id="femaleDoorway">--</span>
+                  </div>
+                  <div class="stat-item clickable" onclick="showStatModal('track', 'Total Doorway Track Students')">
+                    <span class="stat-label">Doorway Total</span>
+                    <span class="stat-value" id="doorwayTotal">--</span>
+                  </div>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+
+        <!-- Electives Report -->
+        <div class="report-content" id="report-electives">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>📚 Electives Enrollment</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printElectives">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportElectivesExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Electives Enrollment -->
+            <div class="report-subsection">
+              <h4>Elective Enrollment</h4>
+              <div class="report-grid" id="electiveCategorySummary">
+                <!-- Category summaries will be populated here -->
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Elective</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="electivesTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="custom-reports" class="section">
+        <div class="section-header">
+          <h2>Custom Reports</h2>
+          <p class="section-subtitle">Build and save custom report queries</p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Custom report builder coming soon.</p>
+        </div>
+      </section>
+
+      <section id="data-visualization" class="section">
+        <div class="section-header">
+          <h2>Data Visualization</h2>
+          <p class="section-subtitle">
+            Charts and dashboards to visualize data
+          </p>
+        </div>
+        <div class="content-card">
+          <div class="viz-filters">
+            <label
+              >Gender:
+              <select id="vizFilterGender">
+                <option value="all">All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select></label
+            >
+            <label
+              >Grade:
+              <select id="vizFilterGrade">
+                <option value="all">All</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+              </select></label
+            >
+            <label
+              >Year:
+              <select id="vizFilterYear">
+                <option value="all">All</option>
+              </select></label
+            >
+            <button id="vizRefreshBtn" class="btn btn-secondary">
+              Refresh
+            </button>
+          </div>
+
+          <div class="viz-grid">
+            <div class="viz-card">
+              <h4>📊 Gender Overview</h4>
+              <canvas id="chartGender" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>📚 Grade Distribution</h4>
+              <canvas id="chartGrade" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>♿ Disability Breakdown</h4>
+              <canvas id="chartDisability" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>🌾 Indigenous Students (IP Groups)</h4>
+              <canvas id="chartIndigenous" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>🧾 4Ps Beneficiaries</h4>
+              <canvas id="chart4Ps" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>🗣️ Mother Tongue Distribution</h4>
+              <canvas id="chartMotherTongue" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>🎓 Track Enrollment</h4>
+              <canvas id="chartTrack" height="160"></canvas>
+            </div>
+            <div class="viz-card viz-wide">
+              <h4>📘 Electives (Top 30 by students)</h4>
+              <canvas id="chartElectives" height="200"></canvas>
+            </div>
+          </div>
+          <!-- dynamic track-specific elective charts will be inserted here -->
+          <div id="trackElectivesContainer" class="track-electives"></div>
+        </div>
+      </section>
+
+      <!-- Records Section -->
+      <section id="records" class="section">
+        <div class="section-header">
+          <h2>Academic Records</h2>
+          <p class="section-subtitle">
+            View student grades and academic information
+          </p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Academic records coming soon...</p>
+        </div>
+      </section>
+
+      <!-- Teacher Registration & Assignment Section -->
+      <section id="teacher-registration" class="section">
+        <div class="content-card">
+          <p class="no-data">Loading Teachers...</p>
+        </div>
+      </section>
+
+      <!-- Sections Management Section -->
+      <section id="sections" class="section">
+        <div class="section-header">
+          <h2>🏫 Student Management → Sections</h2>
+          <p class="section-subtitle">Manage and create class sections</p>
+        </div>
+
+        <div class="content-card">
+          <!-- Quick Action Buttons -->
+          <div class="sections-quick-actions">
+            <div class="action-card">
+              <div class="action-header">
+                <span class="action-icon">🧒</span>
+                <h3>Junior High</h3>
+                <p class="action-subtitle">Grades 7-10</p>
+              </div>
+              <button class="btn btn-primary btn-lg" id="addJHSSection">
+                ➕ Add New Section
+              </button>
+            </div>
+
+            <div class="action-card">
+              <div class="action-header">
+                <span class="action-icon">🎓</span>
+                <h3>Senior High</h3>
+                <p class="action-subtitle">Grades 11-12</p>
+              </div>
+              <button class="btn btn-primary btn-lg" id="addSHSSection">
+                ➕ Add New Section
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Container -->
+          <div id="sectionMessages"></div>
+
+          <!-- Sections List (for reference) -->
+          <div class="sections-reference" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #ddd;">
+            <h3>📋 Existing Sections</h3>
+            
+            <!-- Search & Filter Controls -->
+            <div class="sections-controls">
+              <!-- Search Bar -->
+              <div class="search-bar-container">
+                <input 
+                  type="text" 
+                  id="sectionSearchInput" 
+                  class="search-input" 
+                  placeholder="🔍 Search by section code, name, or adviser..."
+                  aria-label="Search sections"
+                />
+              </div>
+              
+              <!-- Filter Controls -->
+              <div class="filter-controls">
+                <div class="filter-group">
+                  <label for="levelFilter">Level:</label>
+                  <select id="levelFilter" class="filter-select">
+                    <option value="">All Levels</option>
+                    <option value="JHS">Junior High School (JHS)</option>
+                    <option value="SHS">Senior High School (SHS)</option>
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label for="gradeFilter">Grade Level:</label>
+                  <select id="gradeFilter" class="filter-select">
+                    <option value="">All Grades</option>
+                    <option value="7">Grade 7</option>
+                    <option value="8">Grade 8</option>
+                    <option value="9">Grade 9</option>
+                    <option value="10">Grade 10</option>
+                    <option value="11">Grade 11</option>
+                    <option value="12">Grade 12</option>
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label for="sortBy">Sort By:</label>
+                  <select id="sortBy" class="filter-select">
+                    <option value="section_code">Section Code (A-Z)</option>
+                    <option value="section_code_desc">Section Code (Z-A)</option>
+                    <option value="level">Level (JHS First)</option>
+                    <option value="grade">Grade Level</option>
+                    <option value="adviser">Adviser Name</option>
+                    <option value="electives">Elective Subjects</option>
+                  </select>
+                </div>
+                
+                <button id="resetFilters" class="btn btn-secondary" title="Reset all filters">
+                  ↺ Reset
+                </button>
+              </div>
+            </div>
+            
+            <!-- Results Info -->
+            <div id="resultsInfo" class="results-info" style="display: none; margin-bottom: 15px;">
+              <span id="resultsCount">0</span> section(s) found
+            </div>
+            
+            <!-- Sections Table -->
+            <div id="sectionsTable" class="table-container">
+              <p class="no-data">Loading sections...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Assignment Section -->
+      <section id="section-assignment" class="section">
+        <div class="section-header">
+          <h2>👥 Student Management → Section Assignment & Class List</h2>
+          <p class="section-subtitle">Assign students to sections and view class lists</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="section-tabs">
+          <button class="section-tab-btn active" data-tab="section-assignment-tab">
+            📋 Section Assignment
+          </button>
+          <button class="section-tab-btn" data-tab="class-list-tab">
+            📚 Class List
+          </button>
+        </div>
+
+        <!-- TAB 1: SECTION ASSIGNMENT -->
+        <div id="section-assignment-tab" class="section-tab-content active">
+          <!-- Section Assignment Content -->
+          <div id="sectionAssignmentContent"></div>
+        </div>
+
+        <!-- TAB 2: CLASS LIST -->
+        <div id="class-list-tab" class="section-tab-content">
+          <!-- Class List Content -->
+          <div id="classListContent"></div>
+        </div>
+      </section>
+
+      <!-- Teacher Management removed: link and page moved to Teachers view (removed per request) -->
+
+  
+      <!-- Section Creation Modal -->
+      <div id="sectionCreationModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="modalTitle">Create New Section</h2>
+            <button class="modal-close" id="closeSectionModal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <!-- JHS Form inside Modal -->
+            <form class="create-section-form" data-level="jhs" id="modalJHSForm" style="display: none;">
+              <div class="form-group">
+                <label for="modal-jhs-grade">Grade Level <span class="required">*</span></label>
+                <select id="modal-jhs-grade" required>
+                  <option value="">Select Grade...</option>
+                  <option value="7">Grade 7</option>
+                  <option value="8">Grade 8</option>
+                  <option value="9">Grade 9</option>
+                  <option value="10">Grade 10</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-section-name">Section Name <span class="required">*</span></label>
+                <input type="text" id="modal-jhs-section-name" placeholder="e.g., Rizal, Gold, A" required />
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-adviser">Adviser Name</label>
+                <select id="modal-jhs-adviser">
+                  <option value="">Select Adviser...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-program">Program Type</label>
+                <select id="modal-jhs-program">
+                  <option value="Regular">Regular</option>
+                  <option value="Special Program">Special Program</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-status">Status <span class="required">*</span></label>
+                <select id="modal-jhs-status" required>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-remarks">Remarks / Notes</label>
+                <textarea id="modal-jhs-remarks" placeholder="Optional notes about this section..." rows="3"></textarea>
+              </div>
+
+              <div class="form-group section-code-preview">
+                <label>Auto Section Code</label>
+                <div class="preview-box" id="modal-jhs-code-preview">
+                  <span class="code-label">JHS-G0-</span><span class="code-dynamic">SECTION</span>
+                </div>
+              </div>
+            </form>
+
+            <!-- SHS Form inside Modal -->
+            <form class="create-section-form" data-level="shs" id="modalSHSForm" style="display: none;">
+              <div class="form-group">
+                <label for="modal-shs-grade">Grade Level <span class="required">*</span></label>
+                <select id="modal-shs-grade" required>
+                  <option value="">Select Grade...</option>
+                  <option value="11">Grade 11</option>
+                  <option value="12">Grade 12</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-track">Track <span class="required">*</span></label>
+                <select id="modal-shs-track" required>
+                  <option value="">Select Track...</option>
+                  <option value="Academic">Academic</option>
+                  <option value="TechPro">TechPro</option>
+                  <option value="Doorway">Doorway</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Electives <span class="required">*</span></label>
+                <div class="electives-note">Select at least one elective</div>
+                <div class="form-group-checkbox-group" id="modal-shs-electives-container">
+                  <div class="checkbox-message">Select a track first to see available electives</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-section-name">Section Name <span class="required">*</span></label>
+                <input type="text" id="modal-shs-section-name" placeholder="e.g., Alpha, Rizal, A" required />
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-adviser">Adviser Name</label>
+                <select id="modal-shs-adviser">
+                  <option value="">Select Adviser...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-class-type">Class Type</label>
+                <select id="modal-shs-class-type">
+                  <option value="Regular">Regular</option>
+                  <option value="Special Class">Special Class</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-session">Session</label>
+                <select id="modal-shs-session">
+                  <option value="">Not specified</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-remarks">Notes</label>
+                <textarea id="modal-shs-remarks" placeholder="Optional notes about this section..." rows="3"></textarea>
+              </div>
+
+              <div class="form-group section-code-preview">
+                <label>Auto Section Code</label>
+                <div class="preview-box" id="modal-shs-code-preview">
+                  <span class="code-label">SHS-G11-TRACK-ELECTIVE-</span><span class="code-dynamic">SECTION</span>
+                </div>
+              </div>
+
+              <div class="duplicate-check-status" id="modal-shs-duplicate-status" style="display: none;">
+                <div class="warning-message">⚠️ A section with this combination already exists</div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelSectionModal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveSectionModal">Save Section</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Enrollment Detail Modal -->
+    <div
+      id="enrollmentDetailModal"
+      class="modal enrollment-modal"
+      aria-hidden="true"
+    >
+      <div class="modal-content enrollment-modal-content">
+        <div class="modal-header enrollment-modal-header">
+          <div class="header-title">
+            <h2>Enrollment Details</h2>
+            <p class="enrollment-header-subtitle" id="enrollmentStudentInfo">
+              Student Information
+            </p>
+          </div>
+          <button
+            class="modal-close"
+            id="closeDetailModal"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="enrollment-modal-tabs">
+          <button class="tab-btn active" data-tab="personal">
+            👤 Personal
+          </button>
+          <button class="tab-btn" data-tab="academic">🎓 Academic</button>
+          <button class="tab-btn" data-tab="address">📍 Address</button>
+          <button class="tab-btn" data-tab="documents">📄 Documents</button>
+        </div>
+
+        <div id="enrollmentDetail" class="enrollment-modal-body">
+          <!-- Enrollment data will be loaded here -->
+        </div>
+
+        <div class="modal-footer enrollment-modal-footer">
+          <div class="footer-status" id="footerStatus"></div>
+          <div class="footer-actions">
+            <button type="button" id="closeDetailBtn" class="btn btn-secondary btn-cancel">
+              Cancel
+            </button>
+            <button type="button" id="reviewDetailBtn" class="btn btn-primary btn-review">Review</button>
+            <button type="button" id="rejectBtn" class="btn btn-reject">Reject</button>
+            <button type="button" id="approveBtn" class="btn btn-approve">Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document Zoom Modal (lightbox for viewing enlarged documents) -->
+    <div id="documentZoomModal" class="modal" aria-hidden="true">
+      <button class="zoom-close" aria-label="Close zoom">✕</button>
+      <img id="documentZoomImage" src="" alt="Document preview" />
+    </div>
+
+    <!-- Review Modal (for confirming student enrollment changes) -->
+    <div id="reviewModal" class="modal" aria-hidden="true">
+      <div class="modal-content review-modal-content">
+        <div class="modal-header">
+          <h2>Review Student Information</h2>
+          <button class="modal-close" id="closeReviewModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="review-modal-body">
+          <div class="review-section">
+            <h3>Updated Information</h3>
+            <div id="reviewContent" class="review-content">
+              <p class="no-data">Loading review information...</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelReviewBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmReviewBtn" class="btn btn-approve">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Details Modal (for displaying student lists) -->
+    <div id="statModalContainer" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="statModalTitle">Student List</h2>
+          <button class="modal-close" id="closeStatModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body" id="statModalBody">
+          <div class="no-data">Loading...</div>
+        </div>
+        <div class="modal-footer">
+          <button id="closeStatModalBtn" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demographics Print Filter Modal -->
+    <div id="demographicsPrintModal" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width: 520px; width: 100%;">
+        <div class="modal-header">
+          <h2>Demographics Print Filter</h2>
+          <button class="modal-close" id="closeDemographicsPrintModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Select gender filter:</label>
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="demPrintMale" value="male" /> Male Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="demPrintFemale" value="female" /> Female Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="demPrintOverall" value="overall" checked /> Overall</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Select grade filter(s):</label>
+            <div style="display:grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="demPrintGrade" value="7" /> Grade 7</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="demPrintGrade" value="8" /> Grade 8</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="demPrintGrade" value="9" /> Grade 9</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="demPrintGrade" value="10" /> Grade 10</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="demPrintGrade" value="11" /> Grade 11</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="demPrintGrade" value="12" /> Grade 12</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelDemographicsPrintBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmDemographicsPrintBtn" class="btn btn-primary">Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Disability Print Filter Modal -->
+    <div id="disabilityPrintModal" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width: 520px; width: 100%;">
+        <div class="modal-header">
+          <h2>Disability Print Filter</h2>
+          <button class="modal-close" id="closeDisabilityPrintModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Gender Filters:</label>
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="disPrintMale" value="male" /> Male Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="disPrintFemale" value="female" /> Female Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="disPrintOverall" value="overall" checked /> Overall</label>
+            </div>
+          </div>
+
+          <div class="form-group" id="disabilityPrintTypeGroup">
+            <label>Disability Type Filters:</label>
+            <div id="disabilityTypeCheckboxes" style="display:grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap:8px; margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelDisabilityPrintBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmDisabilityPrintBtn" class="btn btn-primary">Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indigenous Print Filter Modal -->
+    <div id="indigenousPrintModal" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width: 520px; width: 100%;">
+        <div class="modal-header">
+          <h2>Indigenous Print Filter</h2>
+          <button class="modal-close" id="closeIndigenousPrintModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Gender Filters:</label>
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="ipPrintMale" value="male" /> Male Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="ipPrintFemale" value="female" /> Female Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="ipPrintOverall" value="overall" checked /> Overall</label>
+            </div>
+          </div>
+
+          <div class="form-group" id="indigenousPrintTypeGroup">
+            <label>IP Group Filters:</label>
+            <div id="ipGroupCheckboxes" style="display:grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap:8px; margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelIndigenousPrintBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmIndigenousPrintBtn" class="btn btn-primary">Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4Ps Print Filter Modal -->
+    <div id="fourPsPrintModal" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width: 520px; width: 100%;">
+        <div class="modal-header">
+          <h2>4Ps Print Filter</h2>
+          <button class="modal-close" id="closeFourPsPrintModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Gender Filters:</label>
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="fourPsPrintMale" value="male" /> Male Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="fourPsPrintFemale" value="female" /> Female Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="fourPsPrintOverall" value="overall" checked /> Overall</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Grade Filters:</label>
+            <div style="display:grid; grid-template-columns: repeat(3, minmax(120px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="fourPsPrintGrade" value="7" /> Grade 7</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="fourPsPrintGrade" value="8" /> Grade 8</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="fourPsPrintGrade" value="9" /> Grade 9</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="fourPsPrintGrade" value="10" /> Grade 10</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="fourPsPrintGrade" value="11" /> Grade 11</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" class="fourPsPrintGrade" value="12" /> Grade 12</label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelFourPsPrintBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmFourPsPrintBtn" class="btn btn-primary">Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mother Tongue Print Filter Modal -->
+    <div id="motherTonguePrintModal" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width: 520px; width: 100%;">
+        <div class="modal-header">
+          <h2>Mother Tongue Print Filter</h2>
+          <button class="modal-close" id="closeMotherTonguePrintModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Gender Filters:</label>
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="mtPrintMale" value="male" /> Male Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="mtPrintFemale" value="female" /> Female Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="mtPrintOverall" value="overall" checked /> Overall</label>
+            </div>
+          </div>
+
+          <div class="form-group" id="motherTonguePrintTypeGroup">
+            <label>Mother Tongue Filters:</label>
+            <div id="motherTongueCheckboxes" style="display:grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap:8px; margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelMotherTonguePrintBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmMotherTonguePrintBtn" class="btn btn-primary">Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Track Print Filter Modal -->
+    <div id="trackPrintModal" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width: 520px; width: 100%;">
+        <div class="modal-header">
+          <h2>Track Print Filter</h2>
+          <button class="modal-close" id="closeTrackPrintModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Gender Filters:</label>
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="trackPrintMale" value="male" /> Male Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="trackPrintFemale" value="female" /> Female Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="trackPrintOverall" value="overall" checked /> Overall</label>
+            </div>
+          </div>
+
+          <div class="form-group" id="trackPrintTypeGroup">
+            <label>Track Filters:</label>
+            <div id="trackTypeCheckboxes" style="display:grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap:8px; margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelTrackPrintBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmTrackPrintBtn" class="btn btn-primary">Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Electives Print Filter Modal -->
+    <div id="electivesPrintModal" class="modal" aria-hidden="true">
+      <div class="modal-content" style="max-width: 520px; width: 100%;">
+        <div class="modal-header">
+          <h2>Electives Print Filter</h2>
+          <button class="modal-close" id="closeElectivesPrintModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Gender Filters:</label>
+            <div style="display:grid; grid-template-columns: repeat(2, minmax(160px, 1fr)); gap:8px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="electivePrintMale" value="male" /> Male Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="electivePrintFemale" value="female" /> Female Only</label>
+              <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" id="electivePrintOverall" value="overall" checked /> Overall</label>
+            </div>
+          </div>
+
+          <div class="form-group" id="electivesPrintTypeGroup">
+            <label>Elective Filters:</label>
+            <div id="electiveTypeCheckboxes" style="display:grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap:8px; margin-top:8px;"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancelElectivesPrintBtn" class="btn btn-secondary">Cancel</button>
+          <button id="confirmElectivesPrintBtn" class="btn btn-primary">Print</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Section Modal -->
+    <div id="sectionEditModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Section</h2>
+          <button class="modal-close" id="closeEditModal" aria-label="Close modal">✕</button>
+        </div>
+        <form id="editSectionForm">
+          <input type="hidden" id="edit-section-id" />
+          <div class="form-group">
+            <label for="edit-level">Level</label>
+            <input id="edit-level" type="text" readonly />
+          </div>
+          <div class="form-group">
+            <label for="edit-grade">Grade</label>
+            <select id="edit-grade">
+              <option value="">Select Grade...</option>
+              <option value="7">Grade 7</option>
+              <option value="8">Grade 8</option>
+              <option value="9">Grade 9</option>
+              <option value="10">Grade 10</option>
+              <option value="11">Grade 11</option>
+              <option value="12">Grade 12</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-section-name">Section Name</label>
+            <input id="edit-section-name" type="text" />
+          </div>
+          <div class="form-group">
+            <label for="edit-adviser">Adviser</label>
+            <select id="edit-adviser">
+              <option value="">-- Select Adviser --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-program">Program Type</label>
+            <select id="edit-program">
+              <option value="">Select Program...</option>
+              <option value="Regular">Regular</option>
+              <option value="Special Class">Special Class</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-status">Status</label>
+            <select id="edit-status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-remarks">Remarks / Notes</label>
+            <textarea id="edit-remarks" rows="3"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="editSaveBtn" class="btn btn-primary">Save</button>
+            <button type="button" id="editCancelBtn" class="btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Teacher Role Assignment Modal -->
+    <div id="teacherAssignmentModal" class="modal assign-teacher-modal" aria-hidden="true">
+      <div class="modal-content" style="max-width:920px; width:100%; box-shadow:0 16px 48px rgba(15, 60, 20, 0.18); border-radius:12px; overflow:hidden;">
+        <div class="modal-header" style="background:linear-gradient(90deg,#1b5e20,#2e7d32); color:white; padding:20px 24px; display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">TR</div>
+            <div>
+              <h2 style="margin:0; font-size:18px;">Assign Teacher Role</h2>
+              <div style="font-size:13px; opacity:0.95;">Quickly assign or change a teacher's role and advisory sections</div>
+            </div>
+          </div>
+          <button class="modal-close" id="closeTeacherAssignmentModal" aria-label="Close modal" onclick="window.trv2CloseAssignmentModal ? window.trv2CloseAssignmentModal() : (typeof closeTeacherAssignmentModal==='function' && closeTeacherAssignmentModal())" style="background:transparent;border:0;color:white;font-size:20px;cursor:pointer;">✕</button>
+        </div>
+
+        <div class="modal-body" style="background: #fff;">
+          <form id="teacherAssignmentForm" onsubmit="event.preventDefault(); event.stopPropagation(); if (typeof submitTeacherRoleAssignment==='function') { submitTeacherRoleAssignment(); } else if (window.submitTeacherRoleAssignment) { window.submitTeacherRoleAssignment(); } return false;">
+            <input type="hidden" id="assignTeacherId" />
+            <input type="hidden" id="selectedAdviserSectionIds" value="" />
+
+            <div style="display:flex; gap:24px; align-items:flex-start; padding:20px;">
+              <!-- Left: Teacher card -->
+              <div style="flex:0 0 340px;">
+                <div class="teacher-card" style="background:#ffffff; border:1px solid #eef6ee; padding:18px; border-radius:10px; box-shadow:0 8px 22px rgba(18,60,18,0.04);">
+                  <div style="display:flex; gap:12px; align-items:center;">
+                    <div id="assignTeacherAvatar" class="avatar">N</div>
+                    <div>
+                      <div style="font-weight:700; font-size:16px;" id="assignTeacherName">--</div>
+                      <div style="font-size:13px; color:#666;" id="assignTeacherEmail">--</div>
+                      <div style="margin-top:8px; font-size:13px; color:#444;"><strong>Dept:</strong> <span id="assignTeacherDept">--</span></div>
+                      <div style="font-size:12px; color:#888; margin-top:6px;">ID: <span id="assignTeacherId2">--</span></div>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top:12px; font-size:13px; color:#444;">Teacher Level: <span id="assignTeacherLevelSmall" style="font-weight:700; margin-left:6px;">--</span></div>
+              </div>
+
+              <!-- Right: Form fields -->
+              <div style="flex:1;">
+                <div style="display:flex; gap:16px; align-items:center;">
+                  <div style="flex:1;">
+                    <label for="assignRole" style="display:block; font-weight:700; margin-bottom:8px; color:#254a2b;">Select Role <span class="required">*</span></label>
+                    <select id="assignRole" required style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e0e6e0; font-size:14px; background:#fbfdfb;">
+                      <option value="">-- Choose Role --</option>
+                      <option value="Subject Teacher">Subject Teacher</option>
+                      <option value="Adviser">Adviser</option>
+                    </select>
+                    <div style="margin-top:10px; font-size:13px; color:#666;">Choose the role for the teacher; Adviser role enables advisory section assignment.</div>
+                  </div>
+                  <div style="width:160px;">
+                    <label style="display:block; font-weight:700; margin-bottom:8px; color:#254a2b;">School Year</label>
+                    <div style="background:#ffffff;border:1px solid #eef6ee;padding:12px;border-radius:8px;font-weight:700; text-align:center;"> <span id="assignSchoolYearDisplay">--</span></div>
+                  </div>
+                </div>
+
+                <div id="assignmentFields" style="margin-top:18px;">
+                  <div id="advisorySectionGroup" class="form-section" style="display:none; background:linear-gradient(180deg,#f6fcf6,#f9fdf9); border:1px solid #e1f2df; padding:14px; border-radius:8px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                      <div style="font-weight:700; color:#1b5e20; font-size:15px;">Adviser Assignment</div>
+                      <div style="font-size:13px; color:#2e7d32;">Select 1+ advisory sections</div>
+                    </div>
+
+                    <div style="display:flex; gap:12px; margin-top:12px;">
+                      <div style="flex:0 0 160px;">
+                        <label for="advisoryGradeLevel" style="display:block; font-size:13px; margin-bottom:6px; color:#254a2b;">Grade Level</label>
+                        <select id="advisoryGradeLevel" style="width:100%; padding:8px; border-radius:6px; border:1px solid #e6efe6; background:#fff;">
+                          <option value="">-- Select Grade Level --</option>
+                          <option value="7">Grade 7</option>
+                          <option value="8">Grade 8</option>
+                          <option value="9">Grade 9</option>
+                          <option value="10">Grade 10</option>
+                          <option value="11">Grade 11</option>
+                          <option value="12">Grade 12</option>
+                        </select>
+                      </div>
+
+                      <div style="flex:1;">
+                        <label for="assignAdvisorySection" style="display:block; font-size:13px; margin-bottom:6px; color:#254a2b;">Sections</label>
+                        <select id="assignAdvisorySection" multiple size="6" style="width:100%; padding:8px; border-radius:6px; border:1px solid #e6efe6; background:#fff;">
+                          <option value="">-- Select Sections (hold Ctrl/Cmd) --</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="margin-top:12px; display:flex; gap:8px; align-items:center; justify-content:flex-start;">
+                      <button type="button" id="addAdviserSectionsBtn" class="btn btn-sm btn-secondary" style="padding:8px 12px; border-radius:8px;">+ Add Sections</button>
+                      <div id="selectedAdviserSectionsContainer" style="display:none; background:white; padding:8px 10px; border-radius:8px; border:1px solid #e6f2ff;">
+                        <div id="selectedAdviserSectionsList" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+                      </div>
+                    </div>
+
+                    <div id="adviserConflictWarning" style="display:none; margin-top:12px; padding:10px; background:#fff6e6; border:1px solid #ffd9b3; border-radius:6px; color:#8a4b00;">
+                      <strong>⚠️ Adviser conflict</strong>
+                      <div style="margin-top:8px; font-size:13px; color:#6b4b00;">Some selected section(s) are already assigned to another adviser. Review before confirming.</div>
+                      <ul id="adviserConflictList" style="margin:8px 0 0 18px; color:#5a3f00;"></ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:18px; display:flex; gap:10px; justify-content:flex-end;">
+              <button type="button" id="assignTeacherCancelBtn" class="btn btn-secondary" onclick="window.trv2CloseAssignmentModal ? window.trv2CloseAssignmentModal() : (typeof closeTeacherAssignmentModal==='function' && closeTeacherAssignmentModal())" style="padding:10px 14px; border-radius:8px;">Cancel</button>
+              <button type="submit" id="assignTeacherSaveBtn" class="btn btn-primary" onclick="event.preventDefault(); event.stopPropagation(); if (typeof submitTeacherRoleAssignment==='function') { submitTeacherRoleAssignment(); } else if (window.submitTeacherRoleAssignment) { window.submitTeacherRoleAssignment(); } return false;" style="padding:10px 14px; border-radius:8px; background:#1b5e20; border-color:#1b5e20;">Confirm Assignment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <!-- Edit Teacher Sections Modal -->
+    <!-- Edit Teacher Sections Modal -->
+    <div id="editSectionsModal" class="modal edit-sections-modal" aria-hidden="true">
+      <div class="modal-content" style="max-width:900px; width:100%; box-shadow:0 16px 48px rgba(15, 60, 20, 0.18); border-radius:12px; overflow:hidden;">
+        <div class="modal-header" style="background:linear-gradient(90deg,#1b5e20,#2e7d32); color:white; padding:20px 24px; display:flex; align-items:center; justify-content:space--between;">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div style="width:46px; height:46px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;">✎</div>
+            <div>
+              <h2 style="margin:0; font-size:18px;">Edit Section Assignments</h2>
+              <div style="font-size:13px; opacity:0.95;">Manage teacher role and assign sections</div>
+            </div>
+          </div>
+          <button class="modal-close" id="closeEditSectionsModal" aria-label="Close modal" style="background:transparent;border:0;color:white;font-size:20px;cursor:pointer;">✕</button>
+        </div>
+
+        <div class="modal-body" style="background: #fff;">
+          <form id="editSectionsForm">
+            <input type="hidden" id="editTeacherId" />
+
+            <div style="display:flex; gap:24px; align-items:flex-start; padding:20px;">
+              <!-- Left: Teacher info card -->
+              <div style="flex:0 0 340px;">
+                <div class="teacher-card" style="background:#ffffff; border:1px solid #eef6ee; padding:18px; border-radius:10px; box-shadow:0 8px 22px rgba(18,60,18,0.04);">
+                  <div style="display:flex; gap:12px; align-items:center;">
+                    <div id="editTeacherAvatar" class="avatar" style="width:44px; height:44px; border-radius:50%; background:#2e7d32; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px;">--</div>
+                    <div style="flex:1;">
+                      <div style="font-weight:700; font-size:16px;" id="editTeacherName">--</div>
+                      <div style="font-size:13px; color:#666;" id="editTeacherEmail">--</div>
+                      <div style="font-size:12px; color:#888; margin-top:4px;">ID: <span id="editTeacherId2">--</span></div>
+                    </div>
+                  </div>
+                  <div style="margin-top:12px; padding-top:12px; border-top:1px solid #eef6ee;">
+                    <div style="font-size:13px; color:#444;"><strong>Current Role:</strong></div>
+                    <div style="display:inline-block; margin-top:6px; padding:4px 10px; border-radius:6px; font-size:12px; font-weight:700; background:#e8f5e9; color:#1b5e20;" id="editTeacherCurrentRole">Subject Teacher</div>
+                  </div>
+                </div>
+                <div style="margin-top:16px; font-size:13px; background:#f6fcf6; padding:12px; border-radius:8px; border-left:3px solid #2e7d32;">
+                  <div style="color:#254a2b; margin-bottom:6px;"><strong>📚 School Year</strong></div>
+                  <div style="font-weight:700; color:#1b5e20;" id="editSchoolYearDisplay">--</div>
+                </div>
+              </div>
+
+              <!-- Right: Form fields -->
+              <div style="flex:1;">
+                <!-- Role Selection -->
+                <div style="margin-bottom:20px;">
+                  <label for="editTeacherRole" style="display:block; font-weight:700; margin-bottom:8px; color:#254a2b;">Teacher Role <span class="required">*</span></label>
+                  <select id="editTeacherRole" required style="width:100%; padding:12px 14px; border-radius:8px; border:1px solid #e0e6e0; font-size:14px; background:#fbfdfb; cursor:pointer;">
+                    <option value="Subject Teacher">Subject Teacher</option>
+                    <option value="Adviser">Adviser</option>
+                  </select>
+                  <div style="margin-top:8px; font-size:13px; color:#666;">Select the role. Changing to Subject Teacher will clear section assignments.</div>
+                </div>
+
+                <!-- Section Selection -->
+                <div>
+                  <label for="editSectionSelect" style="display:block; font-weight:700; margin-bottom:8px; color:#254a2b;">Section Assignments <span class="required">*</span></label>
+                  <select id="editSectionSelect" multiple size="8" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e0e6e0; background:#fbfdfb; font-size:14px;" data-original-role="Subject Teacher">
+                    <option value="">-- Select Sections (hold Ctrl/Cmd to select) --</option>
+                  </select>
+                  <small style="color: #666; margin-top:8px; display:block; line-height:1.4;">
+                    ✓ Currently assigned sections are pre-selected. For Advisers, select advisory sections; for Subject Teachers, select teaching sections.
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div style="margin-top:20px; padding:16px 20px; background:#fafafa; border-top:1px solid #eef6ee; display:flex; gap:10px; justify-content:flex-end;">
+              <button type="button" id="editSectionsCancelBtn" class="btn btn-secondary" style="padding:10px 14px; border-radius:8px;">Cancel</button>
+              <button type="submit" id="editSectionsSaveBtn" class="btn btn-primary" style="padding:10px 14px; border-radius:8px; background:#1b5e20; border-color:#1b5e20;">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification" role="alert"></div>
+
+    <script>
+      window.__FORCED_API_BASE__ = '';
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="enrollment-form.js?v=20260228-2"></script>
+    <script src="shs-track-config.js"></script>
+    <!-- ✅ Tab-Scoped Session Manager - Prevents multi-tab session conflicts -->
+    <script src="session-manager.js"></script>
+    <script src="admin-dashboard-school-years.js?v=20260303-3"></script>
+    <script src="admin-dashboard.js?v=20260304-31"></script>
+    <script src="admin-dashboard-sections.js"></script>
+    <script src="admin-dashboard-section-assignment-v2.js"></script>
+    <script src="admin-dashboard-viz.js?v=20260303-4"></script>
+    <script src="admin-dashboard-students.js?v=20260308-2"></script>
+    <script src="admin-dashboard-enrollment-conditionals.js"></script>
+    <script src="quick-enrollment-tab-v2.js?v=20260304-4"></script>
+    <script src="admin-dashboard-adviser.js"></script>
+    <script src="admin-dashboard-debug.js"></script>
+    <script src="admin-dashboard-standard-reports-v2.js?v=20260303-8"></script>
+    <script src="admin-dashboard-teacher-registration-v3.js?v=20260302-3"></script>
+    <script src="admin-dashboard-teaching-assignments-v2.js?v=20260302-7"></script>
+    <script src="admin-dashboard-subject-assignment-modal-v4.js?v=20260303-5"></script>
+    <script src="quick-notification-center-v2.js?v=20260301-1"></script>
+    <script src="quick-admin-settings-v2.js?v=20260301-1"></script>
+    <script src="quick-message-panel-v2.js?v=20260301-1"></script>
+
+    <script>
+      (function () {
+        let fallbackRecentExpanded = false;
+        let fallbackRecentRows = [];
+        let fallbackRecentSections = [];
+        let fallbackRecentBusy = false;
+
+        function detectSchoolCode() {
+          try {
+            const params = new URLSearchParams(window.location.search || '');
+            const fromQuery = (params.get('school') || params.get('tenant') || params.get('code') || '').trim().toLowerCase();
+            if (fromQuery) return fromQuery;
+          } catch (_e) {}
+
+          const fromStorage = String(
+            localStorage.getItem('sms.selectedSchoolCode') || localStorage.getItem('sms.selectedTenantCode') || ''
+          ).trim().toLowerCase();
+          return fromStorage || '';
+        }
+
+        function shouldRunFallback() {
+          const total = document.getElementById('totalStudents');
+          const recent = document.getElementById('recentEnrollments');
+          if (!total || !recent) return false;
+          const totalText = String(total.textContent || '').trim();
+          const recentText = String(recent.textContent || '');
+          return totalText === '--' || /Loading enrollments/i.test(recentText);
+        }
+
+        async function apiGet(path, schoolCode) {
+          const url = new URL(path, window.location.origin);
+          if (schoolCode) url.searchParams.set('school', schoolCode);
+          const headers = schoolCode ? { 'x-tenant-code': schoolCode } : {};
+          const res = await fetch(url.pathname + url.search, { headers, cache: 'no-store' });
+          if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+          return res.json();
+        }
+
+        function renderStats(stats) {
+          const set = (id, val) => {
+            const node = document.getElementById(id);
+            if (node) node.textContent = String(val ?? 0);
+          };
+          try {
+            window.dashboardTotalEnrollments = Number(stats.totalEnrollments || 0);
+          } catch (_e) {}
+          const pending = Number(stats && stats.pendingCount != null ? stats.pendingCount : 0);
+          const approved = Number(stats && stats.approvedCount != null ? stats.approvedCount : 0);
+          set('totalStudents', pending + approved);
+          set('pendingEnrollments', pending);
+          set('approvedEnrollments', approved);
+          set('rejectedEnrollments', stats.rejectedCount ?? 0);
+        }
+
+        function renderRecentEnrollments(enrollments, sections) {
+          const tbody = document.getElementById('recentEnrollments');
+          const toggle = document.getElementById('recentEnrollmentsToggle');
+          if (!tbody) return;
+
+          const allRows = Array.isArray(enrollments) ? enrollments : [];
+          const visibleRows = fallbackRecentExpanded ? allRows : allRows.slice(0, 5);
+          const dashboardTotal = Number(window.dashboardTotalEnrollments || 0);
+          const totalStudentsEl = document.getElementById('totalStudents');
+          const totalStudentsCount = Number((totalStudentsEl && totalStudentsEl.textContent) ? String(totalStudentsEl.textContent).trim() : 0);
+          const effectiveTotal = Math.max(allRows.length, dashboardTotal, Number.isFinite(totalStudentsCount) ? totalStudentsCount : 0);
+
+          const sectionMap = {};
+          (Array.isArray(sections) ? sections : []).forEach((section) => {
+            const id = section.id ?? section.section_id ?? section.sectionId;
+            const name = section.section_name || section.name || '';
+            if (id && name) sectionMap[String(id)] = name;
+          });
+
+          if (toggle) {
+            toggle.style.visibility = effectiveTotal > 5 ? 'visible' : 'hidden';
+            toggle.textContent = fallbackRecentExpanded ? 'Show Less →' : 'View All →';
+          }
+
+          const normalizeText = (value) => String(value || '').replace(/\s+/g, ' ').trim();
+          const parseList = (value) => {
+            if (!value) return [];
+            if (Array.isArray(value)) return value.flatMap((item) => parseList(item));
+            if (typeof value === 'object') {
+              const named = value.name || value.elective || value.title || value.subject || value.subject_name || value.value || '';
+              if (named) return [normalizeText(named)].filter(Boolean);
+              return Object.values(value).flatMap((item) => parseList(item));
+            }
+
+            const text = normalizeText(value);
+            if (!text) return [];
+
+            if ((text.startsWith('[') && text.endsWith(']')) || (text.startsWith('{') && text.endsWith('}'))) {
+              try { return parseList(JSON.parse(text)); } catch (_e) {}
+            }
+
+            const bulletSplit = text
+              .split(/\r?\n|•|\u2022|\u25CF|\u25E6|\u2219/g)
+              .map((v) => normalizeText(v))
+              .filter(Boolean);
+            if (bulletSplit.length > 1) return bulletSplit;
+
+            if (text.includes(';')) {
+              const semicolonSplit = text.split(';').map((v) => normalizeText(v)).filter(Boolean);
+              if (semicolonSplit.length > 1) return semicolonSplit;
+            }
+
+            if (text.includes('|')) {
+              const pipeSplit = text.split('|').map((v) => normalizeText(v)).filter(Boolean);
+              if (pipeSplit.length > 1) return pipeSplit;
+            }
+
+            return [text];
+          };
+
+          const countChar = (text, char) => String(text || '').split(char).length - 1;
+          const mergeFragments = (items) => {
+            const source = (Array.isArray(items) ? items : []).map((v) => normalizeText(v)).filter(Boolean);
+            const merged = [];
+            let i = 0;
+            while (i < source.length) {
+              let current = source[i];
+              let balance = countChar(current, '(') - countChar(current, ')');
+              while (balance > 0 && i + 1 < source.length) {
+                i += 1;
+                current = `${current}, ${source[i]}`;
+                balance = countChar(current, '(') - countChar(current, ')');
+              }
+              merged.push(normalizeText(current));
+              i += 1;
+            }
+            return Array.from(new Set(merged.filter(Boolean)));
+          };
+
+          const resolveGradeNumber = (data, enrollment) => {
+            const raw = data.gradeLevel || data.grade || data.grade_level || enrollment.grade_to_enroll_id || enrollment.grade_level;
+            const m = String(raw || '').match(/(\d{1,2})/);
+            return m ? Number(m[1]) : null;
+          };
+
+          const resolveElectives = (data, enrollment) => {
+            const grade = resolveGradeNumber(data, enrollment);
+            if (grade !== 11 && grade !== 12) return '--';
+
+            const items = [
+              ...parseList(data.academicElectives),
+              ...parseList(data.techproElectives),
+              ...parseList(data.doorwayAcademic),
+              ...parseList(data.doorwayTechPro),
+              ...parseList(data.doorwayTechpro),
+              ...parseList(data.selectedElectives),
+              ...parseList(data.electives),
+              ...parseList(data.shs && data.shs.electives),
+              ...parseList(data.interest)
+            ];
+
+            const merged = mergeFragments(items);
+            return merged.length ? merged.join(', ') : '--';
+          };
+
+          if (!allRows.length) {
+            tbody.innerHTML = '<tr><td colspan="8" style="padding: 40px; text-align: center; color: #999;">No enrollments yet.</td></tr>';
+            return;
+          }
+
+          const html = visibleRows.map((enrollment) => {
+            let data = enrollment && enrollment.enrollment_data ? enrollment.enrollment_data : {};
+            if (typeof data === 'string') {
+              try { data = JSON.parse(data); } catch (_err) { data = {}; }
+            }
+            if (!data || typeof data !== 'object') data = {};
+
+            const enrollmentId = String(enrollment.id || enrollment.enrollment_id || '').trim();
+            const rowClickable = Boolean(enrollmentId);
+
+            const first = String(data.firstName || '').trim();
+            const last = String(data.lastName || '').trim();
+            const name = [first, last].filter(Boolean).join(' ') || 'N/A';
+            const status = String(enrollment.status || 'Pending');
+            const statusClass = status.toLowerCase();
+            const statusStyles = {
+              approved: 'background:#d4edda;color:#155724;',
+              pending: 'background:#fff3cd;color:#856404;',
+              rejected: 'background:#f8d7da;color:#721c24;'
+            };
+            const style = statusStyles[statusClass] || 'background:#e2e3e5;color:#383d41;';
+
+            const sectionId = enrollment.section_id || data.section_id || data.sectionId || '';
+            const section = sectionMap[String(sectionId)] || data.section_name || data.section || '--';
+            const date = enrollment.enrollment_date ? new Date(enrollment.enrollment_date).toLocaleDateString() : '-';
+            const electives = resolveElectives(data, enrollment);
+
+            return `
+              <tr
+                class="recent-enrollment-row"
+                data-enrollment-id="${enrollmentId}"
+                style="border-bottom: 1px solid #dee2e6; ${rowClickable ? 'cursor: pointer; transition: background 0.2s ease;' : ''}"
+                ${rowClickable ? `onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'"` : ''}
+              >
+                <td style="padding: 12px;">${data.studentLRN || data.lrn || '-'}</td>
+                <td style="padding: 12px;">${name}</td>
+                <td style="padding: 12px;">${data.gradeLevel || '-'}</td>
+                <td style="padding: 12px;">${section}</td>
+                <td style="padding: 12px;">${data.track || '-'}</td>
+                <td style="padding: 12px; max-width:260px; white-space: normal; line-height:1.35;">${electives}</td>
+                <td style="padding: 12px;"><span style="padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;${style}">${status}</span></td>
+                <td style="padding: 12px;">${date}</td>
+              </tr>
+            `;
+          }).join('');
+
+          tbody.innerHTML = html;
+        }
+
+        function bindFallbackRecentRowClicks() {
+          const tbody = document.getElementById('recentEnrollments');
+          if (!tbody || tbody.dataset.fallbackRowClickBound === '1') return;
+          tbody.dataset.fallbackRowClickBound = '1';
+
+          tbody.addEventListener('click', function (event) {
+            const row = event.target && typeof event.target.closest === 'function'
+              ? event.target.closest('tr[data-enrollment-id]')
+              : null;
+            if (!row) return;
+
+            const enrollmentId = String(row.getAttribute('data-enrollment-id') || '').trim();
+            if (!enrollmentId) return;
+
+            if (typeof window.openStudentProfileFromEnrollment === 'function') {
+              Promise.resolve(window.openStudentProfileFromEnrollment(enrollmentId)).catch(function () {});
+              return;
+            }
+
+            if (typeof window.openEnrollmentDetailSafely === 'function') {
+              window.openEnrollmentDetailSafely(enrollmentId);
+            }
+          });
+        }
+
+        async function handleFallbackRecentToggle(event) {
+          const toggle = event.target && typeof event.target.closest === 'function'
+            ? event.target.closest('#recentEnrollmentsToggle')
+            : null;
+          if (!toggle) return;
+
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+
+          if (fallbackRecentBusy) return;
+
+          if (typeof window.toggleRecentEnrollmentsView === 'function') {
+            try {
+              await window.toggleRecentEnrollmentsView();
+              return;
+            } catch (_e) {
+              // Continue to fallback behavior
+            }
+          }
+
+          fallbackRecentBusy = true;
+          try {
+            const willExpand = !fallbackRecentExpanded;
+            const schoolCode = detectSchoolCode();
+
+            if (willExpand && fallbackRecentRows.length <= 5) {
+              const endpointCandidates = [
+                '/api/enrollments?sort=recent&activeYear=true&limit=200',
+                '/api/enrollments?activeYear=true&limit=200',
+                '/api/enrollments?sort=recent&activeYear=true',
+                '/api/enrollments?activeYear=true'
+              ];
+
+              let expandedRows = [];
+              for (const endpoint of endpointCandidates) {
+                try {
+                  const result = await apiGet(endpoint, schoolCode);
+                  if (!Array.isArray(result) || result.length === 0) continue;
+                  expandedRows = result;
+                  if (result.length > fallbackRecentRows.length) break;
+                } catch (_e) {
+                  // Try next endpoint
+                }
+              }
+
+              if (Array.isArray(expandedRows) && expandedRows.length > 0) {
+                fallbackRecentRows = expandedRows;
+                try { window.dashboardEnrollmentsCache = expandedRows; } catch (_e) {}
+              }
+            }
+
+            fallbackRecentExpanded = willExpand;
+            renderRecentEnrollments(fallbackRecentRows, fallbackRecentSections);
+          } catch (_err) {
+            // No-op: fallback handler should not disrupt dashboard usage
+          } finally {
+            fallbackRecentBusy = false;
+          }
+        }
+
+        async function runFallback() {
+          if (!shouldRunFallback()) return;
+          try {
+            const schoolCode = detectSchoolCode();
+            const [stats, enrollments, sections] = await Promise.all([
+              apiGet('/api/enrollments/stats?activeYear=true', schoolCode),
+              apiGet('/api/enrollments?limit=5&sort=recent&activeYear=true', schoolCode),
+              apiGet('/api/sections', schoolCode).catch(() => [])
+            ]);
+
+            try {
+              const rows = Array.isArray(enrollments) ? enrollments : [];
+              window.dashboardEnrollmentsCache = rows;
+              fallbackRecentRows = rows;
+              fallbackRecentSections = Array.isArray(sections) ? sections : [];
+              if (stats && typeof stats === 'object' && stats.totalEnrollments == null) {
+                stats.totalEnrollments = rows.length;
+              }
+            } catch (_e) {}
+
+            renderStats(stats || {});
+            renderRecentEnrollments(enrollments || [], sections || []);
+            console.warn('[Admin Dashboard] Emergency fallback loader applied successfully');
+          } catch (err) {
+            console.warn('[Admin Dashboard] Emergency fallback loader failed:', err && err.message ? err.message : err);
+          }
+        }
+
+        window.addEventListener('load', function () {
+          if (!window.__recentEnrollmentsEmergencyBound) {
+            window.__recentEnrollmentsEmergencyBound = true;
+            document.addEventListener('click', handleFallbackRecentToggle, true);
+            bindFallbackRecentRowClicks();
+          }
+
+          setTimeout(runFallback, 300);
+          setTimeout(runFallback, 1200);
+          setTimeout(runFallback, 3000);
+        });
+      })();
+    </script>
+
+    <script>
+      (function () {
+        function triggerSectionLoad(sectionId) {
+          try {
+            const normalizedSectionId = sectionId === 'teaching-assignments' ? 'teacher-registration' : sectionId;
+
+            if (sectionId === 'dashboard') {
+              if (typeof loadDashboardStats === 'function') loadDashboardStats();
+              if (typeof loadRecentEnrollments === 'function') loadRecentEnrollments();
+              return;
+            }
+
+            if (sectionId === 'standard-reports') {
+              if (typeof setupReportTabs === 'function' && !window.__reportsTabsEmergencyInit) {
+                window.__reportsTabsEmergencyInit = true;
+                setupReportTabs();
+              }
+
+              const activeReport = document.querySelector('.report-tab.active')?.getAttribute('data-report') || 'demographics';
+              if (typeof loadReportData === 'function') {
+                loadReportData(activeReport);
+              }
+              return;
+            }
+
+            if (normalizedSectionId === 'teacher-registration' || sectionId === 'teaching-assignments') {
+              if (typeof loadTeachersForAdmin === 'function') {
+                loadTeachersForAdmin();
+              }
+
+              if (sectionId === 'teaching-assignments') {
+                if (typeof window.switchTeachersMainTab === 'function') {
+                  try { window.switchTeachersMainTab('assignments'); } catch (_e) {}
+                } else if (typeof window.loadTeachingAssignmentsV2 === 'function') {
+                  setTimeout(() => {
+                    try { window.loadTeachingAssignmentsV2(); } catch (_e) {}
+                  }, 300);
+                }
+              } else if (typeof window.switchTeachersMainTab === 'function') {
+                try { window.switchTeachersMainTab('registration'); } catch (_e) {}
+              }
+            }
+          } catch (_err) {}
+        }
+
+        function showSection(sectionId) {
+          if (!sectionId) return;
+          const normalizedSectionId = sectionId === 'teaching-assignments' ? 'teacher-registration' : sectionId;
+          const target = document.getElementById(normalizedSectionId);
+          if (!target) return;
+
+          document.querySelectorAll('.section').forEach((section) => section.classList.remove('active'));
+          target.classList.add('active');
+          triggerSectionLoad(sectionId);
+        }
+
+        function normalizeOverlays() {
+          document.body.classList.remove('modal-open', 'sidebar-open');
+          document.body.style.overflow = '';
+
+          document.querySelectorAll('.modal').forEach((modal) => {
+            const open = modal.classList.contains('active') || modal.getAttribute('aria-hidden') === 'false';
+            if (!open) {
+              modal.style.display = 'none';
+              modal.style.pointerEvents = 'none';
+              modal.setAttribute('aria-hidden', 'true');
+              modal.classList.remove('active');
+            }
+          });
+
+          const chatPanel = document.getElementById('chatPanel');
+          if (chatPanel) {
+            chatPanel.style.display = 'none';
+            chatPanel.style.pointerEvents = 'none';
+            chatPanel.setAttribute('aria-hidden', 'true');
+          }
+        }
+
+        function bindEmergencySidebar() {
+          const sidebarMenu = document.querySelector('.sidebar-menu');
+          if (!sidebarMenu) return;
+
+          const closeSidebarOnMobile = () => {
+            if (window.innerWidth > 768) return;
+            const sidebar = document.getElementById('sidebar');
+            const hamburgerBtn = document.getElementById('hamburgerBtn');
+            if (sidebar) sidebar.classList.remove('active');
+            if (hamburgerBtn) {
+              hamburgerBtn.classList.remove('active');
+              hamburgerBtn.setAttribute('aria-expanded', 'false');
+            }
+            document.body.classList.remove('sidebar-open');
+            document.body.style.overflow = '';
+          };
+
+          sidebarMenu.addEventListener('click', function (event) {
+            const toggle = event.target.closest('.menu-toggle');
+            if (toggle) {
+              event.preventDefault();
+              event.stopPropagation();
+              const group = toggle.closest('.menu-group');
+              if (!group) return;
+              const expanded = group.classList.toggle('expanded');
+              toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+              const submenu = group.querySelector('.submenu');
+              if (submenu) submenu.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+              return;
+            }
+
+            const submenuItem = event.target.closest('.submenu-item[data-section]');
+            const topLevelItem = event.target.closest('.sidebar-menu > .menu-item[data-section]');
+            const menuItem = submenuItem || topLevelItem;
+            if (!menuItem) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            document.querySelectorAll('.sidebar-menu .menu-item').forEach((node) => node.classList.remove('active'));
+            menuItem.classList.add('active');
+            showSection(menuItem.getAttribute('data-section'));
+            closeSidebarOnMobile();
+          }, true);
+        }
+
+        function bindEmergencyHamburger() {
+          if (window.__emergencyHamburgerBound) return;
+
+          const hamburgerBtn = document.getElementById('hamburgerBtn');
+          const sidebar = document.getElementById('sidebar');
+          if (!hamburgerBtn || !sidebar) return;
+
+          const setSidebarOpen = (open) => {
+            sidebar.classList.toggle('active', !!open);
+            hamburgerBtn.classList.toggle('active', !!open);
+            hamburgerBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            document.body.classList.toggle('sidebar-open', !!open);
+            document.body.style.overflow = open ? 'hidden' : '';
+          };
+
+          const toggleHandler = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setSidebarOpen(!sidebar.classList.contains('active'));
+          };
+
+          hamburgerBtn.addEventListener('click', toggleHandler, true);
+
+          document.addEventListener('click', function (event) {
+            if (window.innerWidth > 768) return;
+            if (!sidebar.classList.contains('active')) return;
+            if (sidebar.contains(event.target) || hamburgerBtn.contains(event.target)) return;
+            setSidebarOpen(false);
+          }, true);
+
+          window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) setSidebarOpen(false);
+          });
+
+          window.__emergencyHamburgerBound = true;
+        }
+
+        function bindEmergencyHeaderOverlays() {
+          if (window.__headerOverlayEmergencyBound) return;
+          window.__headerOverlayEmergencyBound = true;
+
+          const setOpen = (overlayId, open) => {
+            const overlay = document.getElementById(overlayId);
+            if (!overlay) return;
+            if (open) {
+              overlay.classList.add('active');
+              overlay.setAttribute('aria-hidden', 'false');
+            } else {
+              overlay.classList.remove('active');
+              overlay.setAttribute('aria-hidden', 'true');
+            }
+          };
+
+          const bellBtn = document.getElementById('adminNotificationBtn');
+          const notifClose = document.getElementById('adminNotificationClose');
+          const notifBackdrop = document.getElementById('adminNotificationBackdrop');
+          if (!window.__useNotificationCenterV2) {
+            if (bellBtn) bellBtn.addEventListener('click', () => setOpen('adminNotificationOverlay', true));
+            if (notifClose) notifClose.addEventListener('click', () => setOpen('adminNotificationOverlay', false));
+            if (notifBackdrop) notifBackdrop.addEventListener('click', () => setOpen('adminNotificationOverlay', false));
+          }
+
+          const settingsBtn = document.getElementById('adminSettingsBtn');
+          const settingsClose = document.getElementById('adminSettingsClose');
+          const settingsBackdrop = document.getElementById('adminSettingsBackdrop');
+          if (settingsBtn) settingsBtn.addEventListener('click', async () => {
+            try {
+              if (typeof window.__openAdminSettingsWithData === 'function') {
+                await window.__openAdminSettingsWithData();
+                return;
+              }
+            } catch (_e) {}
+            setOpen('adminSettingsOverlay', true);
+          });
+          if (settingsClose) settingsClose.addEventListener('click', () => setOpen('adminSettingsOverlay', false));
+          if (settingsBackdrop) settingsBackdrop.addEventListener('click', () => setOpen('adminSettingsOverlay', false));
+
+          const chatBtn = document.getElementById('chatBtn');
+          const chatPanel = document.getElementById('chatPanel');
+          const chatCloseBtn = document.getElementById('chatCloseBtn');
+          const openChat = () => {
+            if (!chatPanel) return;
+            chatPanel.style.display = 'flex';
+            chatPanel.style.pointerEvents = 'auto';
+            chatPanel.setAttribute('aria-hidden', 'false');
+          };
+          const closeChat = () => {
+            if (!chatPanel) return;
+            chatPanel.style.display = 'none';
+            chatPanel.style.pointerEvents = 'none';
+            chatPanel.setAttribute('aria-hidden', 'true');
+          };
+          if (!window.__useMessagePanelV2) {
+            if (chatBtn) chatBtn.addEventListener('click', openChat);
+            if (chatCloseBtn) chatCloseBtn.addEventListener('click', closeChat);
+          }
+
+          document.addEventListener('click', function (event) {
+            const settingsTab = event.target.closest('.admin-settings-tab-btn');
+            if (settingsTab) {
+              event.preventDefault();
+              const tab = settingsTab.getAttribute('data-settings-tab') || 'account';
+              document.querySelectorAll('.admin-settings-tab-btn').forEach((btn) => {
+                btn.classList.toggle('active', btn === settingsTab);
+              });
+              document.querySelectorAll('.admin-settings-tab-content').forEach((panel) => {
+                panel.classList.toggle('active', panel.getAttribute('data-settings-panel') === tab);
+              });
+              return;
+            }
+
+            const notifTab = event.target.closest('.admin-notif-tab-btn');
+            if (notifTab) {
+              event.preventDefault();
+              document.querySelectorAll('.admin-notif-tab-btn').forEach((btn) => {
+                btn.classList.toggle('active', btn === notifTab);
+              });
+              return;
+            }
+
+            if (!window.__useMessagePanelV2) {
+              const chatFilterBtn = event.target.closest('.chat-filter-btn');
+              if (chatFilterBtn) {
+                event.preventDefault();
+                document.querySelectorAll('.chat-filter-btn').forEach((btn) => {
+                  btn.classList.toggle('active', btn === chatFilterBtn);
+                });
+              }
+            }
+          }, true);
+        }
+
+        function bindEmergencySettingsActions() {
+          if (window.__useQuickAdminSettingsV2) return;
+          if (window.__emergencySettingsActionsBound) return;
+          window.__emergencySettingsActionsBound = true;
+
+          const getSchoolCode = () => {
+            try {
+              const params = new URLSearchParams(window.location.search || '');
+              const queryCode = (params.get('school') || params.get('tenant') || '').trim().toLowerCase();
+              if (queryCode) return queryCode;
+            } catch (_e) {}
+            return String(localStorage.getItem('sms.selectedSchoolCode') || localStorage.getItem('sms.selectedTenantCode') || '').trim().toLowerCase();
+          };
+
+          const showToast = (message, type) => {
+            const node = document.getElementById('notification');
+            if (!node) return;
+            node.textContent = String(message || 'Done');
+            node.classList.remove('success', 'error', 'show');
+            node.classList.add(type === 'success' ? 'success' : 'error');
+            node.classList.add('show');
+            setTimeout(() => node.classList.remove('show'), 2200);
+          };
+
+          const getAdminId = async () => {
+            try {
+              if (typeof sessionManager !== 'undefined' && sessionManager.getTabSession) {
+                const tabAdmin = sessionManager.getTabSession('adminData');
+                const tabId = Number(tabAdmin?.id || tabAdmin?.admin_id || 0);
+                if (tabId > 0) return tabId;
+              }
+            } catch (_e) {}
+
+            try {
+              const raw = localStorage.getItem('adminData');
+              if (raw) {
+                const parsed = JSON.parse(raw);
+                const id = Number(parsed?.id || parsed?.admin_id || 0);
+                if (id > 0) return id;
+              }
+            } catch (_e) {}
+
+            try {
+              if (typeof resolveCurrentAdminId === 'function') {
+                const resolved = await resolveCurrentAdminId();
+                if (resolved) return Number(resolved);
+              }
+            } catch (_e) {}
+
+            try {
+              const me = await apiCall('/api/admin/me', 'GET');
+              const id = Number(me?.admin?.id || me?.admin?.admin_id || 0);
+              if (id > 0) return id;
+            } catch (_e) {}
+
+            return null;
+          };
+
+          const apiCall = async (path, method, body) => {
+            const school = getSchoolCode();
+            const url = new URL(path, window.location.origin);
+            if (school) url.searchParams.set('school', school);
+            const token = String(localStorage.getItem('adminAuthToken') || '').trim();
+            const headers = {
+              'Content-Type': 'application/json',
+              ...(school ? { 'x-tenant-code': school } : {}),
+              ...(token ? { Authorization: `Bearer ${token}` } : {})
+            };
+            const res = await fetch(url.pathname + url.search, {
+              method,
+              headers,
+              ...(body ? { body: JSON.stringify(body) } : {})
+            });
+            const json = await res.json().catch(() => ({}));
+            if (!res.ok) {
+              throw new Error(json?.error || json?.message || `Request failed (${res.status})`);
+            }
+            return json;
+          };
+
+          // scope selection removed; backups always capture full database
+          const selectedScope = () => [];
+
+          const settingsStorageKey = () => {
+            const school = getSchoolCode();
+            return school ? `adminDashboardSettingsV1:${school}` : 'adminDashboardSettingsV1';
+          };
+
+          const portalStorageKey = () => {
+            const school = getSchoolCode();
+            return school ? `adminPortalPageContentV1:${school}` : 'adminPortalPageContentV1';
+          };
+
+          const fmtDate = (value) => {
+            if (!value) return '--';
+            const d = new Date(value);
+            return Number.isNaN(d.getTime()) ? '--' : d.toLocaleString();
+          };
+
+          const fmtSize = (bytes) => {
+            const size = Number(bytes || 0);
+            if (!size) return '--';
+            if (size < 1024) return `${size} B`;
+            if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+            return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+          };
+
+          const renderBackupData = async (adminId) => {
+            const [policyData, historyData] = await Promise.all([
+              apiCall(`/api/backups/policy/${adminId}`, 'GET'),
+              apiCall(`/api/backups/history/${adminId}?limit=30`, 'GET')
+            ]);
+
+            const policy = policyData?.policy || {};
+            const history = Array.isArray(historyData?.history) ? historyData.history : [];
+
+            const backupEnabledEl = document.getElementById('settingsBackupEnabled');
+            const backupIntervalEl = document.getElementById('settingsBackupInterval');
+            const backupMetaEl = document.getElementById('settingsBackupMeta');
+            const backupHistoryBody = document.getElementById('settingsBackupHistoryBody');
+
+            if (backupEnabledEl) backupEnabledEl.checked = !!policy.enabled;
+            if (backupIntervalEl) backupIntervalEl.value = String(policy.interval_hours || 24);
+            // scope checkboxes removed; nothing to update
+            if (backupMetaEl) {
+              backupMetaEl.textContent = `Last backup: ${fmtDate(policy.last_run_at)} | Next scheduled backup: ${fmtDate(policy.next_run_at)}`;
+            }
+
+            if (!backupHistoryBody) return;
+            if (!history.length) {
+              backupHistoryBody.innerHTML = '<tr><td colspan="5">No backups yet</td></tr>';
+              return;
+            }
+
+            const school = getSchoolCode();
+            const schoolQuery = school ? `?school=${encodeURIComponent(school)}` : '';
+            backupHistoryBody.innerHTML = history.map((item) => {
+              const action = item.status === 'success'
+                ? `<a href="/api/backups/download/${adminId}/${item.id}${schoolQuery}" class="btn btn-secondary" style="padding:6px 8px;font-size:11px;">Download</a>`
+                : '--';
+              return `
+                <tr>
+                  <td>${fmtDate(item.created_at)}</td>
+                  <td>${String(item.trigger_type || '--')}</td>
+                  <td>${String(item.status || '--')}</td>
+                  <td>${fmtSize(item.file_size)}</td>
+                  <td>${action}</td>
+                </tr>
+              `;
+            }).join('');
+          };
+
+          const runEmergencySettingsAction = async (action) => {
+            try {
+              if (action === 'backupNow') {
+                const adminId = await getAdminId();
+                if (!adminId) {
+                  showToast('Admin session not found', 'error');
+                  return;
+                }
+                await apiCall(`/api/backups/run/${adminId}`, 'POST');
+                await renderBackupData(adminId);
+                showToast('Backup completed successfully', 'success');
+                return;
+              }
+
+              if (action === 'savePolicy') {
+                const adminId = await getAdminId();
+                if (!adminId) {
+                  showToast('Admin session not found', 'error');
+                  return;
+                }
+                const backupEnabledEl = document.getElementById('settingsBackupEnabled');
+                const backupIntervalEl = document.getElementById('settingsBackupInterval');
+                await apiCall(`/api/backups/policy/${adminId}`, 'PUT', {
+                  enabled: !!backupEnabledEl?.checked,
+                  interval_hours: Number(backupIntervalEl?.value || 24)
+                });
+                await renderBackupData(adminId);
+                showToast('Backup policy saved', 'success');
+                return;
+              }
+
+              if (action === 'refreshHistory') {
+                const adminId = await getAdminId();
+                if (!adminId) {
+                  showToast('Admin session not found', 'error');
+                  return;
+                }
+                await renderBackupData(adminId);
+                showToast('Backup history refreshed', 'success');
+                return;
+              }
+
+              if (action === 'resetSettings') {
+                const defaults = {
+                  settingsAdminName: '',
+                  settingsAdminEmail: '',
+                  settingsSessionTimeout: '30'
+                };
+                Object.keys(defaults).forEach((id) => {
+                  const el = document.getElementById(id);
+                  if (el) el.value = defaults[id];
+                });
+                const checkDefaults = {
+                  settingsNotifInApp: true,
+                  settingsNotifSound: false,
+                  settingsNotifEnrollment: true,
+                  settingsNotifSection: true,
+                  settingsNotifTeacher: true,
+                  settingsReauthDestructive: true
+                };
+                Object.keys(checkDefaults).forEach((id) => {
+                  const el = document.getElementById(id);
+                  if (el) el.checked = !!checkDefaults[id];
+                });
+
+                const portalDefaults = {
+                  settingsPortalHeroTagline: '',
+                  settingsPortalAboutTitle: '',
+                  settingsPortalAboutHtml: '',
+                  settingsPortalInfoTitle: '',
+                  settingsPortalInfoHtml: '',
+                  settingsPortalFooterTagline: '',
+                  settingsPortalContactHtml: '',
+                  settingsPortalCopyright: ''
+                };
+                Object.keys(portalDefaults).forEach((id) => {
+                  const el = document.getElementById(id);
+                  if (el) el.value = portalDefaults[id];
+                });
+
+                const backupEnabledEl = document.getElementById('settingsBackupEnabled');
+                const backupIntervalEl = document.getElementById('settingsBackupInterval');
+                if (backupEnabledEl) backupEnabledEl.checked = false;
+                if (backupIntervalEl) backupIntervalEl.value = '24';
+                const backupMetaEl = document.getElementById('settingsBackupMeta');
+                if (backupMetaEl) backupMetaEl.textContent = 'Last backup: -- | Next scheduled backup: --';
+
+                const settingsPayload = {
+                  account: {
+                    name: (document.getElementById('settingsAdminName')?.value || '').trim() || 'Admin',
+                    email: (document.getElementById('settingsAdminEmail')?.value || '').trim()
+                  },
+                  notifications: {
+                    inApp: !!document.getElementById('settingsNotifInApp')?.checked,
+                    sound: !!document.getElementById('settingsNotifSound')?.checked,
+                    enrollment: !!document.getElementById('settingsNotifEnrollment')?.checked,
+                    section: !!document.getElementById('settingsNotifSection')?.checked,
+                    teacher: !!document.getElementById('settingsNotifTeacher')?.checked
+                  },
+                  security: {
+                    sessionTimeout: String(document.getElementById('settingsSessionTimeout')?.value || '30'),
+                    reauthDestructive: !!document.getElementById('settingsReauthDestructive')?.checked
+                  }
+                };
+
+                const portalPayload = {
+                  heroTagline: String(document.getElementById('settingsPortalHeroTagline')?.value || ''),
+                  aboutTitle: String(document.getElementById('settingsPortalAboutTitle')?.value || ''),
+                  aboutCardsHtml: String(document.getElementById('settingsPortalAboutHtml')?.value || ''),
+                  schoolInfoTitle: String(document.getElementById('settingsPortalInfoTitle')?.value || ''),
+                  schoolInfoCardsHtml: String(document.getElementById('settingsPortalInfoHtml')?.value || ''),
+                  footerTagline: String(document.getElementById('settingsPortalFooterTagline')?.value || ''),
+                  contactHtml: String(document.getElementById('settingsPortalContactHtml')?.value || ''),
+                  copyrightText: String(document.getElementById('settingsPortalCopyright')?.value || '')
+                };
+
+                const backupPayload = {
+                  enabled: false,
+                  interval_hours: 24,
+                  scope: selectedScope()
+                };
+
+                localStorage.setItem(settingsStorageKey(), JSON.stringify(settingsPayload));
+                localStorage.setItem(portalStorageKey(), JSON.stringify(portalPayload));
+
+                try {
+                  const adminNameEl = document.getElementById('adminName');
+                  if (adminNameEl) adminNameEl.textContent = settingsPayload.account.name || 'Admin';
+                } catch (_e) {}
+
+                const adminId = await getAdminId();
+                if (adminId) {
+                  try {
+                    await Promise.all([
+                      apiCall(`/api/admin/${adminId}/settings`, 'PUT', { settings: settingsPayload }),
+                      apiCall('/api/admin/portal-page-content', 'PUT', { content: portalPayload }),
+                      apiCall(`/api/backups/policy/${adminId}`, 'PUT', backupPayload)
+                    ]);
+                    await renderBackupData(adminId);
+                    showToast('All settings reset to defaults', 'success');
+                  } catch (_err) {
+                    showToast('Settings reset locally. Server sync failed.', 'error');
+                  }
+                } else {
+                  showToast('All settings reset to defaults', 'success');
+                }
+                return;
+              }
+
+              if (action === 'saveSettings') {
+                const adminId = await getAdminId();
+                const payload = {
+                  account: {
+                    name: document.getElementById('settingsAdminName')?.value || '',
+                    email: document.getElementById('settingsAdminEmail')?.value || ''
+                  },
+                  notifications: {
+                    inApp: !!document.getElementById('settingsNotifInApp')?.checked,
+                    sound: !!document.getElementById('settingsNotifSound')?.checked,
+                    enrollment: !!document.getElementById('settingsNotifEnrollment')?.checked,
+                    section: !!document.getElementById('settingsNotifSection')?.checked,
+                    teacher: !!document.getElementById('settingsNotifTeacher')?.checked
+                  },
+                  security: {
+                    sessionTimeout: String(document.getElementById('settingsSessionTimeout')?.value || '30'),
+                    reauthDestructive: !!document.getElementById('settingsReauthDestructive')?.checked
+                  }
+                };
+
+                const portalPayload = {
+                  heroTagline: String(document.getElementById('settingsPortalHeroTagline')?.value || ''),
+                  aboutTitle: String(document.getElementById('settingsPortalAboutTitle')?.value || ''),
+                  aboutCardsHtml: String(document.getElementById('settingsPortalAboutHtml')?.value || ''),
+                  schoolInfoTitle: String(document.getElementById('settingsPortalInfoTitle')?.value || ''),
+                  schoolInfoCardsHtml: String(document.getElementById('settingsPortalInfoHtml')?.value || ''),
+                  footerTagline: String(document.getElementById('settingsPortalFooterTagline')?.value || ''),
+                  contactHtml: String(document.getElementById('settingsPortalContactHtml')?.value || ''),
+                  copyrightText: String(document.getElementById('settingsPortalCopyright')?.value || '')
+                };
+
+                const backupPayload = {
+                  enabled: !!document.getElementById('settingsBackupEnabled')?.checked,
+                  interval_hours: Number(document.getElementById('settingsBackupInterval')?.value || 24),
+                  scope: selectedScope()
+                };
+
+                localStorage.setItem(settingsStorageKey(), JSON.stringify(payload));
+                localStorage.setItem(portalStorageKey(), JSON.stringify(portalPayload));
+                if (adminId) {
+                  try {
+                    await Promise.all([
+                      apiCall(`/api/admin/${adminId}/settings`, 'PUT', { settings: payload }),
+                      apiCall('/api/admin/portal-page-content', 'PUT', { content: portalPayload }),
+                      apiCall(`/api/backups/policy/${adminId}`, 'PUT', backupPayload)
+                    ]);
+                    await renderBackupData(adminId);
+                    showToast('All settings saved successfully', 'success');
+                  } catch (_err) {
+                    showToast('Saved partially. Remaining changes are local only.', 'success');
+                  }
+                } else {
+                  showToast('Settings saved locally', 'success');
+                }
+                return;
+              }
+            } catch (err) {
+              showToast(err && err.message ? err.message : 'Action failed', 'error');
+            }
+          };
+
+          window.__runEmergencySettingsAction = runEmergencySettingsAction;
+
+          const settingsBtn = document.getElementById('adminSettingsBtn');
+          if (settingsBtn) {
+            settingsBtn.addEventListener('click', async () => {
+              try {
+                const adminId = await getAdminId();
+                if (!adminId) return;
+                await renderBackupData(adminId);
+              } catch (_err) {
+                // fallback loader should stay silent
+              }
+            });
+          }
+
+          document.addEventListener('click', async function (event) {
+            const backupNowBtn = event.target.closest('#settingsBackupNow');
+            const savePolicyBtn = event.target.closest('#settingsSaveBackupPolicy');
+            const refreshHistoryBtn = event.target.closest('#settingsRefreshBackupHistory');
+            const resetBtn = event.target.closest('#adminSettingsReset');
+            const saveSettingsBtn = event.target.closest('#adminSettingsSave');
+
+            let action = '';
+            if (backupNowBtn) action = 'backupNow';
+            else if (savePolicyBtn) action = 'savePolicy';
+            else if (refreshHistoryBtn) action = 'refreshHistory';
+            else if (resetBtn) action = 'resetSettings';
+            else if (saveSettingsBtn) action = 'saveSettings';
+
+            if (!action) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+
+            await runEmergencySettingsAction(action);
+          }, true);
+        }
+
+        window.addEventListener('load', function () {
+          normalizeOverlays();
+          bindEmergencyHamburger();
+          bindEmergencySidebar();
+          bindEmergencyHeaderOverlays();
+          const initialSection = document.querySelector('.section.active')?.id || 'dashboard';
+          triggerSectionLoad(initialSection);
+          setTimeout(normalizeOverlays, 500);
+          setTimeout(normalizeOverlays, 1500);
+        });
+      })();
+    </script>
+
+    <!-- Realtime Chat Panel -->
+    <div id="chatPanel" class="chat-panel" aria-hidden="true" data-conversation-active="false">
+        <div class="chat-sidebar">
+            <div class="chat-header">
+                <div class="chat-header-top">
+                    <span>Chats</span>
+                    <button id="chatNewBtn" class="chat-action-btn" title="New chat or group">＋</button>
+                    <button id="chatCloseBtn" class="chat-close-btn" title="Close messages" aria-label="Close messages">✕</button>
+                </div>
+                <div class="chat-header-tools">
+                    <input id="chatSearchInput" class="chat-search-input" type="text" placeholder="Search conversation..." />
+                    <div class="chat-filter-row" role="tablist" aria-label="Chat filters">
+                        <button type="button" class="chat-filter-btn active" data-chat-filter="all">All</button>
+                        <button type="button" class="chat-filter-btn" data-chat-filter="unread">Unread</button>
+                        <button type="button" class="chat-filter-btn" data-chat-filter="online">Online</button>
+                    </div>
+                    <button id="chatMarkAllReadBtn" class="chat-mark-read-btn" type="button">Mark all as read</button>
+                </div>
+            </div>
+            <div id="conversationsList" class="conversations-list"></div>
+        </div>
+        <div class="chat-window">
+            <div class="chat-window-header">
+                <button id="chatBackBtn" class="chat-back-btn">← Back</button>
+                <div id="chatWindowTitle">Select a conversation</div>
+                <div class="chat-window-actions">
+                    <button id="chatPinBtn" class="chat-action-btn" type="button" title="Pin conversation">Pin</button>
+                    <button id="chatMuteBtn" class="chat-action-btn" type="button" title="Mute conversation">Mute</button>
+                    <button id="chatAddMemberBtn" class="chat-action-btn" type="button" title="Add members">+Add</button>
+                    <button id="chatDeleteBtn" class="chat-action-btn danger" type="button" title="Delete conversation">Delete</button>
+                    <span id="chatConnectionState" class="chat-connection-state disconnected">Disconnected</span>
+                    <div id="chatWindowStatus" class="user-status">Offline</div>
+                </div>
+            </div>
+            <div id="messagesContainer" class="messages-container">
+                <div class="empty-state">No messages yet. Start the conversation!</div>
+            </div>
+            <div class="chat-input-area">
+                <input id="chatMessageInput" placeholder="Type a message..." />
+                <button id="chatSendBtn" class="btn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.CURRENT_USER = {
+            id: null,
+            name: document.getElementById('adminName')?.textContent || 'Admin',
+            role: 'admin'
+        };
+        window.MESSAGING_PORT = window.MESSAGING_PORT || '3012';
+    </script>
+    <script src="messaging.js?v=20260228"></script>
+  </body>
+</html>
+
+
+

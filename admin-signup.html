@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Create Admin</title>
+
+    <link rel="icon" href="cnhs_logo.png" type="image/png" id="schoolFavicon" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="admin-login.css" />
+  </head>
+
+  <body>
+    <script>
+      // redirect to unified auth page for registration
+      const redirectUrl = 'auth.html?role=admin&tab=register' + window.location.search;
+      window.location.replace(redirectUrl);
+    </script>
+    <div class="login-wrapper">
+      <div class="login-card">
+        <div class="brand">
+          <img src="cnhs_logo.png" alt="School Logo" class="school-logo" id="schoolLogo" />
+          <h1 id="schoolName">Create Admin</h1>
+          <p id="schoolSubtitle">School Enrollment System</p>
+        </div>
+
+        <form id="signupForm">
+          <div class="input-group">
+            <i class="fa-solid fa-user"></i>
+            <input
+              type="text"
+              id="adminName"
+              placeholder="Full name"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <i class="fa-regular fa-envelope"></i>
+            <input
+              type="email"
+              id="signupEmail"
+              placeholder="Email address"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="Password (min 8 chars)"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input
+              type="password"
+              id="signupConfirm"
+              placeholder="Confirm password"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <i class="fa-solid fa-user-gear"></i>
+            <select id="adminRole" required>
+              <option value="">Select role</option>
+              <option value="admin">Admin</option>
+              <option value="guidance">Guidance</option>
+              <option value="master">Master Teacher</option>
+            </select>
+          </div>
+
+          <button class="btn-login" type="submit">Create Account</button>
+        </form>
+
+        <div class="signup">
+          Already have an account?
+          <a href="auth.html?role=admin" id="signinLink">Sign in</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="admin-signup.js?v=20260228-otp-jwt-fix"></script>
+  </body>
+</html>
+
+
+

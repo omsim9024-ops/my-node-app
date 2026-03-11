@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Enrollment Form - CNHS</title>
+    <link rel="icon" id="schoolFavicon" href="cnhs_logo (2).png" type="image/png">
+    <link rel="stylesheet" href="enrollment-form.css?v=20260304-2">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar" aria-label="Main navigation">
+        <div class="nav-container">
+            <!-- brand links back to landing page -->
+            <a href="index.html" class="nav-brand" id="schoolLink">
+                <img src="cnhs_logo (2).png" alt="School Logo" class="nav-logo-img" id="schoolLogo">
+                <span class="nav-logo-text" id="schoolShortName">Compostela NHS</span>
+            </a>
+
+            <!-- quick access action buttons -->
+            <div class="nav-actions">
+                <a href="student-dashboard.html" class="home-btn" id="homeLink" aria-label="Student dashboard" title="Dashboard">
+                    <!-- home icon from material design -->
+                    <svg class="icon-home" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h1>Student Enrollment Form</h1>
+                <div id="teacherAssistedBadge" class="teacher-assisted-badge" style="display: none;">Teacher-Assisted Enrollment</div>
+                <p id="activeSchoolYearText">Compostela National High School - School Year 2026-2027</p>
+            </div>
+
+            <form id="enrollmentForm">
+                <!-- Grade Level and Electives Section -->
+                <div class="form-section">
+                    <h2>Grade Level and Subjects</h2>
+                    <div class="form-group">
+                        <label for="gradeLevel">Grade Level to Enroll *</label>
+                        <select id="gradeLevel" name="gradeLevel" required>
+                            <option value="">Select Grade Level</option>
+                            <option value="7">Grade 7</option>
+                            <option value="8">Grade 8</option>
+                            <option value="9">Grade 9</option>
+                            <option value="10">Grade 10</option>
+                            <option value="11">Grade 11 (Senior High School)</option>
+                            <option value="12">Grade 12 (Senior High School)</option>
+                        </select>
+                    </div>
+
+                    <div id="previousEnrollmentLookup" class="previous-enrollment-lookup hidden" aria-live="polite">
+                        <h3>Previous Enrollment Lookup</h3>
+                        <p class="form-subtitle">Search by student name, LRN, or enrollment ID to prefill this form for review and editing.</p>
+                        <div class="lookup-row">
+                            <input type="text" id="previousEnrollmentSearch" placeholder="Search previous enrollment...">
+                            <button type="button" id="previousEnrollmentSearchBtn" class="btn btn-secondary">Search</button>
+                        </div>
+                        <div id="previousEnrollmentLookupStatus" class="lookup-status">Select grade level to start lookup.</div>
+                        <div id="previousEnrollmentResults" class="lookup-results"></div>
+                    </div>
+
+                    <div id="seniorHighFields" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="semester">Semester *</label>
+                                <select id="semester" name="semester">
+                                    <option value="">Select Semester</option>
+                                    <option value="first">First Semester</option>
+                                    <option value="second">Second Semester</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="track">Track *</label>
+                                <select id="track" name="track">
+                                    <option value="">Select Track</option>
+                                    <option value="academic">Academic Track</option>
+                                    <option value="techpro">Tech-Pro Track</option>
+                                    <option value="doorway">Doorway Track</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="electiveSelection" class="form-group senior-electives hidden">
+                            <h3>Subjects / Electives</h3>
+                            <label>Select Your Electives (appears for Grade 11-12)</label>
+                            <div id="electivesList" class="checkbox-group accordion">
+                                <!-- Will be populated by JavaScript as accordion categories -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-sections-two-column">
+                    <!-- Returning Learner Section -->
+                    <div class="form-section">
+                        <h2>Returning Learner</h2>
+                        <div class="form-group">
+                            <label>Are you a returning learner?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="returningLearner" value="yes">
+                                    Yes
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="returningLearner" value="no" checked>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="returningLearnerFields" class="hidden">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="lastGradeLevel">Last Grade Level Completed</label>
+                                    <select id="lastGradeLevel" name="lastGradeLevel">
+                                        <option value="">Select Grade Level</option>
+                                        <option value="6">Grade 6</option>
+                                        <option value="7">Grade 7</option>
+                                        <option value="8">Grade 8</option>
+                                        <option value="9">Grade 9</option>
+                                        <option value="10">Grade 10</option>
+                                        <option value="11">Grade 11</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastSchoolYear">Last School Year Completed</label>
+                                    <input type="text" id="lastSchoolYear" name="lastSchoolYear" placeholder="e.g., 2024-2025">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastSchoolAttended">Last School Attended</label>
+                                <input type="text" id="lastSchoolAttended" name="lastSchoolAttended" placeholder="School name">
+                            </div>
+                            <div class="form-group">
+                                <label for="schoolID">School ID</label>
+                                <input type="text" id="schoolID" name="schoolID" placeholder="Previous school ID">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LRN Section -->
+                    <div class="form-section">
+                        <h2>Learner Reference Number (LRN)</h2>
+                        <div class="form-group">
+                            <label for="lrnNumber">LRN Number</label>
+                            <input type="text" id="lrnNumber" name="lrn" placeholder="Enter 12-digit LRN" maxlength="12">
+                            <small class="form-text">If you don't have an LRN, you may leave this field blank.</small>
+                            <div id="lrnError" class="form-error" style="display: none; color: #dc3545; font-size: 12px; margin-top: 5px; font-weight: 600;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Learner Information Section -->
+                <div class="form-section">
+                    <h2>Learner Information</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="middleName">Middle Name</label>
+                            <input type="text" id="middleName" name="middleName">
+                        </div>
+                        <div class="form-group">
+                            <label for="extensionName">Extension Name (Jr., Sr., III, etc.)</label>
+                            <input type="text" id="extensionName" name="extensionName">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="birthdate">Birthdate *</label>
+                            <input type="date" id="birthdate" name="birthdate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">Age *</label>
+                            <input type="number" id="age" name="age" min="0" max="120" readonly required>
+                            <small class="form-text">Age will be automatically calculated based on birthdate.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="sex">Sex *</label>
+                            <select id="sex" name="sex" required>
+                                <option value="">Select Sex</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="placeOfBirth">Place of Birth (Municipality/City) *</label>
+                            <input type="text" id="placeOfBirth" name="placeOfBirth" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="motherTongue">Mother Tongue *</label>
+                            <select id="motherTongue" name="motherTongue" required>
+                                <option value="">Select Language</option>
+                                <!-- Major Philippine Languages -->
+                                <optgroup label="Major Languages">
+                                    <option value="tagalog">Tagalog</option>
+                                    <option value="cebuano">Cebuano</option>
+                                    <option value="ilocano">Ilocano</option>
+                                    <option value="hiligaynon">Hiligaynon/Ilonggo</option>
+                                    <option value="bicolano">Bicolano</option>
+                                    <option value="pangasinan">Pangasinan</option>
+                                    <option value="kapampangan">Kapampangan</option>
+                                    <option value="maranao">Maranao</option>
+                                    <option value="maguindanao">Maguindanao</option>
+                                    <option value="tausug">Tausug</option>
+                                </optgroup>
+                                <!-- Regional Languages -->
+                                <optgroup label="Regional Languages">
+                                    <option value="waray">Waray</option>
+                                    <option value="masbateno">Masbateno</option>
+                                    <option value="aklanon">Aklanon</option>
+                                    <option value="capiznon">Capiznon</option>
+                                    <option value="romblomanon">Romblomanon</option>
+                                    <option value="antique">Antique</option>
+                                    <option value="sama-bajau">Sama-Bajau</option>
+                                    <option value="maranao-lanao">Maranao (Lanao)</option>
+                                    <option value="maguindanao-cotabato">Maguindanao (Cotabato)</option>
+                                    <option value="subanon">Subanon</option>
+                                    <option value="tiruray">Tiruray</option>
+                                    <option value="subanen">Subanen</option>
+                                    <option value="bukidnon">Bukidnon</option>
+                                    <option value="manobo">Manobo</option>
+                                    <option value="magsaysay">Magsaysay</option>
+                                </optgroup>
+                                <!-- Indigenous and Ethnic Languages -->
+                                <optgroup label="Indigenous/Ethnic Languages">
+                                    <option value="ifugao">Ifugao</option>
+                                    <option value="kalinga">Kalinga</option>
+                                    <option value="kankanaey">Kankanaey</option>
+                                    <option value="ibaloi">Ibaloi</option>
+                                    <option value="bontoc">Bontoc</option>
+                                    <option value="isneg">Isneg</option>
+                                    <option value="tinggian">Tinggian</option>
+                                    <option value="karao">Karao</option>
+                                    <option value="hanunoo">Hanunoo</option>
+                                    <option value="tagbanua">Tagbanua</option>
+                                    <option value="palawano">Palawano</option>
+                                    <option value="batak">Batak</option>
+                                    <option value="molbog">Molbog</option>
+                                    <option value="aeta">Aeta</option>
+                                    <option value="agta">Agta</option>
+                                </optgroup>
+                                <!-- International Languages -->
+                                <optgroup label="International Languages">
+                                    <option value="english">English</option>
+                                    <option value="spanish">Spanish</option>
+                                    <option value="chinese">Chinese</option>
+                                    <option value="japanese">Japanese</option>
+                                    <option value="korean">Korean</option>
+                                    <option value="arabic">Arabic</option>
+                                </optgroup>
+                                <!-- Other -->
+                                <option value="other">Other (Please specify)</option>
+                            </select>
+                        </div>
+                        <div id="motherTongueOther" class="form-group hidden">
+                            <label for="motherTongueOtherText">Please specify mother tongue</label>
+                            <input type="text" id="motherTongueOtherText" name="motherTongueOtherText" placeholder="Enter language">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-sections-three-column">
+                    <!-- IP Section -->
+                    <div class="form-section">
+                        <h2>Indigenous People (IP)</h2>
+                        <div class="form-group">
+                            <label>Are you an Indigenous Person?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="isIP" value="yes">
+                                    Yes
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="isIP" value="no" checked>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                        <div id="ipFields" class="hidden">
+                            <div class="form-group">
+                                <label for="ipGroup">Indigenous Group</label>
+                                <select id="ipGroup" name="ipGroup">
+                                    <option value="">Select IP Group</option>
+                                    <!-- Cordillera Administrative Region (CAR) -->
+                                    <optgroup label="Cordillera Region">
+                                        <option value="ifugao">Ifugao</option>
+                                        <option value="kalinga">Kalinga</option>
+                                        <option value="kankanaey">Kankanaey</option>
+                                        <option value="ibaloi">Ibaloi</option>
+                                        <option value="bontoc">Bontoc</option>
+                                        <option value="isneg">Isneg (Apayao)</option>
+                                        <option value="tinggian">Tinggian</option>
+                                        <option value="karao">Karao</option>
+                                    </optgroup>
+                                    <!-- Luzon Region -->
+                                    <optgroup label="Luzon Region">
+                                        <option value="aeta">Aeta</option>
+                                        <option value="agta">Agta</option>
+                                        <option value="ati">Ati</option>
+                                        <option value="bugkalot">Bugkalot (Ilongot)</option>
+                                        <option value="dumagat">Dumagat</option>
+                                        <option value="remontado">Remontado</option>
+                                    </optgroup>
+                                    <!-- Visayas Region -->
+                                    <optgroup label="Visayas Region">
+                                        <option value="hanunoo">Hanunoo</option>
+                                        <option value="iraya-manobo">Iraya Manobo</option>
+                                        <option value="panay-bukidnon">Panay Bukidnon</option>
+                                        <option value="suludnon">Suludnon</option>
+                                        <option value="tagbanua">Tagbanua</option>
+                                    </optgroup>
+                                    <!-- Mindanao - Muslim IP Groups -->
+                                    <optgroup label="Mindanao - Muslim IP Groups">
+                                        <option value="maranao">Maranao</option>
+                                        <option value="maguindanao">Maguindanao</option>
+                                        <option value="tausug">Tausug</option>
+                                        <option value="sama-bajau">Sama-Bajau</option>
+                                        <option value="yakan">Yakan</option>
+                                    </optgroup>
+                                    <!-- Mindanao - Lumad IP Groups -->
+                                    <optgroup label="Mindanao - Lumad IP Groups">
+                                        <option value="manobo">Manobo (various)</option>
+                                        <option value="bagobo">Bagobo</option>
+                                        <option value="bukidnon">Bukidnon</option>
+                                        <option value="magsaysay">Magsaysay</option>
+                                        <option value="mandaya">Mandaya</option>
+                                        <option value="mansaka">Mansaka</option>
+                                        <option value="maragusan">Maragusan</option>
+                                        <option value="tboli">T'boli</option>
+                                        <option value="blaan">Blaan</option>
+                                        <option value="tiruray">Tiruray</option>
+                                        <option value="subanon">Subanon</option>
+                                        <option value="subanen">Subanen</option>
+                                    </optgroup>
+                                    <!-- Palawan Region -->
+                                    <optgroup label="Palawan Region">
+                                        <option value="palawano">Palawano</option>
+                                        <option value="batak">Batak</option>
+                                        <option value="molbog">Molbog</option>
+                                        <option value="tagbanua-palawan">Tagbanua (Palawan)</option>
+                                    </optgroup>
+                                    <!-- Other -->
+                                    <option value="other">Other (Please specify)</option>
+                                </select>
+                            </div>
+                            <div id="ipOtherField" class="form-group hidden">
+                                <label for="ipOtherText">Please specify</label>
+                                <input type="text" id="ipOtherText" name="ipOtherText" placeholder="Enter IP group">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4Ps Section -->
+                    <div class="form-section">
+                        <h2>Pantawid Pamilyang Pilipino Program (4Ps)</h2>
+                        <div class="form-group">
+                            <label>Are you a 4Ps beneficiary?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="is4Ps" value="yes">
+                                    Yes
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="is4Ps" value="no" checked>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                        <div id="fpsFields" class="form-group hidden">
+                            <label for="householdID">Household ID Number</label>
+                            <input type="text" id="householdID" name="householdID" placeholder="4Ps Household ID">
+                        </div>
+                    </div>
+
+                    <!-- Disability Section -->
+                    <div class="form-section">
+                        <h2>Persons with Disability (PWD)</h2>
+                        <div class="form-group">
+                            <label>Do you have any disability?</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="hasPWD" value="yes">
+                                    Yes
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="hasPWD" value="no" checked>
+                                    No
+                                </label>
+                            </div>
+                        </div>
+                        <div id="disabilityFields" class="hidden">
+                            <div class="form-group">
+                                <label>If Yes, specify the type of disability:</label>
+                                <div class="disability-options">
+                                <!-- Visual Impairment -->
+                                <fieldset class="disability-category">
+                                    <legend>☐ Visual Impairment</legend>
+                                    <div class="disability-subcategory">
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="blind">
+                                            a. blind
+                                        </label>
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="low-vision">
+                                            b. low vision
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Hearing Impairment -->
+                                <fieldset class="disability-category">
+                                    <legend>☐ Hearing Impairment</legend>
+                                    <div class="disability-subcategory">
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="autism-spectrum">
+                                            Autism Spectrum Disorder
+                                        </label>
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="speech-language">
+                                            Speech/Language Disorder
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Learning Disability -->
+                                <fieldset class="disability-category">
+                                    <legend>☐ Learning Disability</legend>
+                                    <div class="disability-subcategory">
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="emotional-behavioral">
+                                            Emotional-Behavioral Disorder
+                                        </label>
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="cerebral-palsy">
+                                            Cerebral Palsy
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Intellectual Disability -->
+                                <fieldset class="disability-category">
+                                    <legend>☐ Intellectual Disability</legend>
+                                    <div class="disability-subcategory">
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="orthopedic-handicap">
+                                            Orthopedic/Physical Handicap
+                                        </label>
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="special-health">
+                                            Special Health Problem/Chronic Disease
+                                        </label>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Multiple Disorder -->
+                                <fieldset class="disability-category">
+                                    <legend>☐ Multiple Disorder</legend>
+                                    <div class="disability-subcategory">
+                                        <label class="checkbox-label indent">
+                                            <input type="checkbox" name="disability" value="cancer">
+                                            a. Cancer
+                                        </label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="disabilityDetails">Additional Details (Optional)</label>
+                            <textarea id="disabilityDetails" name="disabilityDetails" placeholder="Describe your disability in detail..." rows="4"></textarea>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+           
+
+                <!-- Documents Section -->
+                <div class="form-section">
+                    <h2>Documents Upload</h2>
+                    <p class="form-subtitle">Please upload clear and readable images. Image uploads are optional. Click on previews to zoom.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="psaBirthCert">PSA Birth Certificate (Optional)</label>
+                            <input type="file" id="psaBirthCert" name="psaBirthCert" accept="image/*" class="file-input" data-preview-id="psaBirthCertPreview">
+                            <small class="form-text">Accepted formats: JPG, PNG, PDF</small>
+                            <div id="psaBirthCertPreview" class="document-preview-container"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reportCard">Report Card - Previous School Year (Optional)</label>
+                            <input type="file" id="reportCard" name="reportCard" accept="image/*" class="file-input" data-preview-id="reportCardPreview">
+                            <small class="form-text">Accepted formats: JPG, PNG, PDF</small>
+                            <div id="reportCardPreview" class="document-preview-container"></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentImage">Student Image (Optional) <span class="required">*Must be clear and readable</span></label>
+                            <input type="file" id="studentImage" name="studentImage" accept="image/*" class="file-input" data-blur-detect="true" data-preview-id="studentImagePreview">
+                            <small class="form-text">Accepted formats: JPG, PNG. Image will be analyzed for clarity. Click to zoom.</small>
+                            <div id="studentImagePreview" class="document-preview-container"></div>
+                            <div id="blurWarning" class="blur-warning" style="display: none;">
+                                ⚠️ The image appears to be blurry. Please select a clear, readable image.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Address Section -->
+                <div class="form-section">
+                    <h2>Current Address</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentSitio">Sitio/Street Name</label>
+                            <input type="text" id="currentSitio" name="currentSitio" placeholder="Street/Sitio">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentCountry">Country *</label>
+                            <select id="currentCountry" name="currentCountry" required>
+                                <option value="">Select Country</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentProvince">Province *</label>
+                            <select id="currentProvince" name="currentProvince" required>
+                                <option value="">Select Province</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentMunicipality">Municipality/City *</label>
+                            <select id="currentMunicipality" name="currentMunicipality" required>
+                                <option value="">Select Municipality</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="currentBarangay">Barangay *</label>
+                            <select id="currentBarangay" name="currentBarangay" required>
+                                <option value="">Select Barangay</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentZipCode">Zip Code</label>
+                            <input type="text" id="currentZipCode" name="currentZipCode" placeholder="Zip Code">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Permanent Address Section -->
+                <div class="form-section">
+                    <h2>Permanent Address</h2>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="sameAsCurrentAddress" name="sameAsCurrentAddress">
+                            Same as Current Address
+                        </label>
+                    </div>
+
+                    <div id="permanentAddressFields">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="permanentSitio">Sitio/Street Name</label>
+                                <input type="text" id="permanentSitio" name="permanentSitio" placeholder="Street/Sitio">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="permanentCountry">Country</label>
+                                <select id="permanentCountry" name="permanentCountry">
+                                    <option value="">Select Country</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="permanentProvince">Province</label>
+                                <select id="permanentProvince" name="permanentProvince">
+                                    <option value="">Select Province</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="permanentMunicipality">Municipality/City</label>
+                                <select id="permanentMunicipality" name="permanentMunicipality">
+                                    <option value="">Select Municipality</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="permanentBarangay">Barangay</label>
+                                <select id="permanentBarangay" name="permanentBarangay">
+                                    <option value="">Select Barangay</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="permanentZipCode">Zip Code</label>
+                                <input type="text" id="permanentZipCode" name="permanentZipCode" placeholder="Zip Code">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parent/Guardian Information -->
+                <div class="form-section">
+                    <h2>Parent/Guardian Information (Optional)</h2>
+                    <p class="form-subtitle">Leave blank if not applicable</p>
+
+                    <div class="form-group">
+                        <h3>Father's Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fatherName">Father's Name</label>
+                                <input type="text" id="fatherName" name="fatherName">
+                            </div>
+                            <div class="form-group">
+                                <label for="fatherContact">Contact Number</label>
+                                <input type="tel" id="fatherContact" name="fatherContact" placeholder="+63-9XX-XXX-XXXX">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <h3>Mother's Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="motherMaidenName">Mother's Maiden Name</label>
+                                <input type="text" id="motherMaidenName" name="motherMaidenName">
+                            </div>
+                            <div class="form-group">
+                                <label for="motherContact">Contact Number</label>
+                                <input type="tel" id="motherContact" name="motherContact" placeholder="+63-9XX-XXX-XXXX">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <h3>Legal Guardian's Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="guardianName">Legal Guardian's Name</label>
+                                <input type="text" id="guardianName" name="guardianName">
+                            </div>
+                            <div class="form-group">
+                                <label for="guardianContact">Contact Number</label>
+                                <input type="tel" id="guardianContact" name="guardianContact" placeholder="+63-9XX-XXX-XXXX">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Modality -->
+                <div class="form-section">
+                    <h2>Learning Modality *</h2>
+                    <div class="form-group">
+                        <label>Select Your Preferred Learning Modality (You may choose more than one)</label>
+                        <div class="checkbox-group modality-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="learningModality" value="modular-print" required>
+                                Modular (Print)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="learningModality" value="modular-digital">
+                                Modular (Digital)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="learningModality" value="online">
+                                Online
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="learningModality" value="educational-tv">
+                                Educational Television
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="learningModality" value="radio-based">
+                                Radio-Based Instruction
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="learningModality" value="homeschooling">
+                                Homeschooling
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="learningModality" value="blended">
+                                Blended
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certification and Data Privacy -->
+                <div class="form-section">
+                    <h2>Certification and Data Privacy Agreement</h2>
+                    
+                    <div class="form-group certification-box">
+                        <h3>Certification</h3>
+                        <p>I hereby certify that the above information given is true and correct to the best of my knowledge, and I allow the Department of Education to use my child's details to create and/or update his/her learner profile in the Learner Information System. The information herein shall be treated as confidential in compliance with the Data Privacy Act of 2012.</p>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="certificationCheckbox" name="certification" required>
+                            I agree to the certification and data privacy agreement
+                        </label>
+                    </div>
+
+                    <div class="form-group privacy-box">
+                        <h3>Data Privacy Agreement</h3>
+                        <p>The student's personal information will be used solely for educational purposes and administrative functions of Compostela National High School. The school will protect all personal data in accordance with the Data Privacy Act of 2012 (Republic Act 10173). No information will be shared with third parties without the student's or parent/guardian's consent, except as required by law. Students and parents/guardians have the right to access, rectify, or request the deletion of personal data.</p>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="dataPrivacyCheckbox" name="dataPrivacy" required>
+                            I agree to the data privacy agreement
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="button" id="submitBtn" class="btn btn-primary">Review and Submit Enrollment</button>
+                    <button type="reset" class="btn btn-secondary">Clear Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Document Zoom Viewer Modal -->
+    <div id="documentZoomModal" class="document-zoom-modal">
+        <div class="zoom-container">
+            <div class="zoom-header">
+                <h3 id="zoomTitle">Document Preview</h3>
+                <button class="zoom-close" onclick="closeDocumentZoom()">&times;</button>
+            </div>
+            <div class="zoom-body">
+                <img id="zoomImage" src="" alt="Zoomed document" class="zoom-image">
+            </div>
+            <div class="zoom-footer">
+                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                <span class="zoom-percentage" id="zoomPercentage">100%</span>
+                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Notification Modal -->
+    <div id="errorNotification" class="error-notification">
+        <div class="notification-content">
+            <div class="notification-header">
+                <span class="notification-icon">⚠️</span>
+                <span class="notification-title">Required Action</span>
+                <button class="notification-close" onclick="closeNotification()">&times;</button>
+            </div>
+            <div class="notification-message" id="notificationMessage"></div>
+            <div class="notification-actions">
+                <button class="btn btn-primary" onclick="closeNotification()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review and Submit Modal -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Review Your Enrollment</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="enrollmentSummary">
+                    <!-- Summary will be populated here by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="confirmBtn" class="btn btn-primary">Confirm and Submit</button>
+                <button id="editBtn" class="btn btn-secondary">Back to Form</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p id="footerSchoolYearText">Compostela National High School - School Year 2026-2027</p>
+    </footer>
+
+    <script src="enrollment-form.js?v=20260304-12"></script>
+</body>
+</html>
+
+

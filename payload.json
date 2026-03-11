@@ -1,0 +1,16 @@
+{
+  "student_id": 1,
+  "gradeLevel": "11",
+  "semester": "First",
+  "track": "academic",
+  "electives": [],
+  "returningLearner": "no",
+  "lastName": "Test",
+  "firstName": "Track",
+  "middleName": "",
+  "birthdate": "2008-01-01",
+  "sex": "Male",
+  "learningModality": "online",
+  "certification": true,
+  "dataPrivacy": true
+}

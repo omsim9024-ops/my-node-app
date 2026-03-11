@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Compostela National High School</title>
+    <link rel="icon" id="schoolFavicon" href="cnhs_logo (2).png" type="image/png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin-dashboard.css">
+    <link rel="stylesheet" href="student-dashboard.css?v=20260308-fix">
+</head>
+<body>
+    <!-- Header Bar -->
+    <header class="header">
+        <div class="header-left">
+            <button class="hamburger" id="hamburgerBtn" type="button" aria-label="Toggle sidebar" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <div class="logo-section">
+                <img src="cnhs_logo.png" alt="Logo" class="logo" id="schoolLogo" />
+                <div class="logo-text">
+                    <h1 id="schoolName">Compostela National High School</h1>
+                    <p id="schoolSubtitle">Student Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button class="header-icon notification-btn" id="notificationToggleBtn" title="Notifications" aria-label="Open notifications" aria-expanded="false">🔔
+                <span class="notification-badge" id="notificationBadge">0</span>
+            </button>
+            <button class="header-icon theme-btn" id="themeBtn" title="Customize Theme">🎨</button>
+            <button class="header-icon mode-toggle-btn" id="modeToggleBtn" title="Toggle light/dark">🌙</button>
+            <button class="header-icon settings-btn" id="settingsBtn" title="Settings" aria-label="Open settings" aria-expanded="false">⚙️</button>
+
+            <div class="profile-dropdown">
+                <button class="profile-btn" id="profileBtn">
+                    <span class="avatar">👤</span>
+                    <span class="profile-name" id="studentProfileName">Student</span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <a href="#profile" class="dropdown-item" data-section="profile">My Profile</a>
+                    <a href="#my-enrollments" class="dropdown-item" data-section="my-enrollments">My Enrollments</a>
+                    <a href="#guidance" class="dropdown-item" data-section="guidance">Request Guidance</a>
+                    <hr />
+                    <button class="dropdown-item logout" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="notificationDrawerOverlay" class="notification-drawer-overlay" aria-hidden="true"></div>
+    <aside id="notificationDrawer" class="notification-drawer" aria-hidden="true">
+        <div class="notification-drawer-header">
+            <div>
+                <h3>Notifications</h3>
+                <p id="notificationDrawerSummary">No new alerts.</p>
+            </div>
+            <button id="closeNotificationDrawerBtn" class="notification-drawer-close" aria-label="Close notifications">✕</button>
+        </div>
+
+        <div class="notification-drawer-filters" id="notificationDrawerFilters">
+            <button class="notif-filter-btn active" data-filter="all">All</button>
+            <button class="notif-filter-btn" data-filter="unread">Unread</button>
+            <button class="notif-filter-btn" data-filter="academic">Academic</button>
+            <button class="notif-filter-btn" data-filter="enrollment">Enrollment</button>
+            <button class="notif-filter-btn" data-filter="guidance">Guidance</button>
+            <button class="notif-filter-btn" data-filter="system">System</button>
+        </div>
+
+        <div class="notification-drawer-actions">
+            <button id="drawerMarkAllReadBtn" class="btn btn-small">Mark All Read</button>
+            <button id="drawerOpenAllBtn" class="btn btn-small btn-enrollment-status">Open Notifications Section</button>
+        </div>
+
+        <div id="notificationDrawerList" class="notification-drawer-list">
+            <div class="no-data"><p>No notifications yet.</p></div>
+        </div>
+    </aside>
+
+    <div id="themeStudioOverlay" class="theme-studio-overlay" aria-hidden="true"></div>
+    <aside id="themeStudioDrawer" class="theme-studio-drawer" aria-hidden="true">
+        <div class="theme-studio-header">
+            <div>
+                <h3>Theme Studio</h3>
+                <p id="themeStudioStatus">Preview your style, then save.</p>
+            </div>
+            <button id="closeThemeStudioBtn" class="theme-studio-close" aria-label="Close theme studio">✕</button>
+        </div>
+
+        <div class="theme-studio-body">
+            <div class="theme-group">
+                <h4>Color Mode</h4>
+                <div class="theme-chip-row" id="themeModeControls">
+                    <button class="theme-chip active" data-mode="light">Light</button>
+                    <button class="theme-chip" data-mode="dark">Dark</button>
+                    <button class="theme-chip" data-mode="auto">Auto</button>
+                </div>
+            </div>
+
+            <div class="theme-group">
+                <h4>Preset</h4>
+                <div class="theme-chip-row" id="themePresetControls">
+                    <button class="theme-chip active" data-preset="default" data-color="#6366f1">Default</button>
+                    <button class="theme-chip" data-preset="emerald" data-color="#10b981">Emerald</button>
+                    <button class="theme-chip" data-preset="ocean" data-color="#0ea5e9">Ocean</button>
+                    <button class="theme-chip" data-preset="sunset" data-color="#f97316">Sunset</button>
+                </div>
+            </div>
+
+            <div class="theme-group">
+                <h4>Accent Color</h4>
+                <div class="theme-color-row">
+                    <input type="color" id="themeAccentColor" value="#6366f1" aria-label="Choose accent color">
+                    <input type="text" id="themeAccentHex" value="#6366f1" maxlength="7" aria-label="Accent hex code">
+                </div>
+            </div>
+
+            <div class="theme-group">
+                <h4>Font Size</h4>
+                <div class="theme-chip-row" id="themeFontControls">
+                    <button class="theme-chip" data-font="small">Small</button>
+                    <button class="theme-chip active" data-font="default">Default</button>
+                    <button class="theme-chip" data-font="large">Large</button>
+                </div>
+            </div>
+
+            <div class="theme-group">
+                <h4>Layout Density</h4>
+                <div class="theme-chip-row" id="themeDensityControls">
+                    <button class="theme-chip" data-density="compact">Compact</button>
+                    <button class="theme-chip active" data-density="comfortable">Comfortable</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="theme-studio-footer">
+            <button id="resetThemeStudioBtn" class="btn btn-small">Reset Default</button>
+            <button id="saveThemeStudioBtn" class="btn btn-small btn-primary">Save Theme</button>
+        </div>
+    </aside>
+
+    <div id="settingsDrawerOverlay" class="settings-drawer-overlay" aria-hidden="true"></div>
+    <aside id="settingsDrawer" class="settings-drawer" aria-hidden="true">
+        <div class="settings-drawer-header">
+            <div>
+                <h3>Settings</h3>
+                <p id="settingsDrawerStatus">Manage your dashboard preferences.</p>
+            </div>
+            <button id="closeSettingsDrawerBtn" class="settings-drawer-close" aria-label="Close settings">✕</button>
+        </div>
+
+        <div class="settings-drawer-body">
+            <div class="settings-group">
+                <h4>Notification Preferences</h4>
+                <label class="settings-switch-row"><span>In-app notifications</span><input type="checkbox" id="prefInApp" checked></label>
+                <label class="settings-switch-row"><span>Email notifications</span><input type="checkbox" id="prefEmail"></label>
+                <label class="settings-switch-row"><span>SMS notifications</span><input type="checkbox" id="prefSms"></label>
+                <div class="settings-divider"></div>
+                <label class="settings-switch-row"><span>Academic updates</span><input type="checkbox" id="prefAcademic" checked></label>
+                <label class="settings-switch-row"><span>Enrollment updates</span><input type="checkbox" id="prefEnrollment" checked></label>
+                <label class="settings-switch-row"><span>Guidance updates</span><input type="checkbox" id="prefGuidance" checked></label>
+                <label class="settings-switch-row"><span>System announcements</span><input type="checkbox" id="prefSystem" checked></label>
+            </div>
+
+            <div class="settings-group">
+                <h4>Security</h4>
+                <div class="settings-actions-row">
+                    <button id="settingsChangePasswordBtn" class="btn btn-small">Change Password</button>
+                    <button id="settingsLogoutAllBtn" class="btn btn-small btn-enrollment-status">Logout All Devices</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h4>Accessibility</h4>
+                <label class="settings-switch-row"><span>High contrast mode</span><input type="checkbox" id="prefHighContrast"></label>
+                <label class="settings-switch-row"><span>Reduced motion</span><input type="checkbox" id="prefReducedMotion"></label>
+                <label class="settings-switch-row"><span>Larger text</span><input type="checkbox" id="prefLargeText"></label>
+            </div>
+        </div>
+
+        <div class="settings-drawer-footer">
+            <button id="resetSettingsDrawerBtn" class="btn btn-small">Reset</button>
+            <button id="saveSettingsDrawerBtn" class="btn btn-small btn-primary">Save Settings</button>
+        </div>
+    </aside>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-menu">
+            <a href="#dashboard" class="menu-item active" data-section="dashboard">
+                <span class="menu-icon">📊</span>
+                <span class="menu-label">Dashboard</span>
+            </a>
+            <a href="#profile" class="menu-item" data-section="profile">
+                <span class="menu-icon">👤</span>
+                <span class="menu-label">Profile</span>
+            </a>
+            <a href="#my-enrollments" class="menu-item" data-section="my-enrollments">
+                <span class="menu-icon">🗂️</span>
+                <span class="menu-label">My Enrollments</span>
+            </a>
+            <a href="#guidance" class="menu-item" id="sidebarGuidanceBtn" data-section="guidance">
+                <span class="menu-icon">🎓</span>
+                <span class="menu-label">Request Guidance</span>
+            </a>
+        </nav>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section active">
+            <!-- Header -->
+            <div class="dashboard-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>Welcome, <span id="studentName">Student</span>!</h1>
+                        <p class="header-subtitle">Your Academic Dashboard</p>
+                    </div>
+                    <div>
+                        <a href="enrollment-form.html" class="btn btn-primary" id="enrollBtn" style="height: fit-content;">Enroll Now</a>
+                        <button id="viewEnrollmentBtn" class="btn btn-enrollment-status" style="height: fit-content; display: none; margin-left: 10px;">📋 View Enrollment Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="enrollment-tracker-card" id="enrollmentTrackerCard">
+                <div class="tracker-header-row">
+                    <div>
+                        <h3>Enrollment Progress</h3>
+                        <p id="enrollmentTrackerStatusText">No enrollment record yet.</p>
+                    </div>
+                    <button id="openEnrollmentModalBtn" class="btn btn-small btn-enrollment-status" style="display: none;">View Details</button>
+                </div>
+                <div class="tracker-steps" id="enrollmentTrackerSteps">
+                    <div class="tracker-step" data-step="submitted">
+                        <span class="tracker-dot"></span>
+                        <span class="tracker-label">Submitted</span>
+                    </div>
+                    <div class="tracker-step" data-step="review">
+                        <span class="tracker-dot"></span>
+                        <span class="tracker-label">Under Review</span>
+                    </div>
+                    <div class="tracker-step" data-step="approved">
+                        <span class="tracker-dot"></span>
+                        <span class="tracker-label">Approved</span>
+                    </div>
+                    <div class="tracker-step" data-step="assigned">
+                        <span class="tracker-dot"></span>
+                        <span class="tracker-label">Section Assigned</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card stat-card--success">
+                    <div class="stat-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Subjects Enrolled</h3>
+                        <p class="stat-value" id="subjectsCount">--</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity and Announcements -->
+            <div class="dashboard-content">
+                <div class="content-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-bell"></i> Notifications 
+                            <span id="unreadBadge" class="notification-badge" style="display: none;">0</span>
+                        </h2>
+                        <button id="markAllReadBtn" class="btn btn-small" style="display: none;">Mark All as Read</button>
+                    </div>
+                    <div id="notificationsList" class="notifications-list">
+                        <div class="no-data">
+                            <p>No notifications yet.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h2><i class="fas fa-megaphone"></i> School Announcements</h2>
+                    <div id="announcementsList" class="announcements-list">
+                        <div class="no-data">
+                            <p>No announcements at this time.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2><i class="fas fa-tasks"></i> Pending Tasks</h2>
+                        <button id="addTaskBtn" class="btn btn-small"><i class="fas fa-plus"></i> Add Task</button>
+                    </div>
+                    <div id="tasksList" class="tasks-list">
+                        <div class="no-data">
+                            <p>No tasks yet. Create one to get started!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="my-enrollments" class="section">
+            <div class="section-header">
+                <h1>My Enrollments</h1>
+                <p>All enrollment records grouped by school year</p>
+            </div>
+
+            <div id="myEnrollmentsByYear" class="my-enrollments-container">
+                <div class="no-data">
+                    <p>Loading enrollments...</p>
+                </div>
+            </div>
+
+            <!-- Enhanced Enrollment Edit Modal - Admin Style -->
+            <div id="enrollmentEditModal" class="modal" aria-hidden="true">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Edit Enrollment Details</h2>
+                        <button class="modal-close" id="closeEnrollmentEditModalBtn" aria-label="Close modal">✕</button>
+                    </div>
+                    <form id="enrollmentEditForm">
+                        <!-- Personal Information Section -->
+                        <div class="form-section">
+                            <h3>👤 Personal Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="editLRN">LRN Number</label>
+                                    <input type="text" id="editLRN" name="lrn" placeholder="Enter 12-digit LRN" maxlength="12" />
+                                    <small class="form-text">If you don't have an LRN, you may leave this field blank.</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editLastName">Last Name *</label>
+                                    <input type="text" id="editLastName" name="lastName" required />
+                                </div>
+                                <div class="form-group">
+                                    <label for="editFirstName">First Name *</label>
+                                    <input type="text" id="editFirstName" name="firstName" required />
+                                </div>
+                                <div class="form-group">
+                                    <label for="editMiddleName">Middle Name</label>
+                                    <input type="text" id="editMiddleName" name="middleName" placeholder="Optional" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="editBirthdate">Birthdate *</label>
+                                    <input type="date" id="editBirthdate" name="birthdate" required />
+                                </div>
+                                <div class="form-group">
+                                    <label for="editAge">Age</label>
+                                    <input type="number" id="editAge" name="age" readonly />
+                                </div>
+                            </div>
+                            
+                            <!-- Gender Row -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Gender *</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" id="editMale" name="gender" value="male" required> Male</label>
+                                        <label><input type="radio" id="editFemale" name="gender" value="female" required> Female</label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editMotherTongue">Mother Tongue *</label>
+                                    <select id="editMotherTongue" name="motherTongue" required>
+                                        <option value="">Select Language</option>
+                                        <!-- Major Philippine Languages -->
+                                        <optgroup label="Major Languages">
+                                            <option value="tagalog">Tagalog</option>
+                                            <option value="cebuano">Cebuano</option>
+                                            <option value="ilocano">Ilocano</option>
+                                            <option value="hiligaynon">Hiligaynon/Ilonggo</option>
+                                            <option value="bicolano">Bicolano</option>
+                                            <option value="pangasinan">Pangasinan</option>
+                                            <option value="kapampangan">Kapampangan</option>
+                                            <option value="maranao">Maranao</option>
+                                            <option value="maguindanao">Maguindanao</option>
+                                            <option value="tausug">Tausug</option>
+                                        </optgroup>
+                                        <!-- Regional Languages -->
+                                        <optgroup label="Regional Languages">
+                                            <option value="waray">Waray</option>
+                                            <option value="masbateno">Masbateno</option>
+                                            <option value="aklanon">Aklanon</option>
+                                            <option value="capiznon">Capiznon</option>
+                                            <option value="romblomanon">Romblomanon</option>
+                                            <option value="antique">Antique</option>
+                                            <option value="sama-bajau">Sama-Bajau</option>
+                                            <option value="maranao-lanao">Maranao (Lanao)</option>
+                                            <option value="maguindanao-cotabato">Maguindanao (Cotabato)</option>
+                                            <option value="subanon">Subanon</option>
+                                            <option value="tiruray">Tiruray</option>
+                                            <option value="subanen">Subanen</option>
+                                            <option value="bukidnon">Bukidnon</option>
+                                            <option value="manobo">Manobo</option>
+                                            <option value="magsaysay">Magsaysay</option>
+                                        </optgroup>
+                                        <!-- International Languages -->
+                                        <optgroup label="International Languages">
+                                            <option value="english">English</option>
+                                            <option value="spanish">Spanish</option>
+                                            <option value="chinese">Chinese</option>
+                                            <option value="japanese">Japanese</option>
+                                            <option value="korean">Korean</option>
+                                            <option value="arabic">Arabic</option>
+                                        </optgroup>
+                                        <!-- Other -->
+                                        <option value="other">Other (Please specify)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="editMotherTongueOther" class="form-group hidden">
+                                <label for="editMotherTongueOtherText">Please specify mother tongue</label>
+                                <input type="text" id="editMotherTongueOtherText" name="motherTongueOtherText" placeholder="Enter language">
+                            </div>
+                        </div>
+
+                        <!-- Academic Information Section -->
+                        <div class="form-section">
+                            <h3>🎓 Academic Information</h3>
+                            
+                            <!-- Top row with Grade Level, Track/Program, and Semester -->
+                            <div class="academic-info-top-row">
+                                <div class="form-group">
+                                    <label for="editGradeLevel">Grade Level *</label>
+                                    <select id="editGradeLevel" name="gradeLevel" required>
+                                        <option value="">Select Grade Level...</option>
+                                        <option value="7">Grade 7</option>
+                                        <option value="8">Grade 8</option>
+                                        <option value="9">Grade 9</option>
+                                        <option value="10">Grade 10</option>
+                                        <option value="11">Grade 11</option>
+                                        <option value="12">Grade 12</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="editSemesterContainer" style="display: none;">
+                                    <label for="editSemester">Semester *</label>
+                                    <select id="editSemester" name="semester" required>
+                                        <option value="">Select Semester</option>
+                                        <option value="first">First Semester</option>
+                                        <option value="second">Second Semester</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" id="editTrackContainer" style="display: none;">
+                                    <label for="editTrack">Track/Program *</label>
+                                    <select id="editTrack" name="track" required>
+                                        <option value="">Select Program...</option>
+                                        <option value="academic">Academic</option>
+                                        <option value="techpro">TechPro</option>
+                                        <option value="doorway">Doorway</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- Electives Section - Full width below -->
+                            <div class="form-group full-width" id="editElectivesContainer" style="display: none;">
+                                <label>Electives</label>
+                                <div id="editElectivesList" class="electives-scroll-container">
+                                    <!-- Will be populated by JavaScript based on track selection -->
+                                    <p style="color: #666; font-style: italic;">Please select a track to see available electives.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <hr style="margin: 24px 0; border: none; border-top: 2px solid #e0e0e0;" />
+
+                        <!-- IP, 4Ps, and PWD Section -->
+                        <div class="form-section">
+                            <h3>🏛️ Special Programs & Status</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Indigenous People (IP) Member</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" id="editIPYes" name="isIP" value="yes"> Yes</label>
+                                        <label><input type="radio" id="editIPNo" name="isIP" value="no"> No</label>
+                                    </div>
+                                    
+                                    <!-- IP Dropdown Field (shown when IP is Yes) -->
+                                    <div class="form-group hidden" id="ipDetailsGroup" style="margin-top: 15px;">
+                                        <label for="editIPGroup">Indigenous Group</label>
+                                        <select id="editIPGroup" name="ipGroup">
+                                            <option value="">Select IP Group</option>
+                                            <!-- Cordillera Administrative Region (CAR) -->
+                                            <optgroup label="Cordillera Region">
+                                                <option value="ifugao">Ifugao</option>
+                                                <option value="kalinga">Kalinga</option>
+                                                <option value="kankanaey">Kankanaey</option>
+                                                <option value="ibaloi">Ibaloi</option>
+                                                <option value="bontoc">Bontoc</option>
+                                                <option value="isneg">Isneg (Apayao)</option>
+                                                <option value="tinggian">Tinggian</option>
+                                                <option value="karao">Karao</option>
+                                            </optgroup>
+                                            <!-- Luzon Region -->
+                                            <optgroup label="Luzon Region">
+                                                <option value="aeta">Aeta</option>
+                                                <option value="agta">Agta</option>
+                                                <option value="ati">Ati</option>
+                                                <option value="bugkalot">Bugkalot (Ilongot)</option>
+                                                <option value="dumagat">Dumagat</option>
+                                                <option value="remontado">Remontado</option>
+                                            </optgroup>
+                                            <!-- Visayas Region -->
+                                            <optgroup label="Visayas Region">
+                                                <option value="hanunoo">Hanunoo</option>
+                                                <option value="iraya-manobo">Iraya Manobo</option>
+                                                <option value="panay-bukidnon">Panay Bukidnon</option>
+                                                <option value="suludnon">Suludnon</option>
+                                                <option value="tagbanua">Tagbanua</option>
+                                            </optgroup>
+                                            <!-- Mindanao - Muslim IP Groups -->
+                                            <optgroup label="Mindanao - Muslim IP Groups">
+                                                <option value="maranao">Maranao</option>
+                                                <option value="maguindanao">Maguindanao</option>
+                                                <option value="tausug">Tausug</option>
+                                                <option value="sama-bajau">Sama-Bajau</option>
+                                                <option value="yakan">Yakan</option>
+                                            </optgroup>
+                                            <!-- Mindanao - Lumad IP Groups -->
+                                            <optgroup label="Mindanao - Lumad IP Groups">
+                                                <option value="manobo">Manobo (various)</option>
+                                                <option value="bagobo">Bagobo</option>
+                                                <option value="bukidnon">Bukidnon</option>
+                                                <option value="magsaysay">Magsaysay</option>
+                                                <option value="mandaya">Mandaya</option>
+                                                <option value="mansaka">Mansaka</option>
+                                                <option value="maragusan">Maragusan</option>
+                                                <option value="tboli">T'boli</option>
+                                                <option value="blaan">Blaan</option>
+                                                <option value="tiruray">Tiruray</option>
+                                                <option value="subanon">Subanon</option>
+                                                <option value="subanen">Subanen</option>
+                                            </optgroup>
+                                            <!-- Palawan Region -->
+                                            <optgroup label="Palawan Region">
+                                                <option value="palawano">Palawano</option>
+                                                <option value="batak">Batak</option>
+                                                <option value="molbog">Molbog</option>
+                                                <option value="tagbanua-palawan">Tagbanua (Palawan)</option>
+                                            </optgroup>
+                                            <!-- Other -->
+                                            <option value="other">Other (Please specify)</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- IP Other Details Field (shown when "Other" is selected) -->
+                                    <div class="form-group hidden" id="ipOtherDetailsGroup" style="margin-top: 15px;">
+                                        <label for="editIPOtherText">Please specify Indigenous Group</label>
+                                        <input type="text" id="editIPOtherText" name="ipOtherText" placeholder="Enter your Indigenous Group" />
+                                        <small class="form-text">Please specify the name of your Indigenous Group</small>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>4Ps Beneficiary</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" id="edit4PsYes" name="is4Ps" value="yes"> Yes</label>
+                                        <label><input type="radio" id="edit4PsNo" name="is4Ps" value="no"> No</label>
+                                    </div>
+                                    
+                                    <!-- 4Ps Household ID Field (shown when 4Ps is Yes) -->
+                                    <div class="form-group hidden" id="ps4psDetailsGroup" style="margin-top: 15px;">
+                                        <label for="edit4PsHouseholdID">4Ps Household ID Number</label>
+                                        <input type="text" id="edit4PsHouseholdID" name="ps4psHouseholdID" placeholder="Enter 4Ps Household ID Number" />
+                                        <small class="form-text">Please enter your 4Ps Household ID Number as shown in your ID card</small>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Person with Disability (PWD)</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" id="editPWDYes" name="hasPWD" value="yes"> Yes</label>
+                                        <label><input type="radio" id="editPWDNo" name="hasPWD" value="no"> No</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Conditional Fields Row for PWD only -->
+                            <div class="form-row" id="conditionalFieldsRow">
+                                <!-- PWD Details Field -->
+                                <div class="form-group hidden" id="pwdDetailsGroup">
+                                    <label>Person with Disability (PWD) Details</label>
+                                    <div class="disability-options">
+                                        <!-- Visual Impairment -->
+                                        <fieldset class="disability-category">
+                                            <legend>☐ Visual Impairment</legend>
+                                            <div class="disability-subcategory">
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="blind">
+                                                    a. blind
+                                                </label>
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="low-vision">
+                                                    b. low vision
+                                                </label>
+                                            </div>
+                                        </fieldset>
+
+                                        <!-- Hearing Impairment -->
+                                        <fieldset class="disability-category">
+                                            <legend>☐ Hearing Impairment</legend>
+                                            <div class="disability-subcategory">
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="autism-spectrum">
+                                                    Autism Spectrum Disorder
+                                                </label>
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="speech-language">
+                                                    Speech/Language Disorder
+                                                </label>
+                                            </div>
+                                        </fieldset>
+
+                                        <!-- Learning Disability -->
+                                        <fieldset class="disability-category">
+                                            <legend>☐ Learning Disability</legend>
+                                            <div class="disability-subcategory">
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="emotional-behavioral">
+                                                    Emotional-Behavioral Disorder
+                                                </label>
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="cerebral-palsy">
+                                                    Cerebral Palsy
+                                                </label>
+                                            </div>
+                                        </fieldset>
+
+                                        <!-- Intellectual Disability -->
+                                        <fieldset class="disability-category">
+                                            <legend>☐ Intellectual Disability</legend>
+                                            <div class="disability-subcategory">
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="orthopedic-handicap">
+                                                    Orthopedic/Physical Handicap
+                                                </label>
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="special-health">
+                                                    Special Health Problem/Chronic Disease
+                                                </label>
+                                            </div>
+                                        </fieldset>
+
+                                        <!-- Multiple Disorder -->
+                                        <fieldset class="disability-category">
+                                            <legend>☐ Multiple Disorder</legend>
+                                            <div class="disability-subcategory">
+                                                <label class="checkbox-label indent">
+                                                    <input type="checkbox" name="disability" value="cancer">
+                                                    a. Cancer
+                                                </label>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                    <div class="form-group" style="margin-top: 15px;">
+                                        <label for="editPWDDetails">Additional Details (Optional)</label>
+                                        <textarea id="editPWDDetails" name="pwdDetails" placeholder="Describe your disability in detail..." rows="3"></textarea>
+                                        <small class="form-text">Please provide any additional details about your disability</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Returning Learner Section -->
+                        <div class="form-section">
+                            <h3>🔄 Returning Learner Status</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Returning Learner</label>
+                                    <div class="radio-group">
+                                        <label><input type="radio" id="editReturningLearnerYes" name="returningLearner" value="yes"> Yes</label>
+                                        <label><input type="radio" id="editReturningLearnerNo" name="returningLearner" value="no"> No</label>
+                                    </div>
+                                    
+                                    <!-- Returning Learner Conditional Fields (shown when Yes is selected) -->
+                                    <div id="returningLearnerFields" class="hidden" style="margin-top: 15px;">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label for="editLastGradeLevel">Last Grade Level Completed</label>
+                                                <select id="editLastGradeLevel" name="lastGradeLevel">
+                                                    <option value="">Select Grade Level</option>
+                                                    <option value="6">Grade 6</option>
+                                                    <option value="7">Grade 7</option>
+                                                    <option value="8">Grade 8</option>
+                                                    <option value="9">Grade 9</option>
+                                                    <option value="10">Grade 10</option>
+                                                    <option value="11">Grade 11</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="editLastSchoolYear">Last School Year Completed</label>
+                                                <input type="text" id="editLastSchoolYear" name="lastSchoolYear" placeholder="e.g., 2024-2025" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="editLastSchoolAttended">Last School Attended</label>
+                                            <input type="text" id="editLastSchoolAttended" name="lastSchoolAttended" placeholder="School name" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="editSchoolID">School ID</label>
+                                            <input type="text" id="editSchoolID" name="schoolID" placeholder="Previous school ID" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Address Information Section -->
+                        <div class="form-section">
+                            <h3>🏠 Address Information</h3>
+                            
+                            <!-- Current Address Sub-section -->
+                            <div class="address-subsection">
+                                <h4 class="subsection-title">📍 Current Address</h4>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editCurrentSitio">Street/Sitio</label>
+                                        <input type="text" id="editCurrentSitio" name="currentSitio" placeholder="Enter street/sitio" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editCurrentCountry">Country</label>
+                                        <select id="editCurrentCountry" name="currentCountry">
+                                            <option value="">Select Country</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editCurrentProvince">Province</label>
+                                        <select id="editCurrentProvince" name="currentProvince">
+                                            <option value="">Select Province</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editCurrentMunicipality">Municipality/City</label>
+                                        <select id="editCurrentMunicipality" name="currentMunicipality">
+                                            <option value="">Select Municipality/City</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editCurrentBarangay">Barangay</label>
+                                        <select id="editCurrentBarangay" name="currentBarangay">
+                                            <option value="">Select Barangay</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editCurrentZipCode">Zip Code</label>
+                                        <input type="text" id="editCurrentZipCode" name="currentZipCode" placeholder="Enter zip code" />
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Permanent Address Sub-section -->
+                            <div class="address-subsection">
+                                <h4 class="subsection-title">🏠 Permanent Address</h4>
+                                
+                                <!-- Same as Current Address Checkbox -->
+                                <div class="form-group full-width" style="margin-bottom: 20px;">
+                                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
+                                        <input type="checkbox" id="sameAsCurrentAddress" name="sameAsCurrentAddress" style="width: auto; margin: 0;">
+                                        <span>Same as Current Address</span>
+                                    </label>
+                                    <small class="form-text">Check this box to copy all current address information to permanent address</small>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="editPermanentSitio">Street/Sitio</label>
+                                        <input type="text" id="editPermanentSitio" name="permanentSitio" placeholder="Enter street/sitio" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editPermanentCountry">Country</label>
+                                        <select id="editPermanentCountry" name="permanentCountry">
+                                            <option value="">Select Country</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editPermanentProvince">Province</label>
+                                        <select id="editPermanentProvince" name="permanentProvince">
+                                            <option value="">Select Province</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editPermanentMunicipality">Municipality/City</label>
+                                        <select id="editPermanentMunicipality" name="permanentMunicipality">
+                                            <option value="">Select Municipality/City</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editPermanentBarangay">Barangay</label>
+                                        <select id="editPermanentBarangay" name="permanentBarangay">
+                                            <option value="">Select Barangay</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editPermanentZipCode">Zip Code</label>
+                                        <input type="text" id="editPermanentZipCode" name="permanentZipCode" placeholder="Enter zip code" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Documents Section -->
+                        <div class="form-section">
+                            <h3>📁 Documents</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="editPSABirthCert">PSA Birth Certificate</label>
+                                    <input type="file" id="editPSABirthCert" name="psaBirthCert" accept="image/*,.pdf" />
+                                    <small class="form-text">Accepted formats: JPG, PNG, PDF</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editReportCard">Report Card</label>
+                                    <input type="file" id="editReportCard" name="reportCard" accept="image/*,.pdf" />
+                                    <small class="form-text">Accepted formats: JPG, PNG, PDF</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editGoodMoralCert">Good Moral Certificate</label>
+                                    <input type="file" id="editGoodMoralCert" name="goodMoralCert" accept="image/*,.pdf" />
+                                    <small class="form-text">Accepted formats: JPG, PNG, PDF</small>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editOtherRequirements">Other Requirements</label>
+                                    <input type="file" id="editOtherRequirements" name="otherRequirements" accept="image/*,.pdf" multiple />
+                                    <small class="form-text">Accepted formats: JPG, PNG, PDF (Multiple files allowed)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" id="editSaveBtn" class="btn btn-primary">💾 Save Changes</button>
+                            <button type="button" id="editCancelBtn" class="btn btn-secondary">❌ Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grades Section -->
+        <section id="grades" class="section">
+            <div class="section-header">
+                <h1>Your Grades</h1>
+                <p>Current Semester Performance</p>
+            </div>
+
+            <div class="grades-container">
+                <div id="gradesTableContainer">
+                    <div class="no-data">
+                        <p>Grades data is not yet available. Please check back later.</p>
+                    </div>
+                </div>
+
+                <div id="gradesInfoContainer" class="grades-info" style="display:none;">
+                    <h3>Grading Scale</h3>
+                    <div class="grading-scale">
+                        <div class="scale-item">
+                            <span class="scale-range">90-100</span>
+                            <span class="scale-label">Excellent (A)</span>
+                        </div>
+                        <div class="scale-item">
+                            <span class="scale-range">80-89</span>
+                            <span class="scale-label">Very Good (B)</span>
+                        </div>
+                        <div class="scale-item">
+                            <span class="scale-range">70-79</span>
+                            <span class="scale-label">Good (C)</span>
+                        </div>
+                        <div class="scale-item">
+                            <span class="scale-range">60-69</span>
+                            <span class="scale-label">Fair (D)</span>
+                        </div>
+                        <div class="scale-item">
+                            <span class="scale-range">Below 60</span>
+                            <span class="scale-label">Needs Improvement (F)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Schedule Section -->
+        <section id="schedule" class="section">
+            <div class="section-header">
+                <h1>Class Schedule</h1>
+                <p>Your Weekly Timetable</p>
+            </div>
+
+            <div class="schedule-container">
+                <div id="scheduleGridContainer">
+                    <div class="no-data">
+                        <p>Schedule data is not yet available. Please check back later.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="section">
+            <div class="section-header">
+                <h1><i class="fas fa-user-circle"></i> Student Profile</h1>
+                <p>Manage your account information</p>
+            </div>
+
+            <!-- Profile View Mode -->
+            <div id="profileViewMode" class="profile-view-container">
+                <!-- Profile Card with Photo -->
+                <div class="profile-card-enhanced">
+                    <div class="profile-header-enhanced">
+                        <div class="profile-photo-container">
+                            <img id="profilePhotoImg" src="" alt="Profile Photo" class="profile-photo">
+                            <div class="photo-overlay">
+                                <button id="changePhotoBtn" class="photo-action-btn" title="Change Photo">
+                                    <i class="fas fa-camera"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="profile-header-info">
+                            <h2 id="profileName">Student Name</h2>
+                            <p id="profileStudentID" class="student-id">Student ID: --</p>
+                            <span class="status-badge active" id="enrollmentStatusBadge">Active</span>
+                        </div>
+                        <button id="editProfileBtn" class="btn btn-primary btn-edit-profile">
+                            <i class="fas fa-edit"></i> Edit Profile
+                        </button>
+                    </div>
+
+                    <!-- Profile Details Grid -->
+                    <div class="profile-details-grid">
+                        <!-- Personal Information -->
+                        <div class="profile-section-card">
+                            <div class="section-header-inline">
+                                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span class="info-label">Full Name</span>
+                                    <span class="info-value" id="profileFullName">--</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Birthdate</span>
+                                    <span class="info-value" id="profileBirthdate">--</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Gender</span>
+                                    <span class="info-value" id="profileGender">--</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Place of Birth</span>
+                                    <span class="info-value" id="profilePlaceOfBirth">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="profile-section-card">
+                            <div class="section-header-inline">
+                                <h3><i class="fas fa-envelope"></i> Contact Information</h3>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span class="info-label">Email</span>
+                                    <span class="info-value" id="profileEmail">--</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Phone</span>
+                                    <span class="info-value" id="profilePhone">--</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Address</span>
+                                    <span class="info-value" id="profileAddress">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Academic Information -->
+                        <div class="profile-section-card">
+                            <div class="section-header-inline">
+                                <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
+                            </div>
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span class="info-label">Grade Level</span>
+                                    <span class="info-value" id="profileGrade">--</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">School Year</span>
+                                    <span class="info-value" id="profileSchoolYear">--</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Section</span>
+                                    <span class="info-value" id="profileSection">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Settings -->
+                        <div class="profile-section-card">
+                            <div class="section-header-inline">
+                                <h3><i class="fas fa-lock"></i> Account Settings</h3>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary" id="changePasswordBtn">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                                <button class="btn btn-secondary" id="refreshProfileBtn">
+                                    <i class="fas fa-sync-alt"></i> Refresh Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Edit Mode -->
+            <div id="profileEditMode" class="profile-edit-container" style="display: none;">
+                <div class="profile-card-enhanced edit-mode">
+                    <div class="edit-header">
+                        <h2>Edit Profile</h2>
+                        <button id="closeEditBtn" class="close-btn" title="Cancel">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <form id="editProfileForm" class="edit-form">
+                        <!-- Personal Information -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-user"></i> Personal Information</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="editFullName">Full Name *</label>
+                                    <input type="text" id="editFullName" name="fullName" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editBirthdate">Birthdate</label>
+                                    <input type="date" id="editBirthdate" name="birthdate">
+                                </div>
+                                <div class="form-group">
+                                    <label for="editGender">Gender</label>
+                                    <select id="editGender" name="gender">
+                                        <option value="">-- Select --</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPlaceOfBirth">Place of Birth</label>
+                                    <input type="text" id="editPlaceOfBirth" name="placeOfBirth">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="form-section">
+                            <h3><i class="fas fa-envelope"></i> Contact Information</h3>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="editEmail">Email *</label>
+                                    <input type="email" id="editEmail" name="email" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="editPhone">Phone</label>
+                                    <input type="tel" id="editPhone" name="phone" placeholder="+63-XXXXXXXXXX">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="editAddress">Address</label>
+                                    <textarea id="editAddress" name="address" rows="3" placeholder="Street Address, Barangay, Municipality, Province"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="button" id="cancelEditBtn" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Hidden File Input for Photo Upload -->
+        <input type="file" id="photoFileInput" accept="image/*" style="display: none;">
+
+        <!-- Modal for Photo Upload -->
+        <div id="photoUploadModal" class="modal">
+            <div class="modal-content photo-upload-modal">
+                <div class="modal-header">
+                    <h2><i class="fas fa-image"></i> Change Profile Photo</h2>
+                    <button class="modal-close" id="closePhotoModalBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="photo-upload-area" id="photoUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag your photo here or click to browse</p>
+                        <small>JPG, PNG or GIF (Max 5MB)</small>
+                    </div>
+                    <div id="photoPreviewArea" class="photo-preview-area" style="display: none;">
+                        <img id="photoPreview" src="" alt="Preview">
+                        <p id="photoFileName"></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="removePhotoBtn" class="btn btn-danger" style="display: none;">
+                        <i class="fas fa-trash"></i> Remove Photo
+                    </button>
+                    <div>
+                        <button type="button" class="btn btn-secondary" id="cancelPhotoBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="uploadPhotoBtn" style="display: none;">
+                            <i class="fas fa-upload"></i> Upload Photo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Request Guidance Section -->
+        <section id="guidance" class="section">
+            <div class="section-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-comments"></i> Request Guidance & Support</h1>
+                    <p>Connect with a guidance counselor for academic, personal, or career support</p>
+                </div>
+            </div>
+
+            <!-- Quick Info Cards -->
+            <div class="guidance-info-cards">
+                <div class="info-card">
+                    <div class="card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Quick Response</h3>
+                    <p>Usually within 24-48 hours</p>
+                </div>
+                <div class="info-card">
+                    <div class="card-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h3>Confidential</h3>
+                    <p>All information is private</p>
+                </div>
+                <div class="info-card">
+                    <div class="card-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Expert Support</h3>
+                    <p>Experienced counselors ready</p>
+                </div>
+            </div>
+
+            <div class="request-guidance-card">
+                <form id="requestGuidanceForm" class="guidance-form">
+                    <!-- Request Type Section -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <span class="section-number">1</span>
+                            What's your request about?
+                        </h2>
+                        <p class="section-subtitle">Choose the topic that best matches your request</p>
+                        
+                        <div class="form-group full-width">
+                            <select id="guidanceReason" required>
+                                <option value="">-- Select a reason --</option>
+                                <option value="Academic">📚 Academic Support</option>
+                                <option value="Career">💼 Career Guidance</option>
+                                <option value="Personal">💭 Personal Issues</option>
+                                <option value="Bullying">🚨 Bullying/Harassment</option>
+                                <option value="Mental Health">🧠 Mental Health & Wellness</option>
+                                <option value="Other">📋 Other</option>
+                            </select>
+                            <small class="form-note"><i class="fas fa-info-circle"></i> This helps us route your request to the right counselor</small>
+                        </div>
+                    </div>
+
+                    <!-- Details Section -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <span class="section-number">2</span>
+                            Tell us more
+                        </h2>
+                        <p class="section-subtitle">Be as detailed as possible so we can better assist you</p>
+                        
+                        <div class="form-group full-width">
+                            <textarea id="guidanceMessage" 
+                                      placeholder="Describe your situation, concerns, or what you need help with..." 
+                                      required
+                                      minlength="10"></textarea>
+                            <div class="char-count">
+                                <small><span id="charCount">0</span>/500 characters</small>
+                            </div>
+                            <small class="form-note"><i class="fas fa-lightbulb"></i> More details = better support</small>
+                        </div>
+                    </div>
+
+                    <!-- Scheduling Section -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">
+                            <span class="section-number">3</span>
+                            Preferred Meeting Time (optional)
+                        </h2>
+                        <p class="section-subtitle">Let us know when you're available</p>
+                        
+                        <div class="form-row two-cols">
+                            <div class="form-group">
+                                <label for="guidancePreferredDate">
+                                    <i class="fas fa-calendar-alt"></i> Meeting Date
+                                </label>
+                                <input type="date" id="guidancePreferredDate">
+                                <small class="form-note">Select within the next 2 weeks</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="guidancePreferredTime">
+                                    <i class="fas fa-clock"></i> Preferred Time
+                                </label>
+                                <input type="time" id="guidancePreferredTime">
+                                <small class="form-note">School hours: 8 AM - 4 PM</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Information Notes -->
+                    <div class="guidance-info-box">
+                        <div class="info-box-header">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Your information is safe with us</span>
+                        </div>
+                        <ul class="info-box-list">
+                            <li>✓ All conversations are confidential</li>
+                            <li>✓ Your request will be reviewed by trained counselors</li>
+                            <li>✓ You'll receive a response within 24-48 hours</li>
+                            <li>✓ We can arrange in-person, phone, or online meetings</li>
+                        </ul>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions full-width guidance-actions">
+                        <button type="button" id="cancelGuidanceBtn" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-primary-large" id="submitGuidanceBtn">
+                            <i class="fas fa-paper-plane"></i> Send Request
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+   
+
+    <!-- Modal: Create Task -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Task</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="createTaskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Task Title</label>
+                    <input type="text" id="taskTitle" name="title" required placeholder="e.g., Math Assignment">
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description (Optional)</label>
+                    <textarea id="taskDescription" name="description" placeholder="Add more details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="taskDueDate">Due Date</label>
+                    <input type="date" id="taskDueDate" name="dueDate">
+                </div>
+                <div class="form-group">
+                    <label for="taskPriority">Priority</label>
+                    <select id="taskPriority" name="priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Create Task</button>
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Change Password -->
+    <div id="passwordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="changePasswordForm">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password</label>
+                    <input type="password" id="currentPassword" name="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">New Password</label>
+                    <input type="password" id="newPassword" name="newPassword" required placeholder="At least 8 characters">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Profile -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Profile</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="editProfileForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editFirstName">First Name</label>
+                        <input type="text" id="editFirstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLastName">Last Name</label>
+                        <input type="text" id="editLastName" name="lastName" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email</label>
+                    <input type="email" id="editEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPhone">Phone Number</label>
+                    <input type="tel" id="editPhone" name="phone" placeholder="+63-9XX-XXX-XXXX">
+                </div>
+                <div class="form-group">
+                    <label for="editAddress">Address</label>
+                    <input type="text" id="editAddress" name="address" placeholder="Your address">
+                </div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary modal-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Document Zoom Modal (dashboard) -->
+    <!-- moved enrollment status modal outside of section to avoid being hidden
+         by section display rules and ensure it sits on top of other content -->
+    <div id="enrollmentStatusModal" class="modal" style="display:none;" aria-hidden="true">
+        <div class="modal-content enrollment-status-modal">
+            <button class="modal-close" id="closeEnrollmentStatus">&times;</button>
+            
+            <!-- Header with Status Badge -->
+            <div class="enrollment-modal-header">
+                <div class="header-content">
+                    <h2>📋 Enrollment Status</h2>
+                    <p class="enrollment-date" id="enrollmentDateDisplay">Submitted on --</p>
+                </div>
+                <div class="status-badge-large" id="statusBadgeLarge">PENDING</div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="enrollment-modal-body">
+                <!-- Enrollment Summary Section -->
+                <div id="enrollmentSummaryContainer" class="enrollment-summary-section">
+                    <div class="summary-header">
+                        <h3>Quick Summary</h3>
+                        <span class="summary-icon">✓</span>
+                    </div>
+                    <div id="enrollmentSummaryContent" class="enrollment-summary-grid">
+                        <!-- Summary will be populated here by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Personal Information Card -->
+                <div class="enrollment-card">
+                    <div class="card-header">
+                        <h3>👤 Personal Information</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Full Name</span>
+                                <span class="info-value" id="enrollmentFullName">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Birthdate</span>
+                                <span class="info-value" id="enrollmentBirthdate">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Sex</span>
+                                <span class="info-value" id="enrollmentSex">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Place of Birth</span>
+                                <span class="info-value" id="enrollmentPlaceOfBirth">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Mother Tongue</span>
+                                <span class="info-value" id="enrollmentMotherTongue">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">LRN</span>
+                                <span class="info-value" id="enrollmentLRN">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Academic Information Card -->
+                <div class="enrollment-card">
+                    <div class="card-header">
+                        <h3>🎓 Academic Information</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Grade Level</span>
+                                <span class="info-value" id="enrollmentGradeLevel">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Track</span>
+                                <span class="info-value" id="enrollmentTrack">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Semester</span>
+                                <span class="info-value" id="enrollmentSemester">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">School Year</span>
+                                <span class="info-value" id="enrollmentSchoolYear">--</span>
+                            </div>
+                        </div>
+                        <div id="electivesDisplay" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <!-- Address Information Card -->
+                <div class="enrollment-card">
+                    <div class="card-header">
+                        <h3>📍 Address Information</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="address-section">
+                            <h4 style="color: #1e5631; font-weight: 600; margin-bottom: 10px;">Current Address</h4>
+                            <div class="info-grid">
+                                <div class="info-item" style="grid-column: 1/-1;">
+                                    <span class="info-label">Full Address</span>
+                                    <span class="info-value" id="enrollmentCurrentAddress">--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="address-section" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+                            <h4 style="color: #1e5631; font-weight: 600; margin-bottom: 10px;">Permanent Address</h4>
+                            <div class="info-grid">
+                                <div class="info-item" style="grid-column: 1/-1;">
+                                    <span class="info-label">Full Address</span>
+                                    <span class="info-value" id="enrollmentPermanentAddress">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information Card -->
+                <div class="enrollment-card">
+                    <div class="card-header">
+                        <h3>ℹ️ Additional Information</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Learning Modality</span>
+                                <span class="info-value" id="enrollmentLearningModality">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">IP Member</span>
+                                <span class="info-value" id="enrollmentIPStatus">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">4Ps Beneficiary</span>
+                                <span class="info-value" id="enrollment4PSStatus">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">PWD Status</span>
+                                <span class="info-value" id="enrollmentPWDStatus">--</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Returning Learner</span>
+                                <span class="info-value" id="enrollmentReturningStatus">--</span>
+                            </div>
+                        </div>
+                        <div id="additionalDetailsDisplay" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <!-- Documents Card -->
+                <div class="enrollment-card">
+                    <div class="card-header">
+                        <h3>📄 Submitted Documents</h3>
+                    </div>
+                    <div class="card-content">
+                        <div id="enrollmentStatusDocuments" class="document-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Admin Remarks Card -->
+                <div class="enrollment-card">
+                    <div class="card-header">
+                        <h3>📝 Admin Remarks</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="remarks-box" id="enrollmentAdminRemarks">No remarks at this time.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="enrollment-modal-footer">
+                <p class="footer-note">For more information, contact the enrollment office.</p>
+                <button class="btn btn-secondary" id="closeEnrollmentBtn">Close</button>
+            </div>
+        </div>
+    </div>
+    <div id="dashboardDocumentZoomModal" class="document-zoom-modal" style="display:none;">
+        <div class="zoom-container">
+            <button id="dashboardZoomClose" class="zoom-close" title="Close (ESC)">&times;</button>
+            <img id="dashboardZoomImage" src="" alt="Zoomed document" />
+            <div class="zoom-controls">
+                <button id="dashboardZoomOut" class="zoom-btn" title="Zoom Out">−</button>
+                <span id="dashboardZoomPercentage" class="zoom-percent">100%</span>
+                <button id="dashboardZoomIn" class="zoom-btn" title="Zoom In">+</button>
+                <button id="dashboardZoomReset" class="zoom-btn reset-btn" title="Reset Zoom">Reset</button>
+            </div>
+        </div>
+    </div>
+
+        <script>
+        (function(){
+            console.log('[StudentDashboard] inline initializer running, version 20260308-2');
+            function showSection(name){
+                document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+                const el = document.getElementById(name);
+                if(el) el.classList.add('active');
+                document.querySelectorAll('.menu-item').forEach(item=>{
+                    const key = item.dataset && item.dataset.section;
+                    item.classList.toggle('active', key === name);
+                });
+                history.replaceState(null,'', '#'+name);
+            }
+
+            // Handle sidebar menu items
+            document.querySelectorAll('.menu-item').forEach(item=>{
+                item.addEventListener('click', function(e){
+                    e.preventDefault();
+                    const sec = this.dataset && this.dataset.section;
+                    if(sec) showSection(sec);
+                });
+            });
+
+            // Handle dropdown menu items
+            document.querySelectorAll('.dropdown-item[data-section]').forEach(item=>{
+                item.addEventListener('click', function(e){
+                    e.preventDefault();
+                    const sec = this.dataset && this.dataset.section;
+                    if(sec){
+                        showSection(sec);
+                        dropdownMenu.classList.remove('active');
+                    }
+                });
+            });
+
+            const hash = location.hash.replace('#','') || 'dashboard';
+            showSection(hash);
+
+            const hamburger = document.getElementById('hamburgerBtn');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+            if(hamburger && sidebar){
+                function setSidebarOpen(isOpen) {
+                    sidebar.classList.toggle('is-open', isOpen);
+                    hamburger.classList.toggle('active', isOpen);
+                    hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    document.body.classList.toggle('sidebar-open', isOpen);
+
+                    const isMobile = window.innerWidth <= 768;
+                    if (isMobile) {
+                        sidebar.style.setProperty('left', '0px', 'important');
+                        sidebar.style.setProperty('z-index', '1300', 'important');
+                        sidebar.style.setProperty('display', 'flex', 'important');
+                        sidebar.style.setProperty('visibility', isOpen ? 'visible' : 'hidden', 'important');
+                        sidebar.style.setProperty('opacity', isOpen ? '1' : '0', 'important');
+                        sidebar.style.setProperty('transform', isOpen ? 'translateX(0)' : 'translateX(-100%)', 'important');
+                    } else {
+                        sidebar.style.removeProperty('left');
+                        sidebar.style.removeProperty('z-index');
+                        sidebar.style.removeProperty('display');
+                        sidebar.style.removeProperty('visibility');
+                        sidebar.style.removeProperty('opacity');
+                        sidebar.style.removeProperty('transform');
+                    }
+
+                    if (sidebarBackdrop) {
+                        sidebarBackdrop.classList.toggle('active', isOpen);
+                        sidebarBackdrop.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                    }
+                }
+
+                hamburger.addEventListener('click', function(){
+                    const shouldOpen = !sidebar.classList.contains('is-open');
+                    setSidebarOpen(shouldOpen);
+                });
+
+                if (sidebarBackdrop) {
+                    sidebarBackdrop.addEventListener('click', function(){
+                        setSidebarOpen(false);
+                    });
+                }
+
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.addEventListener('click', function(){
+                        if (window.innerWidth <= 768) setSidebarOpen(false);
+                    });
+                });
+
+                window.addEventListener('resize', function(){
+                    if (window.innerWidth > 768) setSidebarOpen(false);
+                });
+            }
+
+            const profileBtn = document.getElementById('profileBtn');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            if(profileBtn && dropdownMenu){
+                profileBtn.addEventListener('click', ()=>{
+                    dropdownMenu.classList.toggle('active');
+                });
+                document.addEventListener('click', (e)=>{
+                    if(!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)){
+                        dropdownMenu.classList.remove('active');
+                    }
+                });
+            }
+
+            const cancelGuidanceBtn = document.getElementById('cancelGuidanceBtn');
+            if(cancelGuidanceBtn){
+                cancelGuidanceBtn.addEventListener('click', ()=>{
+                    showSection('dashboard');
+                    document.getElementById('requestGuidanceForm').reset();
+                });
+            }
+        })();
+        </script>
+        <script src="student-dashboard.js?v=20260308-2"></script>
+        <!-- inline safeguard: ensure enrollment status modal opens even if external JS is stale -->
+        <script>
+        (function(){
+            function safeParse(str){
+                try { return JSON.parse(str); } catch (_){ return {}; }
+            }
+
+            function openEnrollmentStatusModalWithRecord(record){
+                const modal = document.getElementById('enrollmentStatusModal');
+                if(!modal || !record) return;
+                let enrollmentDataParsed = record.enrollment_data;
+                // merge both sources so we don't miss files stored in either place
+                let enrollmentFilesParsed = {};
+                if(record.enrollment_data && record.enrollment_data.enrollmentFiles && typeof record.enrollment_data.enrollmentFiles === 'object'){
+                    Object.assign(enrollmentFilesParsed, record.enrollment_data.enrollmentFiles);
+                }
+                if(record.enrollment_files && typeof record.enrollment_files === 'object'){
+                    Object.assign(enrollmentFilesParsed, record.enrollment_files);
+                }
+                if(typeof enrollmentDataParsed === 'string') enrollmentDataParsed = safeParse(enrollmentDataParsed);
+                if(typeof enrollmentFilesParsed === 'string') enrollmentFilesParsed = safeParse(enrollmentFilesParsed);
+                try {
+                    populateEnrollmentStatusModal({
+                        ...record,
+                        enrollmentData: enrollmentDataParsed || {},
+                        enrollmentFiles: enrollmentFilesParsed || {}
+                    });
+                } catch (_err) {
+                    // continue even if population fails
+                }
+                modal.style.zIndex = '100000';
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden','false');
+                modal.classList.add('active');
+            }
+            window.openEnrollmentStatusModalWithRecord = openEnrollmentStatusModalWithRecord;
+
+            // override saveEnrollmentChanges as well
+            async function safeSaveEnrollmentChanges(){
+                const modal = document.getElementById('enrollmentEditModal');
+                const form = document.getElementById('enrollmentEditForm');
+                if(!modal || !form) return;
+                if(!form.checkValidity()){
+                    alert('Please fill in all required fields correctly.');
+                    return;
+                }
+                const formData = new FormData(form);
+                const enrollmentData = {};
+                for(let [k,v] of formData.entries()) enrollmentData[k]=v;
+                const electives=[];
+                document.querySelectorAll('input[name="electives"]:checked').forEach(cb=>electives.push(cb.value));
+                enrollmentData.electives=electives;
+                const disabilities=[];
+                document.querySelectorAll('input[name="disability"]:checked').forEach(cb=>disabilities.push(cb.value));
+                enrollmentData.disability=disabilities;
+                // collect file inputs into enrollment_files
+                async function gatherFiles(){
+                    const filesObj={};
+                    const toDataUrl=(file)=>new Promise((r,rej)=>{const rd=new FileReader();rd.onload=()=>r(rd.result);rd.onerror=rej;rd.readAsDataURL(file);});
+                    const defs=[
+                        {id:'editPSABirthCert',key:'psaBirthCert',multi:false},
+                        {id:'editReportCard',key:'reportCard',multi:false},
+                        {id:'editGoodMoralCert',key:'goodMoralCert',multi:false},
+                        {id:'editOtherRequirements',key:'otherRequirements',multi:true}
+                    ];
+                    for(const def of defs){
+                        const inp=document.getElementById(def.id);
+                        if(!inp||!inp.files||inp.files.length===0) continue;
+                        if(def.multi){
+                            const arr=[];
+                            for(const f of inp.files) arr.push(await toDataUrl(f));
+                            filesObj[def.key]=arr;
+                        } else {
+                            filesObj[def.key]=await toDataUrl(inp.files[0]);
+                        }
+                    }
+                    return filesObj;
+                }
+                const enrollmentFiles = await gatherFiles();
+                if(Object.keys(enrollmentFiles).length) {
+                    enrollmentData.enrollmentFiles = enrollmentFiles;
+                    enrollmentData.documents = enrollmentFiles;
+                }
+                const enrollmentId = String(modal.dataset.editingEnrollmentId||'').trim();
+                if(!enrollmentId){ alert('Error: No enrollment ID found.'); return; }
+                try{
+                    let enrollments = JSON.parse(localStorage.getItem('enrollments')||'[]');
+                    let enrollmentIndex=-1;
+                    if(modal._currentEnrollment){
+                        enrollmentIndex = enrollments.findIndex(e=>e===modal._currentEnrollment);
+                    }
+                    if(enrollmentIndex===-1){
+                        enrollmentIndex = enrollments.findIndex((entry,idx)=>{
+                            const entryKey = String((entry&&(entry.id||entry.enrollment_id))||'').trim()||`idx-${idx}`;
+                            return entryKey===enrollmentId||String(entry.__historyKey||'').trim()===enrollmentId;
+                        });
+                    }
+                    if(enrollmentIndex!==-1){
+                        const target=enrollments[enrollmentIndex];
+                        target.enrollment_data=enrollmentData;
+                        if(Object.keys(enrollmentFiles||{}).length){
+                            target.enrollment_files = enrollmentFiles;
+                        }
+                        target.updated_at=new Date().toISOString();
+                        const stableKey = String((target.id||target.enrollment_id)||'').trim()||`idx-${enrollmentIndex}`;
+                        target.__historyKey=stableKey;
+                        localStorage.setItem('enrollments',JSON.stringify(enrollments));
+                        loadMyEnrollmentsSection(enrollments);
+                        // attempt server update as well
+                        if(typeof API_BASE==='string' && API_BASE){
+                            try{
+                                const studentData = JSON.parse(localStorage.getItem('studentData')||'{}');
+                                const studentId = studentData.id || studentData.student_id || studentData.studentID;
+                                if(studentId){
+                                    const updResp = await fetch(`${API_BASE}/api/enrollments/by-student/${encodeURIComponent(studentId)}`,{
+                                        method:'PATCH',
+                                        headers:{'Content-Type':'application/json'},
+                                        body:JSON.stringify({ enrollment_data: enrollmentData })
+                                    });
+                                    if(!updResp.ok){
+                                        alert('Failed to update enrollment on server (status ' + updResp.status + ')');
+                                        console.warn('safeSaveEnrollmentChanges server update failed', updResp.status);
+                                    } else {
+                                        // refresh entire list from server
+                                        try{
+                                            const listResp = await fetch(`${API_BASE}/api/enrollments/student/${encodeURIComponent(studentId)}`);
+                                            if(listResp.ok){
+                                                const listJson = await listResp.json();
+                                                if(Array.isArray(listJson)){
+                                                    let stored = listJson;
+                                                    window.studentEnrollmentsCache = stored;
+                                                    window.studentEnrollmentsCacheByKey = {};
+                                                    stored.forEach((e,idx)=>{
+                                                        const key = String((e && (e.id||e.enrollment_id))||'').trim()||`idx-${idx}`;
+                                                        e.__historyKey = key;
+                                                        window.studentEnrollmentsCacheByKey[key]=e;
+                                                    });
+                                                    localStorage.setItem('enrollments',JSON.stringify(stored));
+                                                    loadMyEnrollmentsSection(stored);
+                                                }
+                                            }
+                                        }catch(_e){}
+                                    }
+                                }
+                            }catch(e){
+                                console.warn('safeSaveEnrollmentChanges error updating server', e);
+                            }
+                        }
+                        alert('Enrollment changes saved successfully!');
+                    } else {
+                        alert('Error: Enrollment record not found.');
+                    }
+                }catch(e){
+                    alert('Error saving enrollment changes. Please try again.');
+                }
+                modal.style.display='none';
+                modal.classList.remove('active');
+                modal.setAttribute('aria-hidden','true');
+            }
+            window.saveEnrollmentChanges = safeSaveEnrollmentChanges;
+
+            // inline patch: wrap openEnrollmentEditModal so documents are populated
+            (function(){
+                const orig = window.openEnrollmentEditModal;
+                window.openEnrollmentEditModal = function(enrollment){
+                    if (typeof orig === 'function') {
+                        try { orig(enrollment); } catch(_e){}
+                    }
+                    // after original, force documents section fill
+                    try {
+                        if (!enrollment) return;
+                        let merged = {};
+                        const parseMaybe = (v)=>{
+                            if (!v) return {};
+                            if (typeof v==='string'){
+                                try{return JSON.parse(v)||{};}catch{return{}};
+                            }
+                            if (typeof v==='object') return v;
+                            return {};
+                        };
+                        Object.assign(merged,
+                            parseMaybe(enrollment.enrollment_files),
+                            enrollment.enrollment_data ? parseMaybe(enrollment.enrollment_data.enrollmentFiles) : {},
+                            enrollment.enrollment_data ? parseMaybe(enrollment.enrollment_data.documents) : {},
+                            parseMaybe(enrollment.documents)
+                        );
+                        populateDocumentsSection(merged);
+                    } catch(_err){}
+                };
+            })();
+
+            // inline helpers in case cached JS doesn't include them
+            (function(){
+                function makePreview(src){
+                    if(!src) return null;
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.style.maxWidth = '100px';
+                    img.style.maxHeight = '80px';
+                    img.style.display = 'block';
+                    img.style.marginBottom = '4px';
+                    return img;
+                }
+                window.showExistingFile = window.showExistingFile || function(fieldName,fileData){
+                    const input = document.getElementById(`edit${fieldName.charAt(0).toUpperCase()+fieldName.slice(1)}`);
+                    if(!input) return;
+                    if(typeof fileData==='string'){
+                        try{fileData=JSON.parse(fileData);}catch{}
+                    }
+                    const div=document.createElement('div');
+                    div.className='existing-file-info';
+                    div.style.cssText='margin-top:5px;padding:8px;background:#f0f9ff;border:1px solid #b3d9ff;border-radius:4px;font-size:12px;color:#0066cc;';
+                    if(Array.isArray(fileData)){
+                        div.innerHTML=`📎 ${fileData.length} file(s) already uploaded. Upload new files to replace.`;
+                        const first=fileData[0];
+                        const src=typeof first==='string'?first:(first&& (first.dataUrl||first.url||first.filename||first.name));
+                        const img=makePreview(src);
+                        if(img)div.insertBefore(img,div.firstChild);
+                    } else if(fileData && typeof fileData==='object'){
+                        const src=fileData.dataUrl||fileData.url||fileData.filename||fileData.name;
+                        const img=makePreview(src);
+                        const name=fileData.name||fileData.filename||'Existing file';
+                        if(img)div.appendChild(img);
+                        div.innerHTML+=`📎 ${name} (Click to upload new file)`;
+                    } else if(fileData){
+                        const img=makePreview(fileData);
+                        if(img)div.appendChild(img);
+                        div.appendChild(document.createTextNode('📎 Uploaded'));
+                    } else {
+                        div.textContent='📎 File already uploaded';
+                    }
+                    input.parentNode.insertBefore(div,input.nextSibling);
+                };
+                window.populateDocumentsSection = window.populateDocumentsSection || function(documents){
+                    if(typeof documents==='string'){
+                        try{documents=JSON.parse(documents);}catch{documents={}};
+                    }
+                    document.querySelectorAll('.existing-file-info').forEach(el=>el.remove());
+                    console.log('[Inline] Populating docs:',documents);
+                    if(documents.psaBirthCert) showExistingFile('psaBirthCert',documents.psaBirthCert);
+                    if(documents.reportCard) showExistingFile('reportCard',documents.reportCard);
+                    if(documents.goodMoralCert) showExistingFile('goodMoralCert',documents.goodMoralCert);
+                    if(documents.otherRequirements) showExistingFile('otherRequirements',documents.otherRequirements);
+                };
+            })();
+
+            function handleHistoryClick(event){
+                const viewBtn = event.target && event.target.closest ?
+                    event.target.closest('.open-enrollment-history-btn[data-enrollment-id]') : null;
+                if(viewBtn){
+                    const enrollmentId = String(viewBtn.getAttribute('data-enrollment-id')||'').trim();
+                    if(enrollmentId){
+                        const selected = (window.studentEnrollmentsCacheByKey && window.studentEnrollmentsCacheByKey[enrollmentId])
+                            || (window.studentEnrollmentsCache||[]).find(e=>String(e.__historyKey||e.id||e.enrollment_id||'').trim()===enrollmentId);
+                        if(selected) {
+                            openEnrollmentStatusModalWithRecord(selected);
+                        } else if(typeof API_BASE==='string' && API_BASE){
+                            fetch(`${API_BASE}/api/enrollments/${encodeURIComponent(enrollmentId)}`)
+                                .then(res=>res.ok?res.json():null)
+                                .then(rec=>{ if(rec) openEnrollmentStatusModalWithRecord(rec); })
+                                .catch(()=>{});
+                        }
+                    }
+                    return;
+                }
+                const editBtn = event.target && event.target.closest ?
+                    event.target.closest('.btn-edit-enrollment[data-enrollment-id]') : null;
+                if(editBtn){
+                    const enrollmentId = String(editBtn.getAttribute('data-enrollment-id')||'').trim();
+                    if(enrollmentId){
+                        const selected = (window.studentEnrollmentsCacheByKey && window.studentEnrollmentsCacheByKey[enrollmentId])
+                            || (window.studentEnrollmentsCache||[]).find(e=>String(e.__historyKey||e.id||e.enrollment_id||'').trim()===enrollmentId);
+                        if(selected) openEnrollmentEditModal(selected);
+                    }
+                }
+            }
+
+            function bindHandler(){
+                const container = document.getElementById('myEnrollmentsByYear');
+                if(container){
+                    container.removeEventListener('click', handleHistoryClick);
+                    container.addEventListener('click', handleHistoryClick);
+                }
+            }
+            document.addEventListener('DOMContentLoaded', bindHandler);
+            // also bind immediately in case content already present
+            bindHandler();
+        })();
+        </script>
+</body>
+</html>
+

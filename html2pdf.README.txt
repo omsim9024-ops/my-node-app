@@ -1,0 +1,1 @@
+Download html2pdf.bundle.min.js from https://github.com/eKoopmans/html2pdf and place it in this directory for PDF export functionality in the dashboard.

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Adviser Table</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f8f9fa; }
+        .error { color: red; padding: 10px; background: #ffe0e0; border-radius: 4px; margin: 10px 0; }
+        .success { color: green; padding: 10px; background: #e0ffe0; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Adviser Dashboard - Test Table</h1>
+    <div id="messages"></div>
+    <table id="testTable">
+        <thead>
+            <tr>
+                <th>LRN</th>
+                <th>Student Name</th>
+                <th>Grade Level</th>
+                <th>Section</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr><td colspan="5" style="text-align: center; color: #999;">Loading...</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        const API_BASE = window.location.origin;
+        const messagesDiv = document.getElementById('messages');
+
+        function addMessage(msg, isError = false) {
+            const div = document.createElement('div');
+            div.className = isError ? 'error' : 'success';
+            div.textContent = msg;
+            messagesDiv.appendChild(div);
+            console.log(msg);
+        }
+
+        async function testEnrollmentsAPI() {
+            try {
+                addMessage('Starting API test...');
+                
+                const response = await fetch(`${API_BASE}/api/enrollments`);
+                addMessage(`API Response Status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`API returned status ${response.status}`);
+                }
+                
+                const data = await response.json();
+                addMessage(`Received ${Array.isArray(data) ? data.length : Object.keys(data).length} records`);
+                
+                if (!Array.isArray(data)) {
+                    addMessage('ERROR: Data is not an array!', true);
+                    return;
+                }
+                
+                if (data.length === 0) {
+                    addMessage('WARNING: No enrollments returned', true);
+                    return;
+                }
+                
+                // Display data
+                const tbody = document.getElementById('tbody');
+                tbody.innerHTML = data.map(e => `
+                    <tr>
+                        <td>${e.student_id || '-'}</td>
+                        <td>${(e.first_name || '') + ' ' + (e.last_name || '')}</td>
+                        <td>${e.grade_level || '-'}</td>
+                        <td>${e.section_id || '-'}</td>
+                        <td>${e.status || 'Pending'}</td>
+                    </tr>
+                `).join('');
+                
+                addMessage(`SUCCESS: Displayed ${data.length} students`);
+                
+                // Log first record
+                addMessage(`First record: ${JSON.stringify(data[0], null, 2)}`);
+                
+            } catch (error) {
+                addMessage(`ERROR: ${error.message}`, true);
+                console.error(error);
+            }
+        }
+
+        // Run test
+        document.addEventListener('DOMContentLoaded', testEnrollmentsAPI);
+    </script>
+</body>
+</html>
+

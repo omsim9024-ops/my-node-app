@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Sign In | School Enrollment System</title>
+    <link rel="stylesheet" href="developer-auth.css">
+</head>
+<body>
+    <main class="dev-auth-page">
+        <section class="dev-auth-card" aria-labelledby="developerSignInTitle">
+            <div class="dev-auth-brand">
+                <div class="dev-auth-logo" aria-hidden="true">🛡️</div>
+                <div>
+                    <p class="dev-auth-eyebrow">Developer Portal</p>
+                    <h1 id="developerSignInTitle" class="dev-auth-title">Developer Sign In</h1>
+                    <p class="dev-auth-subtitle">Sign in to access the Developer Dashboard.</p>
+                </div>
+            </div>
+
+            <form id="developerSignInForm" class="dev-auth-form">
+                <div class="dev-auth-field">
+                    <label for="developerEmail">Email</label>
+                    <input id="developerEmail" type="email" required autocomplete="email" placeholder="you@example.com">
+                </div>
+                <div class="dev-auth-field">
+                    <label for="developerPassword">Password</label>
+                    <div class="dev-password-wrap">
+                        <input id="developerPassword" type="password" required autocomplete="current-password" placeholder="Enter your password">
+                        <button class="dev-password-toggle" type="button" data-target="developerPassword" aria-label="Show password">Show</button>
+                    </div>
+                </div>
+                <button id="developerSignInBtn" class="dev-auth-btn" type="submit">Sign In</button>
+                <div id="developerSignInFeedback" class="dev-auth-feedback" aria-live="polite"></div>
+            </form>
+
+            <p class="dev-auth-footer">
+                No developer account yet?
+                <a href="developer-signup.html" id="developerSignUpLink">Create one</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="developer-auth.js"></script>
+    <script src="developer-signin.js"></script>
+</body>
+</html>
+

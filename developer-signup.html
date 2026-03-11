@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Sign Up | School Enrollment System</title>
+    <link rel="stylesheet" href="developer-auth.css">
+</head>
+<body>
+    <main class="dev-auth-page">
+        <section class="dev-auth-card" aria-labelledby="developerSignUpTitle">
+            <div class="dev-auth-brand">
+                <div class="dev-auth-logo" aria-hidden="true">✨</div>
+                <div>
+                    <p class="dev-auth-eyebrow">Developer Portal</p>
+                    <h1 id="developerSignUpTitle" class="dev-auth-title">Developer Sign Up</h1>
+                    <p class="dev-auth-subtitle">Create a developer account to continue to the dashboard.</p>
+                </div>
+            </div>
+
+            <form id="developerSignUpForm" class="dev-auth-form">
+                <div class="dev-auth-field">
+                    <label for="developerFullName">Full Name</label>
+                    <input id="developerFullName" type="text" required autocomplete="name" placeholder="Juan Dela Cruz">
+                </div>
+                <div class="dev-auth-field">
+                    <label for="developerEmail">Email</label>
+                    <input id="developerEmail" type="email" required autocomplete="email" placeholder="you@example.com">
+                </div>
+                <div class="dev-auth-field">
+                    <label for="developerPassword">Password</label>
+                    <div class="dev-password-wrap">
+                        <input id="developerPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+                        <button class="dev-password-toggle" type="button" data-target="developerPassword" aria-label="Show password">Show</button>
+                    </div>
+                </div>
+                <div class="dev-auth-field">
+                    <label for="developerConfirmPassword">Confirm Password</label>
+                    <div class="dev-password-wrap">
+                        <input id="developerConfirmPassword" type="password" required minlength="8" autocomplete="new-password" placeholder="Repeat your password">
+                        <button class="dev-password-toggle" type="button" data-target="developerConfirmPassword" aria-label="Show password">Show</button>
+                    </div>
+                    <small class="dev-auth-hint">Use a strong password with at least 8 characters.</small>
+                </div>
+                <button id="developerSignUpBtn" class="dev-auth-btn" type="submit">Create Developer Account</button>
+                <div id="developerSignUpFeedback" class="dev-auth-feedback" aria-live="polite"></div>
+            </form>
+
+            <p class="dev-auth-footer">
+                Already registered?
+                <a href="developer-signin.html" id="developerSignInLink">Sign in</a>
+            </p>
+        </section>
+    </main>
+
+    <script src="developer-auth.js"></script>
+    <script src="developer-signup.js"></script>
+</body>
+</html>
+

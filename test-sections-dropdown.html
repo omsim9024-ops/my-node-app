@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Section Dropdown Test</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; }
+        .test-box { border: 1px solid #ddd; padding: 20px; margin: 20px 0; }
+        select { width: 100%; padding: 10px; font-size: 16px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Section Dropdown Test</h1>
+    
+    <div class="test-box">
+        <h2>1. Test API Endpoint</h2>
+        <button onclick="testAPIEndpoint()">Test /api/sections</button>
+        <div id="apiStatus"></div>
+    </div>
+    
+    <div class="test-box">
+        <h2>2. Test Dropdown Population</h2>
+        <select id="testSelect">
+            <option value="">-- Select Section --</option>
+        </select>
+        <button onclick="populateDropdown()">Populate Dropdown</button>
+        <div id="popStatus"></div>
+    </div>
+    
+    <div class="test-box">
+        <h2>3. Expected Sections</h2>
+        <div id="expectedList"></div>
+    </div>
+    
+    <script>
+        async function testAPIEndpoint() {
+            const status = document.getElementById('apiStatus');
+            status.className = 'status info';
+            status.innerHTML = '⏳ Testing API...';
+            
+            try {
+                const response = await fetch('/api/sections');
+                console.log('[Test] Response status:', response.status);
+                
+                const data = await response.json();
+                console.log('[Test] Data received:', data);
+                
+                if (!Array.isArray(data)) {
+                    throw new Error('API did not return an array. Got: ' + typeof data);
+                }
+                
+                status.className = 'status success';
+                status.innerHTML = `✓ API working! Received ${data.length} sections<br>` +
+                    `First section: ${data[0]?.section_code || 'N/A'} - ${data[0]?.section_name || 'N/A'}`;
+                
+                // Show expected sections
+                const list = document.getElementById('expectedList');
+                list.innerHTML = '<strong>Sections from API:</strong><ul>' +
+                    data.map(s => `<li>${s.section_code} - ${s.section_name} (ID: ${s.id})</li>`).join('') +
+                    '</ul>';
+                    
+            } catch (err) {
+                status.className = 'status error';
+                status.innerHTML = `✗ Error: ${err.message}`;
+                console.error('[Test] Error:', err);
+            }
+        }
+        
+        async function populateDropdown() {
+            const status = document.getElementById('popStatus');
+            const select = document.getElementById('testSelect');
+            
+            status.className = 'status info';
+            status.innerHTML = '⏳ Fetching sections...';
+            
+            try {
+                // Fetch sections
+                const response = await fetch('/api/sections');
+                if (!response.ok) throw new Error('API returned ' + response.status);
+                
+                const data = await response.json();
+                if (!Array.isArray(data)) throw new Error('API did not return an array');
+                
+                console.log('Fetched ' + data.length + ' sections');
+                
+                // Clear select and rebuild completely
+                select.innerHTML = '';
+                
+                // Add default option
+                const opt0 = document.createElement('option');
+                opt0.value = '';
+                opt0.text = '-- Select Section --';
+                select.appendChild(opt0);
+                
+                // Add sections one by one
+                for (let i = 0; i < data.length; i++) {
+                    const s = data[i];
+                    const opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.text = s.section_code + ' - ' + s.section_name;
+                    select.appendChild(opt);
+                    console.log('Added ' + (i+1) + ': ' + opt.text);
+                }
+                
+                status.className = 'status success';
+                status.innerHTML = '✓ Added ' + data.length + ' sections!<br>' +
+                    'Select now has ' + select.options.length + ' total options';
+                
+                console.log('Total options in select:', select.options.length);
+                console.log('Dropdown is now visible with all sections');
+                
+            } catch (err) {
+                status.className = 'status error';
+                status.innerHTML = '✗ Error: ' + err.message;
+                console.error('Error:', err);
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('[Auto-test] Starting auto-tests...');
+                testAPIEndpoint();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+

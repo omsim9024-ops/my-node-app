@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Admin Login</title>
+  <link rel="icon" href="cnhs_logo.png" type="image/png" id="schoolFavicon">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="admin-login.css" />
+  </head>
+
+  <body>
+    <script>
+      // when unified auth page is ready, redirect here to avoid stale form
+      const redirectUrl = 'auth.html?role=admin' + window.location.search;
+      window.location.replace(redirectUrl);
+    </script>
+    <div class="login-wrapper">
+      <div class="login-card">
+        <div class="brand">
+          <img src="cnhs_logo.png" alt="School Logo" class="school-logo" id="schoolLogo" />
+          <h1 id="schoolName">School Enrollment System</h1>
+          <p>School Enrollment System</p>
+        </div>
+
+        <form id="loginForm">
+          <div class="input-group">
+            <i class="fa-regular fa-envelope"></i>
+            <input
+              type="email"
+              id="email"
+              placeholder="Email address"
+              required
+            />
+          </div>
+
+          <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+          </div>
+
+          <div class="options">
+            <label>
+              <input type="checkbox" id="rememberMe" />
+              Remember me
+            </label>
+          </div>
+
+          <div class="input-group" id="otpGroup" style="display:none;">
+            <i class="fa-solid fa-key"></i>
+            <input
+              type="text"
+              id="otpCode"
+              placeholder="Enter 6-digit verification code"
+              maxlength="6"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+            />
+          </div>
+
+          <button class="btn-login" type="button" id="otpVerifyBtn" style="display:none;margin-bottom:10px;">Verify Code</button>
+
+          <button class="btn-login" type="submit">Sign In</button>
+        </form>
+
+        <div class="signup">
+          Don’t have an account?
+          <a href="auth.html?role=admin&tab=register" id="signupLink">Create one</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Tab-Scoped Session Manager - Prevents multi-tab session conflicts -->
+    <script src="session-manager.js"></script>
+    <script src="admin-login.js?v=20260228-otp-jwt-fix"></script>
+  </body>
+</html>
+
+
+

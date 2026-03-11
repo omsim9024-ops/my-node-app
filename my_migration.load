@@ -1,0 +1,41 @@
+-- pgloader load file for enrollments_db -> compostela-sms
+-- Save as my_migration.load and run: pgloader my_migration.load
+
+LOAD DATABASE
+  FROM mysql://root@127.0.0.1/enrollments_db
+  INTO postgresql://pg_user@127.0.0.1/compostela-sms
+
+ WITH include drop, create tables, create indexes, reset sequences, foreign keys, workers = 4
+
+-- Casts to handle MySQL -> Postgres type differences
+ CAST
+     type tinyint when (= precision 1) to boolean using tinyint-to-boolean,
+     type tinyint to smallint,
+     type datetime to timestamptz,
+     type timestamp to timestamptz,
+     type year to smallint,
+     type enum to text,
+     type set to text,
+     type longtext to text,
+     type mediumtext to text,
+     type tinytext to text,
+     type tinyblob to bytea,
+     type blob to bytea,
+     type mediumblob to bytea,
+     type longblob to bytea,
+     type bit to boolean
+
+-- Make sure target DB uses UTF8 and add helpful extensions
+ BEFORE LOAD DO
+   $$ CREATE EXTENSION IF NOT EXISTS "uuid-ossp"; $$,
+   $$ SET client_encoding = 'UTF8'; $$
+;
+-- Notes:
+-- 1) Replace connection strings above with your actual credentials (MYSQLPASS, PGPASS).
+-- 2) If the dump contains zero-dates ("0000-00-00 00:00:00"), pre-process them in MySQL
+--    (or run a quick UPDATE to NULL them) before pgloader, because Postgres rejects zero-dates.
+-- 3) After load, run sequence resets and boolean column conversions if necessary (examples below).
+
+-- Example post-import SQL (run in psql):
+-- SELECT setval(pg_get_serial_sequence('students','id'), coalesce((SELECT max(id) FROM students),0));
+-- ALTER TABLE students ALTER COLUMN is_active TYPE boolean USING (is_active::int = 1);

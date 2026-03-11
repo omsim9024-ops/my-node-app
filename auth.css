@@ -1,0 +1,448 @@
+/* --- DESIGN SYSTEM & VARIABLES --- */
+:root {
+    --primary: #1e5631;
+    --primary-hover: #154024;
+    --primary-light: #eaf4ee;
+    --bg-body: #f0f2f5;
+    --bg-card: #ffffff;
+    --text-main: #1f2937;
+    --text-muted: #6b7280;
+    --border-color: #e5e7eb;
+    --danger: #ef4444;
+    --success: #10b981;
+    --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    
+    --radius: 16px;
+    --radius-pill: 8px;
+
+    /* green gradient used on index page for tinting background */
+    --bg-gradient: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    position: relative;
+    /* allow vertical scrolling if content exceeds viewport */
+}
+
+/* subtle fullscreen background image, same as index */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('bg_cnhs.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    opacity: 0.15;
+    z-index: -1;
+}
+
+/* --- LAYOUT & CONTAINER --- */
+.auth-container {
+    width: 100%;
+    max-width: 440px; /* Smaller container width */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* --- BRANDING --- */
+.brand-header {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+.brand-text h1,
+.brand-text p {
+    color: #fff;
+}
+
+.brand-logo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: white;
+    padding: 4px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
+}
+
+.brand-text h1 {
+    font-size: 1.5rem;
+    color: #fff; /* keep white over background */
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.brand-text p {
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+/* --- AUTH CARD --- */
+.auth-card {
+    width: 100%;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 2rem;
+    position: relative;
+    transition: transform 0.2s ease;
+}
+
+/* --- ROLE SELECTOR --- */
+.role-selector {
+    display: flex;
+    background: var(--bg-body);
+    border-radius: var(--radius-pill);
+    padding: 4px;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.role-btn {
+    flex: 1;
+    padding: 10px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    z-index: 2;
+    transition: color 0.3s;
+}
+
+.role-btn.active {
+    color: white;
+}
+
+/* Slider effect */
+.role-selector::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(33.333% - 4px);
+    height: calc(100% - 8px);
+    background: var(--primary);
+    border-radius: 6px;
+    z-index: 1;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.role-selector[data-pos="1"]::before { transform: translateX(0); }
+.role-selector[data-pos="2"]::before { transform: translateX(100%); }
+.role-selector[data-pos="3"]::before { transform: translateX(200%); }
+
+/* --- TABS --- */
+.auth-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    position: relative;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary);
+}
+
+/* --- FORMS --- */
+.auth-form { display: none; animation: fadeIn 0.3s ease; }
+.auth-form.active { display: block; }
+
+.form-header { margin-bottom: 1.5rem; }
+.form-header h2 { font-size: 1.25rem; font-weight: 700; }
+.form-header p { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+
+.form-row { display: flex; gap: 1rem; }
+
+/* Floating Label Inputs */
+.input-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.form-input, .form-select {
+    width: 100%;
+    /* now include extra top padding so text sits lower and label can
+       float completely above without overlapping */
+    padding: 16px 12px 12px 12px;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.4;
+    background: #fafafa;
+    transition: all 0.2s;
+}
+
+.form-input:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+}
+
+.form-label {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: #9ca3af;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.form-input:focus + .form-label,
+.form-input:not(:placeholder-shown) + .form-label {
+    /* float label fully above the field – avoid any overlap with input
+       text by positioning at the very top and translating upwards */
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: var(--primary);
+    background: var(--bg-card); /* white background to cover the input behind */
+    padding: 0 4px; /* small padding so white box doesn’t touch border */
+}
+
+/* Password Toggle */
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9ca3af;
+    padding: 4px;
+}
+
+/* Options Row */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.checkbox-container input {
+    height: 0;
+    width: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
+.checkmark {
+    position: relative;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    margin-right: 8px;
+    transition: all 0.2s;
+}
+
+.checkbox-container input:checked + .checkmark {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.checkmark::after {
+    content: '';
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-container input:checked + .checkmark::after {
+    display: block;
+}
+
+.link-forgot {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+.link-forgot:hover { text-decoration: underline; }
+
+/* Primary Button */
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:disabled { background: #d1d5db; cursor: not-allowed; }
+
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+.btn-loading .btn-text { visibility: hidden; }
+.btn-loading .spinner { position: absolute; top: 50%; left: 50%; margin: -9px 0 0 -9px; }
+
+.form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.form-footer a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* --- TOAST SYSTEM --- */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    min-width: 250px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateX(120%);
+    transition: transform 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.toast.show { transform: translateX(0); }
+.toast.success .toast-icon { color: #10b981; }
+.toast.error .toast-icon { color: #ef4444; }
+.toast.info .toast-icon { color: #3b82f6; }
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.hidden { display: none !important; }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 480px) {
+    body {
+        padding: 0;
+        align-items: flex-start; /* Card starts at top */
+        background: white; /* White background for mobile */
+    }
+    
+    .auth-container {
+        max-width: 100%;
+        margin-top: 2rem;
+        gap: 1rem;
+    }
+    
+    .brand-header {
+        margin-bottom: 0;
+    }
+    
+    .brand-text h1 {
+        font-size: 1.25rem;
+    }
+    
+    .auth-card {
+        box-shadow: none; /* Flat design on mobile */
+        border-radius: 0;
+        padding: 1.5rem;
+        margin-top: 0;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}

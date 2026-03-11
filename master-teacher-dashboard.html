@@ -1,0 +1,2027 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Master Teacher Dashboard - CNHS</title>
+     <link rel="icon" href="cnhs_logo.png" type="image/png" />
+    <link rel="stylesheet" href="admin-dashboard.css" />
+    <script>
+      // Set API base to current origin to work with any port
+      try {
+        window.__FORCED_API_BASE__ = window.location.origin;
+        // Remove any large fixed/absolute elements that might block interaction
+        document.addEventListener('DOMContentLoaded', () => {
+          try {
+            Array.from(document.querySelectorAll('body *')).forEach(el => {
+              const s = window.getComputedStyle(el);
+              if (!s) return;
+              if ((s.position === 'fixed' || s.position === 'absolute')) {
+                const r = el.getBoundingClientRect();
+                const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                if (r.width > vw * 0.4 && r.height > vh * 0.4) {
+                  el.style.pointerEvents = 'none'; el.style.visibility = 'hidden';
+                }
+              }
+            });
+          } catch (e) { /* ignore */ }
+        });
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <!-- Header Bar -->
+    <header class="header">
+      <div class="header-left">
+        <button class="hamburger" id="hamburgerBtn">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="logo-section">
+          <img src="cnhs_logo.png" alt="Compostela National High School Logo" class="logo" />
+          <div class="logo-text">
+            <h1>Compostela National High School</h1>
+            <p>School Enrollment System</p>
+          </div>
+        </div>
+      </div>
+
+        <!-- Subject Assignment Modal (Assign subjects & sections to a teacher) -->
+        <div id="subjectAssignmentModal" class="modal" aria-hidden="true">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Assign Subjects & Sections</h2>
+              <button class="modal-close" id="closeSubjectAssignmentModal" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body">
+              <form id="subjectAssignmentForm">
+                <input type="hidden" id="subjectAssignTeacherId" />
+                <div class="form-group">
+                  <label>Teacher</label>
+                  <div style="background:#f5f5f5;padding:12px;border-radius:6px;margin-bottom:12px;">
+                    <p><strong>Name:</strong> <span id="subjectAssignTeacherName">--</span></p>
+                    <p><strong>Email:</strong> <span id="subjectAssignTeacherEmail">--</span></p>
+                  </div>
+                </div>
+
+                <div style="margin-bottom:10px; display:flex; gap:8px; align-items:center;">
+                  <button type="button" id="subjectAddRowBtn" class="btn btn-sm btn-secondary">+ Add Subject Row</button>
+                  <div style="margin-left:auto; color:#666; font-weight:600;">Using active school year</div>
+                </div>
+
+                <div id="subjectModalSubjectLoadsContainer">
+                  <p class="no-data">No subject rows added. Click "+ Add Subject Row" to begin.</p>
+                </div>
+
+                <div class="form-actions" style="margin-top:12px;">
+                  <button type="button" id="subjectAssignCancelBtn" class="btn btn-secondary">Cancel</button>
+                  <button type="submit" id="subjectAssignSaveBtn" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separate SHS Modal for Assign Subjects & Sections -->
+        <div id="subjectAssignmentModalSHS" class="modal" aria-hidden="true">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Assign Subjects & Sections (Senior High)</h2>
+              <button class="modal-close" id="closeSubjectAssignmentModalSHS" aria-label="Close modal">✕</button>
+            </div>
+            <div class="modal-body">
+              <form id="subjectAssignmentFormSHS">
+                <input type="hidden" id="subjectAssignTeacherIdSHS" />
+                <div class="form-group">
+                  <label>Teacher</label>
+                  <div style="background:#f5f5f5;padding:12px;border-radius:6px;margin-bottom:12px;">
+                    <p><strong>Name:</strong> <span id="subjectAssignTeacherNameSHS">--</span></p>
+                    <p><strong>Email:</strong> <span id="subjectAssignTeacherEmailSHS">--</span></p>
+                  </div>
+                </div>
+
+                <!-- Grade Level Dropdown -->
+                <!-- REMOVED: Grade/Section/Subject dropdowns - these are now per-row only -->
+
+                <div style="margin-bottom:10px; display:flex; gap:8px; align-items:center;">
+                  <button type="button" id="subjectAddRowBtnSHS" class="btn btn-sm btn-secondary">+ Add Subject Row</button>
+                  <div style="margin-left:auto; color:#666; font-weight:600;">Using active school year</div>
+                </div>
+
+                <div id="subjectModalSubjectLoadsContainerSHS">
+                  <p class="no-data">No subject rows added. Click "+ Add Subject Row" to begin.</p>
+                </div>
+
+                <div class="form-actions" style="margin-top:12px;">
+                  <button type="button" id="subjectAssignCancelBtnSHS" class="btn btn-secondary">Cancel</button>
+                  <button type="submit" id="subjectAssignSaveBtnSHS" class="btn btn-primary">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      <div class="header-right">
+        <button class="header-icon notification-btn" title="Notifications">
+          🔔
+          <span class="notification-badge" id="notificationBadge">3</span>
+        </button>
+
+        <button class="header-icon settings-btn" title="Settings">⚙️</button>
+
+        <div class="profile-dropdown">
+          <button class="profile-btn" id="profileBtn">
+            <span class="avatar">👤</span>
+            <span class="profile-name" id="adminName">Master Teacher</span>
+          </button>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" class="dropdown-item">My Profile</a>
+            <a href="#" class="dropdown-item">Account Settings</a>
+            <hr />
+            <a href="#" class="dropdown-item logout" id="logoutBtn">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-menu">
+        <a href="#dashboard" class="menu-item active" data-section="dashboard">
+          <span class="menu-icon">📊</span>
+          <span class="menu-label">Dashboard</span>
+        </a>
+        <a href="#school-years" class="menu-item" data-section="school-years">
+          <span class="menu-icon">📅</span>
+          <span class="menu-label">School Years</span>
+        </a>
+        <div class="menu-group" id="studentManagementGroup">
+          <button
+            class="menu-item menu-toggle"
+            aria-expanded="false"
+            data-section="students"
+          >
+            <span class="menu-icon">👥</span>
+            <span class="menu-label">Student Management</span>
+            <span class="chevron">▸</span>
+          </button>
+          <div class="submenu" aria-hidden="true">
+            <a
+              href="#directory"
+              class="menu-item submenu-item"
+              data-section="directory"
+            >
+              <span class="menu-icon">📋</span>
+              <span class="menu-label">Student Directory</span>
+            </a>
+            <a
+              href="#enrollment"
+              class="menu-item submenu-item"
+              data-section="enrollment"
+            >
+              <span class="menu-icon">📝</span>
+              <span class="menu-label">Enrollment</span>
+            </a>
+            <a
+              href="#attendance"
+              class="menu-item submenu-item"
+              data-section="attendance"
+            >
+              <span class="menu-icon">✅</span>
+              <span class="menu-label">Attendance</span>
+            </a>
+            <a
+              href="#records"
+              class="menu-item submenu-item"
+              data-section="records"
+            >
+              <span class="menu-icon">📚</span>
+              <span class="menu-label">Academic Records</span>
+            </a>
+            <a
+              href="#sections"
+              class="menu-item submenu-item"
+              data-section="sections"
+            >
+              <span class="menu-icon">🏫</span>
+              <span class="menu-label">Sections</span>
+            </a>
+            <a
+              href="#section-assignment"
+              class="menu-item submenu-item"
+              data-section="section-assignment"
+            >
+              <span class="menu-icon">👥</span>
+              <span class="menu-label">Section Assignment</span>
+            </a>
+          </div>
+        </div>
+        <div class="menu-group" id="reportsGroup">
+          <button
+            class="menu-item menu-toggle"
+            aria-expanded="false"
+            data-section="reports"
+          >
+            <span class="menu-icon">📈</span>
+            <span class="menu-label">Reports &amp; Analytics</span>
+            <span class="chevron">▸</span>
+          </button>
+          <div class="submenu" aria-hidden="true">
+            <a
+              href="#standard-reports"
+              class="menu-item submenu-item"
+              data-section="standard-reports"
+            >
+              <span class="menu-icon">📄</span>
+              <span class="menu-label">Standard Reports</span>
+            </a>
+            <a
+              href="#custom-reports"
+              class="menu-item submenu-item"
+              data-section="custom-reports"
+            >
+              <span class="menu-icon">✏️</span>
+              <span class="menu-label">Custom Reports</span>
+            </a>
+            <a
+              href="#data-visualization"
+              class="menu-item submenu-item"
+              data-section="data-visualization"
+            >
+              <span class="menu-icon">📊</span>
+              <span class="menu-label">Data Visualization</span>
+            </a>
+          </div>
+        </div>
+        <div class="menu-group" id="teachersGroup">
+          <button
+            class="menu-item menu-toggle"
+            aria-expanded="false"
+            data-section="teachers"
+          >
+            <span class="menu-icon">👨‍🏫</span>
+            <span class="menu-label">Manage Teachers</span>
+            <span class="chevron">▸</span>
+          </button>
+          <div class="submenu" aria-hidden="true">
+            <a
+              href="#teacher-registration"
+              class="menu-item submenu-item"
+              data-section="teacher-registration"
+            >
+              <span class="menu-icon">📝</span>
+              <span class="menu-label">Teacher Registration</span>
+            </a>
+            <a
+              href="#registration-codes"
+              class="menu-item submenu-item"
+              data-section="registration-codes"
+            >
+              <span class="menu-icon">🔐</span>
+              <span class="menu-label">Registration Codes</span>
+            </a>
+            <a
+              href="#teaching-assignments"
+              class="menu-item submenu-item"
+              data-section="teaching-assignments"
+            >
+              <span class="menu-icon">📚</span>
+              <span class="menu-label">Teaching Assignments</span>
+            </a>
+          </div>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="section active">
+        <div class="section-header">
+          <h2>Dashboard</h2>
+          <p class="section-subtitle">Welcome to the Master Teacher dashboard</p>
+        </div>
+
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <h3>Total Students</h3>
+              <p class="stat-value" id="totalStudents">--</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+              <h3>Pending Enrollments</h3>
+              <p class="stat-value" id="pendingEnrollments">--</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+              <h3>Approved Enrollments</h3>
+              <p class="stat-value" id="approvedEnrollments">--</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+              <h3>Rejected Enrollments</h3>
+              <p class="stat-value" id="rejectedEnrollments">--</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-content">
+          <div class="content-card">
+            <div class="card-header">
+              <h3>Recent Enrollments</h3>
+              <a href="#enrollment" class="view-all">View All →</a>
+            </div>
+            <div style="overflow-x: auto;">
+              <table class="enrollments-table" style="width: 100%; border-collapse: collapse; background: white;">
+                <thead style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                  <tr>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">LRN</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Student Name</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Grade Level</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Section</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Track</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Status</th>
+                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #333;">Date Submitted</th>
+                  </tr>
+                </thead>
+                <tbody id="recentEnrollments">
+                  <tr style="border-bottom: 1px solid #dee2e6;">
+                    <td colspan="7" style="padding: 40px; text-align: center; color: #999;">Loading enrollments...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Teaching Assignments Section -->
+      <section id="teaching-assignments" class="section">
+        <div class="section-header">
+          <h2>👩‍🏫 Manage Teachers → Teaching Assignments</h2>
+          <p class="section-subtitle">Assign subjects, sections and grade levels to Subject Teachers and Advisers</p>
+        </div>
+
+        <div class="content-card">
+          <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px; flex-wrap:wrap;">
+            <div style="min-width:260px;">
+              <label style="font-weight:700; display:block; margin-bottom:6px;">Select Teacher</label>
+              <select id="taTeacherSelect" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px;"></select>
+            </div>
+
+            <div style="min-width:180px;">
+              <label style="font-weight:700; display:block; margin-bottom:6px;">Role</label>
+              <select id="taRoleSelect" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px;">
+                <option value="Subject Teacher">Subject Teacher</option>
+                <option value="Adviser">Adviser</option>
+              </select>
+            </div>
+
+            <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+              <button id="taAddSubjectBtn" class="btn btn-secondary">+ Add Subject Row</button>
+              <button id="taSaveAssignmentsBtn" class="btn btn-primary">Save Assignments</button>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-bottom:12px;">
+            <button class="btn" id="taTabJHS" style="background:#f0f0f0;">Junior High</button>
+            <button class="btn" id="taTabSHS" style="background:#f0f0f0;">Senior High</button>
+          </div>
+
+          <div id="taSubjectLoadsContainer">
+            <p class="no-data">No subject rows added. Click "Add Subject Row" to begin.</p>
+          </div>
+        
+          <!-- Teachers table tabs (Junior High / Senior High) -->
+          <div class="content-card" style="margin-top:14px;">
+            <div class="ta-table-controls" style="display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:12px;">
+              <div style="display:flex; gap:8px; align-items:center;">
+                <input id="taTableSearch" type="search" placeholder="Search teachers (name, email, dept)" style="padding:8px 10px; border:1px solid #ddd; border-radius:6px; min-width:260px;" />
+                <select id="taTableRoleFilter" style="padding:8px; border:1px solid #ddd; border-radius:6px;">
+                  <option value="">All Roles</option>
+                  <option value="Adviser">Adviser</option>
+                  <option value="Subject Teacher">Subject Teacher</option>
+                  <option value="unassigned">Unassigned</option>
+                </select>
+                <button id="taTableRefreshBtn" class="btn btn-secondary">Refresh</button>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <div class="ta-table-tabs" style="display:flex; gap:8px;">
+                  <button class="btn btn-tertiary ta-tab active" id="taTabJHSTableBtn">Junior High</button>
+                  <button class="btn btn-tertiary ta-tab" id="taTabSHSTableBtn">Senior High</button>
+                </div>
+                <div id="taTableCount" style="font-weight:600; color:#666;">0 teachers</div>
+              </div>
+            </div>
+
+            <div id="taTabContentJHS" class="ta-tab-content">
+              <div class="table-container">
+                <table class="table" id="taTeachersJHSTable">
+                  <thead>
+                    <tr>
+                      <th>Teacher ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Department</th>
+                      <th>Role</th>
+                      <th>Assigned Sections</th>
+                      <th>Teaching Assignments</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="taTeachersJHSBody">
+                    <tr>
+                      <td colspan="8" class="no-data">Loading teachers...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="taTabContentSHS" class="ta-tab-content" style="display:none;">
+              <div class="table-container">
+                <table class="table" id="taTeachersSHSTable">
+                  <thead>
+                    <tr>
+                      <th>Teacher ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Department</th>
+                      <th>Role</th>
+                      <th>Assigned Sections</th>
+                      <th>Teaching Assignments</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="taTeachersSHSBody">
+                    <tr>
+                      <td colspan="8" class="no-data">Loading teachers...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- School Years Section -->
+      <section id="school-years" class="section">
+        <div class="section-header">
+          <h2>School Years</h2>
+          <p class="section-subtitle">Manage school years and set active year</p>
+        </div>
+
+        <!-- Active School Year Display -->
+        <div class="content-card active-year-card">
+          <div class="active-year-header">
+            <h3>📅 Active School Year</h3>
+          </div>
+          <div id="activeSchoolYearDisplay" class="active-year-display">
+            <div class="no-data">No active school year set. Create one below.</div>
+          </div>
+        </div>
+
+        <!-- Create School Year Form -->
+        <div class="content-card">
+          <div class="card-header">
+            <h3>Create New School Year</h3>
+          </div>
+          <form id="schoolYearForm" class="school-year-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="schoolYearName">School Year (e.g., 2025-2026):</label>
+                <input 
+                  type="text" 
+                  id="schoolYearName" 
+                  placeholder="2025-2026" 
+                  required 
+                  pattern="^\d{4}-\d{4}$"
+                  title="Format: YYYY-YYYY"
+                />
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input 
+                  type="date" 
+                  id="startDate" 
+                  required 
+                />
+              </div>
+              <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input 
+                  type="date" 
+                  id="endDate" 
+                  required 
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              ➕ Create School Year
+            </button>
+          </form>
+        </div>
+
+        <!-- School Years List -->
+        <div class="content-card">
+          <div class="card-header">
+            <h3>All School Years</h3>
+          </div>
+          <div class="school-years-table-container">
+            <table class="school-years-table">
+              <thead>
+                <tr>
+                  <th>School Year</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="schoolYearsTableBody">
+                <tr>
+                  <td colspan="5" class="no-data">Loading school years...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Students Section -->
+      <section id="students" class="section">
+        <div class="section-header">
+          <h2>Student Management</h2>
+          <p class="section-subtitle">Manage student accounts and profiles</p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Student management tools coming soon...</p>
+        </div>
+      </section>
+
+      <!-- Directory Section -->
+      <section id="directory" class="section">
+        <div class="section-header">
+          <h2>Student Directory</h2>
+          <p class="section-subtitle">Search and view student information</p>
+        </div>
+        <div class="content-card">
+          <!-- Filters -->
+          <div class="dir-filters">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label>Search Name/LRN:</label>
+                <input
+                  type="text"
+                  id="dirSearchInput"
+                  placeholder="Enter name or LRN..."
+                  class="filter-input"
+                />
+              </div>
+              <div class="filter-group">
+                <label>Grade:</label>
+                <select id="dirFilterGrade" class="filter-select">
+                  <option value="">All</option>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Gender:</label>
+                <select id="dirFilterGender" class="filter-select">
+                  <option value="">All</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Track:</label>
+                <select id="dirFilterTrack" class="filter-select">
+                  <option value="">All</option>
+                  <option value="academic">Academic</option>
+                  <option value="techpro">TechPro</option>
+                  <option value="doorway">Doorway</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Status:</label>
+                <select id="dirFilterStatus" class="filter-select">
+                  <option value="">All</option>
+                  <option value="Approved">Active</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+            <div class="filter-row">
+              <div class="filter-group">
+                <label>Disability:</label>
+                <select id="dirFilterDisability" class="filter-select">
+                  <option value="">All</option>
+                  <option value="blind">Blind</option>
+                  <option value="deaf">Deaf</option>
+                  <option value="autism">Autism Spectrum</option>
+                  <option value="cerebral-palsy">Cerebral Palsy</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>IP Group:</label>
+                <select id="dirFilterIP" class="filter-select">
+                  <option value="">All</option>
+                  <option value="aeta">Aeta</option>
+                  <option value="ifugao">Ifugao</option>
+                  <option value="maranao">Maranao</option>
+                  <option value="tboli">T'boli</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>4Ps Member:</label>
+                <select id="dirFilter4Ps" class="filter-select">
+                  <option value="">All</option>
+                  <option value="yes">Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+              <button id="dirResetBtn" class="btn btn-secondary">
+                Reset Filters
+              </button>
+              <button id="dirReloadBtn" class="btn btn-primary">
+                🔄 Reload from Server
+              </button>
+            </div>
+          </div>
+
+          <!-- Student List Table -->
+          <div class="dir-table-container">
+            <table class="dir-table">
+              <thead>
+                <tr>
+                  <th>Student LRN</th>
+                  <th>Full Name</th>
+                  <th>Gender</th>
+                  <th>Grade</th>
+                  <th>Track</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="dirTableBody">
+                <tr>
+                  <td colspan="7" class="no-data">Loading students...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="dir-pagination">
+            <button id="dirPrevBtn" class="btn btn-secondary">
+              ← Previous
+            </button>
+            <span id="dirPageInfo">Page 1</span>
+            <button id="dirNextBtn" class="btn btn-secondary">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Student Profile Modal -->
+      <div id="studentProfileModal" class="modal" aria-hidden="true">
+        <div class="modal-content student-profile-modal">
+          <div class="modal-header">
+            <h2 id="profileStudentName">Student Profile</h2>
+            <button
+              class="modal-close"
+              id="closeProfileModal"
+              aria-label="Close"
+            >
+              &times;
+            </button>
+          </div>
+          <div class="profile-tabs">
+            <button class="tab-btn active" data-tab="personal">
+              👤 Personal
+            </button>
+            <button class="tab-btn" data-tab="academic">🎓 Academic</button>
+            <button class="tab-btn" data-tab="social">👥 Social</button>
+            <button class="tab-btn" data-tab="documents">📎 Documents</button>
+            <button class="tab-btn" data-tab="history">🕒 History</button>
+          </div>
+          <div class="profile-content">
+            <div id="tab-personal" class="tab-pane active">
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Full Name:</label><span id="infoFullName">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Student LRN:</label><span id="infoStudentID">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Gender:</label><span id="infoGender">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Birthdate:</label><span id="infoBirthdate">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Place of Birth:</label
+                  ><span id="infoPlaceOfBirth">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Mother Tongue:</label
+                  ><span id="infoMotherTongue">--</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Current Address:</label
+                  ><span id="infoAddress">--</span>
+                </div>
+              </div>
+            </div>
+            <div id="tab-academic" class="tab-pane">
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Grade Level:</label><span id="infoGrade">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Track:</label><span id="infoTrack">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Status:</label
+                  ><span id="infoEnrollmentStatus">--</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Electives:</label><span id="infoElectives">--</span>
+                </div>
+              </div>
+            </div>
+            <div id="tab-social" class="tab-pane">
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Disability:</label><span id="infoDisability">--</span>
+                </div>
+                <div class="info-item">
+                  <label>Indigenous Group:</label
+                  ><span id="infoIPGroup">--</span>
+                </div>
+                <div class="info-item">
+                  <label>4Ps Member:</label><span id="info4Ps">--</span>
+                </div>
+              </div>
+            </div>
+            <div id="tab-documents" class="tab-pane">
+              <p class="no-data">No documents submitted.</p>
+            </div>
+            <div id="tab-history" class="tab-pane">
+              <div id="historyContent">
+                <p class="no-data">No enrollment history available.</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="footer-actions">
+              <button id="profileCloseBtn" class="btn btn-secondary">
+                Close
+              </button>
+              <button id="profileEditBtn" class="btn btn-primary">✏ Edit</button>
+              <button id="profileRejectBtn" class="btn btn-reject">
+                ✕ Reject
+              </button>
+              <button id="profileApproveBtn" class="btn btn-approve">
+                ✓ Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enrollment Section -->
+      <section id="enrollment" class="section">
+        <div class="section-header">
+          <h2>Enrollment Management</h2>
+          <p class="section-subtitle">Review and manage student enrollments</p>
+        </div>
+        <div class="content-card">
+          <!-- Search and Filter Bar -->
+          <div
+            style="
+              display: flex;
+              gap: 15px;
+              margin-bottom: 20px;
+              flex-wrap: wrap;
+              align-items: center;
+            "
+          >
+            <input
+              type="text"
+              id="enrollmentSearchInput"
+              placeholder="Search by student name or email..."
+              style="
+                flex: 1;
+                min-width: 250px;
+                padding: 10px 15px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+              "
+            />
+            <button
+              id="clearSearchBtn"
+              class="btn btn-secondary"
+              style="height: fit-content"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div class="enrollments-filter">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="approved">Approved</button>
+            <button class="filter-btn" data-filter="rejected">Rejected</button>
+          </div>
+          <div id="enrollmentsTable" class="table-container">
+            <p class="no-data">Loading enrollments...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Attendance Section -->
+      <section id="attendance" class="section">
+        <div class="section-header">
+          <h2>Attendance</h2>
+          <p class="section-subtitle">Student attendance records</p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Attendance tracking coming soon...</p>
+        </div>
+      </section>
+
+      <!-- Reports & Analytics Sections -->
+      <section id="standard-reports" class="section">
+        <div class="section-header">
+          <h2>📊 Analytics & Reports</h2>
+          <p class="section-subtitle">Official school reports and analytics</p>
+        </div>
+
+        <!-- Approval Status Notice -->
+        <div class="approval-notice">
+          <span class="notice-icon">ℹ️</span>
+          <span class="notice-text"
+            ><strong>Note:</strong> These reports include only
+            <strong>approved students</strong>. Pending and rejected enrollments
+            are excluded.</span
+          >
+        </div>
+
+        <!-- Report Customization Panel -->
+        <div class="report-customization-panel">
+          <button class="btn btn-tertiary" id="toggleCustomization">⚙️ Customize Report</button>
+          <div class="customization-options" id="customizationOptions" style="display: none;">
+            <div class="customization-section">
+              <h4>Header Customization</h4>
+              <div class="form-group">
+                <label for="schoolName">School Name:</label>
+                <input type="text" id="schoolName" placeholder="Compostela National High School" value="Compostela National High School">
+              </div>
+              <div class="form-group">
+                <label for="schoolAddress">School Address:</label>
+                <input type="text" id="schoolAddress" placeholder="Address" value="">
+              </div>
+              <div class="form-group">
+                <label for="reportTitle">Report Title:</label>
+                <input type="text" id="reportTitle" placeholder="Official School Report" value="Official School Report">
+              </div>
+              <div class="form-group">
+                <label for="reportDate">Include Date:</label>
+                <input type="checkbox" id="reportDate" checked>
+              </div>
+              <div class="form-group">
+                <label for="includeSchoolLogo">Include School Logo:</label>
+                <input type="checkbox" id="includeSchoolLogo" checked>
+              </div>
+            </div>
+            <div class="customization-section">
+              <h4>Footer Customization</h4>
+              <div class="form-group">
+                <label for="footerText">Footer Text:</label>
+                <input type="text" id="footerText" placeholder="Official Document" value="Official Document">
+              </div>
+              <div class="form-group">
+                <label for="showPageNumbers">Show Page Numbers:</label>
+                <input type="checkbox" id="showPageNumbers" checked>
+              </div>
+            </div>
+            <div class="customization-actions">
+              <button class="btn btn-primary" id="applyCustomization">Apply Settings</button>
+              <button class="btn btn-secondary" id="resetCustomization">Reset to Defaults</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Report Navigation Tabs -->
+        <div class="report-tabs">
+          <button class="report-tab active" data-report="demographics">
+            👥 Demographics
+          </button>
+          <button class="report-tab" data-report="disability">
+            ♿ Disability
+          </button>
+          <button class="report-tab" data-report="indigenous">
+            🌾 Indigenous
+          </button>
+          <button class="report-tab" data-report="4ps">🧾 4Ps</button>
+          <button class="report-tab" data-report="mothertongue">
+            🗣️ Mother Tongue
+          </button>
+          <button class="report-tab" data-report="track">🎓 Track</button>
+          <button class="report-tab" data-report="electives">
+            📚 Electives
+          </button>
+        </div>
+
+        <!-- Demographics Report -->
+        <div class="report-content active" id="report-demographics">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>👥 Student Demographics</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printDemo">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportDemoExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Gender Summary -->
+            <div class="report-subsection">
+              <h4>Gender Summary</h4>
+              <div class="report-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Total Male Students</span>
+                  <span class="stat-value" id="totalMale">--</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Total Female Students</span>
+                  <span class="stat-value" id="totalFemale">--</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Total Overall Students</span>
+                  <span class="stat-value" id="totalGenderStudents">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Grade</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="genderTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Grade Level Population -->
+            <div class="report-subsection">
+              <h4>Grade Level Population</h4>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Grade</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gradePopTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disability Report -->
+        <div class="report-content" id="report-disability">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>♿ Disability Reports</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printDisability">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportDisabilityExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Students With Disability -->
+            <div class="report-subsection">
+              <h4>Students With Disability</h4>
+              <div class="report-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Total Students with Disability</span>
+                  <span class="stat-value" id="totalDisability">--</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Percentage of Population</span>
+                  <span class="stat-value" id="disabilityPercentage">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Disability Type</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="disabilityTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indigenous People Report -->
+        <div class="report-content" id="report-indigenous">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🌾 Indigenous People (IP) Membership</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printIP">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportIPExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- IP Membership -->
+            <div class="report-subsection">
+              <h4>IP Membership Report</h4>
+              <div class="report-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Total IP Students</span>
+                  <span class="stat-value" id="totalIP">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>IP Group</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ipTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4Ps Report -->
+        <div class="report-content" id="report-4ps">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🧾 4Ps Membership</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="print4Ps">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="export4PsExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- 4Ps Beneficiaries -->
+            <div class="report-subsection">
+              <h4>4Ps Beneficiaries</h4>
+              <div class="report-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Male 4Ps Students</span>
+                  <span class="stat-value" id="male4Ps">--</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Female 4Ps Students</span>
+                  <span class="stat-value" id="female4Ps">--</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Total 4Ps Students</span>
+                  <span class="stat-value" id="total4Ps">--</span>
+                </div>
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Grade</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="4psTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mother Tongue Report -->
+        <div class="report-content" id="report-mothertongue">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🗣️ Mother Tongue Distribution</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printMTong">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportMTongExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Mother Tongue Distribution -->
+            <div class="report-subsection">
+              <h4>Mother Tongue Distribution</h4>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Mother Tongue</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="motherTongueTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Track Report -->
+        <div class="report-content" id="report-track">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>🎓 Track & Program Enrollment</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printTrack">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportTrackExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Track Summary -->
+            <div class="report-subsection">
+              <h4>Track Summary</h4>
+              <p class="track-note">Academic, TechPro, and Doorway Programs</p>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Track/Program</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="trackTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Electives Report -->
+        <div class="report-content" id="report-electives">
+          <div class="content-card">
+            <div class="section-subheader">
+              <h3>📚 Electives Enrollment</h3>
+              <div class="export-buttons">
+                <button class="btn btn-secondary" id="printElectives">
+                  🖨️ Print
+                </button>
+                <button class="btn btn-secondary" id="exportElectivesExcel">
+                  📥 Excel
+                </button>
+              </div>
+            </div>
+
+            <!-- Electives Enrollment -->
+            <div class="report-subsection">
+              <h4>Elective Enrollment</h4>
+              <div class="report-grid" id="electiveCategorySummary">
+                <!-- Category summaries will be populated here -->
+              </div>
+              <div class="table-container">
+                <table class="report-table">
+                  <thead>
+                    <tr>
+                      <th>Elective</th>
+                      <th>Male</th>
+                      <th>Female</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="electivesTableBody">
+                    <tr>
+                      <td colspan="4" class="no-data">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="custom-reports" class="section">
+        <div class="section-header">
+          <h2>Custom Reports</h2>
+          <p class="section-subtitle">Build and save custom report queries</p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Custom report builder coming soon.</p>
+        </div>
+      </section>
+
+      <section id="data-visualization" class="section">
+        <div class="section-header">
+          <h2>Data Visualization</h2>
+          <p class="section-subtitle">
+            Charts and dashboards to visualize data
+          </p>
+        </div>
+        <div class="content-card">
+          <div class="viz-filters">
+            <label
+              >Gender:
+              <select id="vizFilterGender">
+                <option value="all">All</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select></label
+            >
+            <label
+              >Grade:
+              <select id="vizFilterGrade">
+                <option value="all">All</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+              </select></label
+            >
+            <label
+              >Year:
+              <select id="vizFilterYear">
+                <option value="all">All</option>
+              </select></label
+            >
+            <button id="vizRefreshBtn" class="btn btn-secondary">
+              Refresh
+            </button>
+          </div>
+
+          <div class="viz-grid">
+            <div class="viz-card">
+              <h4>📊 Gender Overview</h4>
+              <canvas id="chartGender" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>📚 Grade Distribution</h4>
+              <canvas id="chartGrade" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>♿ Disability Breakdown</h4>
+              <canvas id="chartDisability" height="160"></canvas>
+            </div>
+            <div class="viz-card">
+              <h4>🎓 Track Enrollment</h4>
+              <canvas id="chartTrack" height="160"></canvas>
+            </div>
+            <div class="viz-card viz-wide">
+              <h4>📘 Electives (Top 30 by students)</h4>
+              <canvas id="chartElectives" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Records Section -->
+      <section id="records" class="section">
+        <div class="section-header">
+          <h2>Academic Records</h2>
+          <p class="section-subtitle">
+            View student grades and academic information
+          </p>
+        </div>
+        <div class="content-card">
+          <p class="no-data">Academic records coming soon...</p>
+        </div>
+      </section>
+
+      <!-- Teacher Registration & Assignment Section -->
+      <section id="teacher-registration" class="section">
+        <div class="section-header">
+          <h2>👨‍🏫 Manage Teachers → Teacher Registration</h2>
+          <p class="section-subtitle">View and assign roles to newly registered teachers</p>
+        </div>
+
+        <div class="content-card">
+          <!-- Search & Filter Controls -->
+          <div class="sections-controls">
+            <div class="search-bar-container">
+              <input 
+                type="text" 
+                id="teacherSearchInput" 
+                class="search-input" 
+                placeholder="🔍 Search by name, email, or department..."
+                aria-label="Search teachers"
+              />
+            </div>
+            
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+              <div class="filter-group">
+                <label for="teacherRoleFilter">Role:</label>
+                <select id="teacherRoleFilter" class="filter-select">
+                  <option value="">All Teachers</option>
+                  <option value="unassigned">Unassigned (No Role)</option>
+                  <option value="Adviser">Adviser</option>
+                  <option value="Subject Teacher">Subject Teacher</option>
+                </select>
+              </div>
+              
+              <div class="filter-group">
+                <label for="teacherSortBy">Sort By:</label>
+                <select id="teacherSortBy" class="filter-select">
+                  <option value="created_at">Registration Date (Newest)</option>
+                  <option value="created_at_desc">Registration Date (Oldest)</option>
+                  <option value="name">Name (A-Z)</option>
+                  <option value="email">Email (A-Z)</option>
+                </select>
+              </div>
+              
+              <button id="refreshTeachers" class="btn btn-secondary" title="Refresh teacher list">
+                ↺ Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Results Info -->
+          <div id="teacherResultsInfo" class="results-info" style="display: none; margin-bottom: 15px;">
+            <span id="teacherResultsCount">0</span> teacher(s) found
+          </div>
+
+          <!-- Debug Info -->
+          <div id="teacherDebugInfo" style="display: none; background: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 4px; font-size: 12px; color: #856404;">
+            <strong>Debug Info:</strong> <span id="teacherDebugText">Initializing...</span>
+          </div>
+
+          <!-- Teachers Table -->
+          <div id="teachersTableContainer" class="table-container">
+            <table id="teachersTable" class="table">
+              <thead>
+                <tr>
+                  <th>Teacher ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Department</th>
+                  <th>Phone</th>
+                  <th>Current Role</th>
+                  <th>Assigned Section</th>
+                  <th>Registration Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teachersTableBody">
+                <tr>
+                  <td colspan="9" class="no-data">Loading teachers...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sections Management Section -->
+      <section id="sections" class="section">
+        <div class="section-header">
+          <h2>🏫 Student Management → Sections</h2>
+          <p class="section-subtitle">Manage and create class sections</p>
+        </div>
+
+        <div class="content-card">
+          <!-- Quick Action Buttons -->
+          <div class="sections-quick-actions">
+            <div class="action-card">
+              <div class="action-header">
+                <span class="action-icon">🧒</span>
+                <h3>Junior High</h3>
+                <p class="action-subtitle">Grades 7-10</p>
+              </div>
+              <button class="btn btn-primary btn-lg" id="addJHSSection">
+                ➕ Add New Section
+              </button>
+            </div>
+
+            <div class="action-card">
+              <div class="action-header">
+                <span class="action-icon">🎓</span>
+                <h3>Senior High</h3>
+                <p class="action-subtitle">Grades 11-12</p>
+              </div>
+              <button class="btn btn-primary btn-lg" id="addSHSSection">
+                ➕ Add New Section
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Container -->
+          <div id="sectionMessages"></div>
+
+          <!-- Sections List (for reference) -->
+          <div class="sections-reference" style="margin-top: 40px; padding-top: 30px; border-top: 2px solid #ddd;">
+            <h3>📋 Existing Sections</h3>
+            
+            <!-- Search & Filter Controls -->
+            <div class="sections-controls">
+              <!-- Search Bar -->
+              <div class="search-bar-container">
+                <input 
+                  type="text" 
+                  id="sectionSearchInput" 
+                  class="search-input" 
+                  placeholder="🔍 Search by section code, name, or adviser..."
+                  aria-label="Search sections"
+                />
+              </div>
+              
+              <!-- Filter Controls -->
+              <div class="filter-controls">
+                <div class="filter-group">
+                  <label for="levelFilter">Level:</label>
+                  <select id="levelFilter" class="filter-select">
+                    <option value="">All Levels</option>
+                    <option value="JHS">Junior High School (JHS)</option>
+                    <option value="SHS">Senior High School (SHS)</option>
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label for="gradeFilter">Grade Level:</label>
+                  <select id="gradeFilter" class="filter-select">
+                    <option value="">All Grades</option>
+                    <option value="7">Grade 7</option>
+                    <option value="8">Grade 8</option>
+                    <option value="9">Grade 9</option>
+                    <option value="10">Grade 10</option>
+                    <option value="11">Grade 11</option>
+                    <option value="12">Grade 12</option>
+                  </select>
+                </div>
+                
+                <div class="filter-group">
+                  <label for="sortBy">Sort By:</label>
+                  <select id="sortBy" class="filter-select">
+                    <option value="section_code">Section Code (A-Z)</option>
+                    <option value="section_code_desc">Section Code (Z-A)</option>
+                    <option value="level">Level (JHS First)</option>
+                    <option value="grade">Grade Level</option>
+                    <option value="adviser">Adviser Name</option>
+                  </select>
+                </div>
+                
+                <button id="resetFilters" class="btn btn-secondary" title="Reset all filters">
+                  ↺ Reset
+                </button>
+              </div>
+            </div>
+            
+            <!-- Results Info -->
+            <div id="resultsInfo" class="results-info" style="display: none; margin-bottom: 15px;">
+              <span id="resultsCount">0</span> section(s) found
+            </div>
+            
+            <!-- Sections Table -->
+            <div id="sectionsTable" class="table-container">
+              <p class="no-data">Loading sections...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section Assignment Section -->
+      <section id="section-assignment" class="section">
+        <div class="section-header">
+          <h2>👥 Student Management → Section Assignment & Class List</h2>
+          <p class="section-subtitle">Assign students to sections and view class lists</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="section-tabs">
+          <button class="section-tab-btn active" data-tab="section-assignment-tab">
+            📋 Section Assignment
+          </button>
+          <button class="section-tab-btn" data-tab="class-list-tab">
+            📚 Class List
+          </button>
+        </div>
+
+        <!-- TAB 1: SECTION ASSIGNMENT -->
+        <div id="section-assignment-tab" class="section-tab-content active">
+          <!-- Section Assignment Content -->
+          <div id="sectionAssignmentContent"></div>
+        </div>
+
+        <!-- TAB 2: CLASS LIST -->
+        <div id="class-list-tab" class="section-tab-content">
+          <!-- Class List Content -->
+          <div id="classListContent"></div>
+        </div>
+      </section>
+
+      <!-- Teacher Management removed: link and page moved to Teachers view (removed per request) -->
+
+
+      <!-- Section Creation Modal -->
+      <div id="sectionCreationModal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 id="modalTitle">Create New Section</h2>
+            <button class="modal-close" id="closeSectionModal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <!-- JHS Form inside Modal -->
+            <form class="create-section-form" data-level="jhs" id="modalJHSForm" style="display: none;">
+              <div class="form-group">
+                <label for="modal-jhs-grade">Grade Level <span class="required">*</span></label>
+                <select id="modal-jhs-grade" required>
+                  <option value="">Select Grade...</option>
+                  <option value="7">Grade 7</option>
+                  <option value="8">Grade 8</option>
+                  <option value="9">Grade 9</option>
+                  <option value="10">Grade 10</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-section-name">Section Name <span class="required">*</span></label>
+                <input type="text" id="modal-jhs-section-name" placeholder="e.g., Rizal, Gold, A" required />
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-adviser">Adviser Name</label>
+                <select id="modal-jhs-adviser">
+                  <option value="">Select Adviser...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-program">Program Type</label>
+                <select id="modal-jhs-program">
+                  <option value="Regular">Regular</option>
+                  <option value="Special Program">Special Program</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-status">Status <span class="required">*</span></label>
+                <select id="modal-jhs-status" required>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-jhs-remarks">Remarks / Notes</label>
+                <textarea id="modal-jhs-remarks" placeholder="Optional notes about this section..." rows="3"></textarea>
+              </div>
+
+              <div class="form-group section-code-preview">
+                <label>Auto Section Code</label>
+                <div class="preview-box" id="modal-jhs-code-preview">
+                  <span class="code-label">JHS-G0-</span><span class="code-dynamic">SECTION</span>
+                </div>
+              </div>
+            </form>
+
+            <!-- SHS Form inside Modal -->
+            <form class="create-section-form" data-level="shs" id="modalSHSForm" style="display: none;">
+              <div class="form-group">
+                <label for="modal-shs-grade">Grade Level <span class="required">*</span></label>
+                <select id="modal-shs-grade" required>
+                  <option value="">Select Grade...</option>
+                  <option value="11">Grade 11</option>
+                  <option value="12">Grade 12</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-track">Track <span class="required">*</span></label>
+                <select id="modal-shs-track" required>
+                  <option value="">Select Track...</option>
+                  <option value="Academic">Academic</option>
+                  <option value="TechPro">TechPro</option>
+                  <option value="Doorway">Doorway</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Electives <span class="required">*</span></label>
+                <div class="electives-note">Select at least one elective</div>
+                <div class="form-group-checkbox-group" id="modal-shs-electives-container">
+                  <div class="checkbox-message">Select a track first to see available electives</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-section-name">Section Name <span class="required">*</span></label>
+                <input type="text" id="modal-shs-section-name" placeholder="e.g., Alpha, Rizal, A" required />
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-adviser">Adviser Name</label>
+                <select id="modal-shs-adviser">
+                  <option value="">Select Adviser...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-class-type">Class Type</label>
+                <select id="modal-shs-class-type">
+                  <option value="Regular">Regular</option>
+                  <option value="Special Class">Special Class</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-session">Session</label>
+                <select id="modal-shs-session">
+                  <option value="">Not specified</option>
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="modal-shs-remarks">Notes</label>
+                <textarea id="modal-shs-remarks" placeholder="Optional notes about this section..." rows="3"></textarea>
+              </div>
+
+              <div class="form-group section-code-preview">
+                <label>Auto Section Code</label>
+                <div class="preview-box" id="modal-shs-code-preview">
+                  <span class="code-label">SHS-G11-TRACK-ELECTIVE-</span><span class="code-dynamic">SECTION</span>
+                </div>
+              </div>
+
+              <div class="duplicate-check-status" id="modal-shs-duplicate-status" style="display: none;">
+                <div class="warning-message">⚠️ A section with this combination already exists</div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="cancelSectionModal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="saveSectionModal">Save Section</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Enrollment Detail Modal -->
+    <div
+      id="enrollmentDetailModal"
+      class="modal enrollment-modal"
+      aria-hidden="true"
+    >
+      <div class="modal-content enrollment-modal-content">
+        <div class="modal-header enrollment-modal-header">
+          <div class="header-title">
+            <h2>Enrollment Details</h2>
+            <p class="enrollment-header-subtitle" id="enrollmentStudentInfo">
+              Student Information
+            </p>
+          </div>
+          <button
+            class="modal-close"
+            id="closeDetailModal"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="enrollment-modal-tabs">
+          <button class="tab-btn active" data-tab="personal">
+            👤 Personal
+          </button>
+          <button class="tab-btn" data-tab="academic">🎓 Academic</button>
+          <button class="tab-btn" data-tab="address">📍 Address</button>
+          <button class="tab-btn" data-tab="documents">📄 Documents</button>
+        </div>
+
+        <div id="enrollmentDetail" class="enrollment-modal-body">
+          <!-- Enrollment data will be loaded here -->
+        </div>
+
+        <div class="modal-footer enrollment-modal-footer">
+          <div class="footer-status" id="footerStatus"></div>
+          <div class="footer-actions">
+            <button id="closeDetailBtn" class="btn btn-secondary btn-cancel">
+              Cancel
+            </button>
+            <button id="saveDetailBtn" class="btn btn-primary btn-save">Save</button>
+            <button id="rejectBtn" class="btn btn-reject">Reject</button>
+            <button id="approveBtn" class="btn btn-approve">Approve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Section Modal -->
+    <div id="sectionEditModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Section</h2>
+          <button class="modal-close" id="closeEditModal" aria-label="Close modal">✕</button>
+        </div>
+        <form id="editSectionForm">
+          <input type="hidden" id="edit-section-id" />
+          <div class="form-group">
+            <label for="edit-level">Level</label>
+            <input id="edit-level" type="text" readonly />
+          </div>
+          <div class="form-group">
+            <label for="edit-grade">Grade</label>
+            <select id="edit-grade">
+              <option value="">Select Grade...</option>
+              <option value="7">Grade 7</option>
+              <option value="8">Grade 8</option>
+              <option value="9">Grade 9</option>
+              <option value="10">Grade 10</option>
+              <option value="11">Grade 11</option>
+              <option value="12">Grade 12</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-section-name">Section Name</label>
+            <input id="edit-section-name" type="text" />
+          </div>
+          <div class="form-group">
+            <label for="edit-adviser">Adviser</label>
+            <select id="edit-adviser">
+              <option value="">-- Select Adviser --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-program">Program Type</label>
+            <select id="edit-program">
+              <option value="">Select Program...</option>
+              <option value="Regular">Regular</option>
+              <option value="Special Class">Special Class</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-status">Status</label>
+            <select id="edit-status">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="edit-remarks">Remarks / Notes</label>
+            <textarea id="edit-remarks" rows="3"></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="editSaveBtn" class="btn btn-primary">Save</button>
+            <button type="button" id="editCancelBtn" class="btn btn-secondary">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Teacher Role Assignment Modal -->
+    <div id="teacherAssignmentModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Assign Teacher Role</h2>
+          <button class="modal-close" id="closeTeacherAssignmentModal" aria-label="Close modal">✕</button>
+        </div>
+        <div class="modal-body">
+        <form id="teacherAssignmentForm">
+          <input type="hidden" id="assignTeacherId" />
+          
+          <!-- Teacher Info Display -->
+          <div class="form-group">
+            <label>Teacher Information</label>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <p><strong>Name:</strong> <span id="assignTeacherName">--</span></p>
+              <p><strong>Email:</strong> <span id="assignTeacherEmail">--</span></p>
+              <p><strong>Department:</strong> <span id="assignTeacherDept">--</span></p>
+              <p><strong>Teacher ID:</strong> <span id="assignTeacherId2">--</span></p>
+            </div>
+          </div>
+
+          <!-- Role Selection -->
+          <div class="form-group">
+            <label for="assignRole">Select Role <span class="required">*</span></label>
+            <select id="assignRole" required>
+              <option value="">-- Choose Role --</option>
+              <option value="Subject Teacher">Subject Teacher</option>
+              <option value="Adviser">Adviser</option>
+            </select>
+          </div>
+
+          <!-- Teacher level display (Junior High / Senior High) -->
+          <div id="assignTeacherLevel" style="margin-bottom:8px;color:#444;font-weight:600;display:none;"></div>
+
+          <!-- Assignment Fields: Advisory (single) + Teaching (multiple) -->
+          <div id="assignmentFields">
+            <div style="border-top:1px solid #eee;margin:12px 0;padding-top:12px;">
+              <strong style="display:block;margin-bottom:8px;color:#2e7d32;">🟢 Adviser Assignment</strong>
+              <div id="advisorySectionGroup" class="form-group" style="display:none;">
+                <label for="advisoryGradeLevel">Grade Level <span class="required">*</span></label>
+                <select id="advisoryGradeLevel">
+                  <option value="">-- Select Grade Level --</option>
+                  <option value="7">Grade 7</option>
+                  <option value="8">Grade 8</option>
+                  <option value="9">Grade 9</option>
+                  <option value="10">Grade 10</option>
+                  <option value="11">Grade 11</option>
+                  <option value="12">Grade 12</option>
+                </select>
+                <small style="color:#666; display:block; margin-top:8px;">Select a grade level to filter available sections.</small>
+                
+                <label for="assignAdvisorySection" style="margin-top:15px;">Sections <span class="required">*</span></label>
+                <select id="assignAdvisorySection" multiple size="5">
+                  <option value="">-- Select Sections (hold Ctrl/Cmd) --</option>
+                </select>
+                <small style="color:#666; display:block; margin-top:8px;">Select 1 or more sections from this grade level.</small>
+
+                <button type="button" id="addAdviserSectionsBtn" class="btn btn-sm btn-secondary" style="margin-top:10px;">+ Add Selected Sections</button>
+
+                <!-- Selected Sections Container -->
+                <div id="selectedAdviserSectionsContainer" style="margin-top:15px; padding:12px; background:#f0f7ff; border-radius:6px; border:1px solid #cde4f4; display:none;">
+                  <strong style="display:block; margin-bottom:10px; color:#1565c0;">📍 Selected Sections for Adviser</strong>
+                  <div id="selectedAdviserSectionsList" style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <!-- Badge items will be added here -->
+                  </div>
+                </div>
+
+                <!-- Hidden input to store selected section IDs -->
+                <input type="hidden" id="selectedAdviserSectionIds" value="" />
+              </div>
+            </div>
+
+          </div>
+
+          <!-- School Year (read-only: use active school year) -->
+          <div class="form-group">
+            <label>School Year</label>
+            <div style="background: #fafafa; padding: 10px 12px; border-radius: 6px;">
+              <strong id="assignSchoolYearDisplay">--</strong>
+              <div style="color: #666; font-size: 13px; margin-top:6px;">Using currently active school year set in School Years tab.</div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="button" id="assignTeacherCancelBtn" class="btn btn-secondary">Cancel</button>
+            <button type="submit" id="assignTeacherSaveBtn" class="btn btn-primary">Confirm Assignment</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Teacher Sections Modal -->
+    <div id="editSectionsModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Section Assignments</h2>
+          <button class="modal-close" id="closeEditSectionsModal" aria-label="Close modal">✕</button>
+        </div>
+        <form id="editSectionsForm">
+          <input type="hidden" id="editTeacherId" />
+          
+          <!-- Teacher Info Display -->
+          <div class="form-group">
+            <label>Teacher Information</label>
+            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+              <p><strong>Name:</strong> <span id="editTeacherName">--</span></p>
+              <p><strong>Email:</strong> <span id="editTeacherEmail">--</span></p>
+              <p><strong>Role:</strong> <span id="editTeacherRole">--</span></p>
+            </div>
+          </div>
+
+          <!-- Current and Available Sections -->
+          <div class="form-group">
+            <label for="editSectionSelect">Section Assignments <span class="required">*</span></label>
+            <select id="editSectionSelect" multiple size="5">
+              <option value="">-- Select Sections (hold Ctrl/Cmd to select) --</option>
+            </select>
+            <small style="color: #666; margin-top: 8px; display: block;">
+              ✓ Currently assigned sections are pre-selected. Modify as needed.
+            </small>
+          </div>
+
+          <!-- School Year (read-only) -->
+          <div class="form-group">
+            <label>School Year</label>
+            <div style="background: #fafafa; padding: 10px 12px; border-radius: 6px;">
+              <strong id="editSchoolYearDisplay">--</strong>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="form-actions">
+            <button type="button" id="editSectionsCancelBtn" class="btn btn-secondary">Cancel</button>
+            <button type="submit" id="editSectionsSaveBtn" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification" role="alert"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="enrollment-form.js"></script>
+    <script src="shs-track-config.js"></script>
+    <script src="admin-dashboard-school-years.js"></script>
+    <script src="master-teacher-dashboard.js"></script>
+    <script src="admin-dashboard-sections.js"></script>
+    <script src="admin-dashboard-section-assignment-v2.js"></script>
+    <script src="admin-dashboard-viz.js"></script>
+    <script src="admin-dashboard-students.js"></script>
+    <script src="admin-dashboard-enrollment-conditionals.js"></script>
+    <script src="admin-dashboard-adviser.js"></script>
+    <script src="admin-dashboard-debug.js"></script>
+  </body>
+</html>
+

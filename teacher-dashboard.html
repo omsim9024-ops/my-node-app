@@ -1,0 +1,1600 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teacher Dashboard</title>
+    <link rel="icon" id="schoolFavicon" href="cnhs_logo.png" type="image/png" />
+    <link rel="stylesheet" href="admin-dashboard.css" />
+    <link rel="stylesheet" href="messaging.css" />
+    <style>
+      :root {
+        --td-surface: #ffffff;
+        --td-surface-muted: #f7f9f8;
+        --td-border: #dbe5de;
+        --td-border-strong: #bdd1c2;
+        --td-text: #16311f;
+        --td-text-muted: #5f7266;
+        --td-accent: #1e5631;
+        --td-accent-soft: rgba(30, 86, 49, 0.1);
+        --td-shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.08);
+        --td-shadow-md: 0 10px 28px rgba(15, 23, 42, 0.12);
+      }
+
+      body.dark-mode {
+        --td-surface: #1f1f1f;
+        --td-surface-muted: #252727;
+        --td-border: #3a3f3c;
+        --td-border-strong: #4e5552;
+        --td-text: #e9f7ee;
+        --td-text-muted: #a8baaf;
+        --td-accent: #4ade80;
+        --td-accent-soft: rgba(74, 222, 128, 0.16);
+        --td-shadow-sm: 0 8px 18px rgba(0, 0, 0, 0.28);
+        --td-shadow-md: 0 16px 30px rgba(0, 0, 0, 0.34);
+      }
+
+      body {
+        padding-top: 64px;
+        background: linear-gradient(180deg, var(--td-surface-muted), #eef3ef);
+        transition: background 0.25s ease;
+      }
+
+      body.dark-mode {
+        background: linear-gradient(180deg, #171717, #111314);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 28px 24px;
+      }
+
+      .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: var(--td-surface);
+        border-radius: 16px;
+        border: 1px solid var(--td-border);
+        box-shadow: var(--td-shadow-md);
+        padding: 30px;
+        transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .header-section {
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--td-border-strong);
+        padding-bottom: 16px;
+      }
+
+      .header-section h1 {
+        font-size: 28px;
+        color: var(--td-text);
+        margin-bottom: 5px;
+        letter-spacing: 0.2px;
+      }
+
+      .header-section p {
+        font-size: 14px;
+        color: var(--td-text-muted);
+      }
+
+      .filter-section {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .search-group {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .search-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--td-border);
+        border-radius: 10px;
+        font-size: 14px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        background: var(--td-surface-muted);
+        color: var(--td-text);
+      }
+
+      .search-group input:focus {
+        outline: none;
+        border-color: var(--td-accent);
+        box-shadow: 0 0 0 3px var(--td-accent-soft);
+      }
+
+      .filter-group {
+        min-width: 200px;
+      }
+
+      .filter-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--td-border);
+        border-radius: 10px;
+        font-size: 14px;
+        background: var(--td-surface-muted);
+        color: var(--td-text);
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      }
+
+      .filter-group select:focus {
+        outline: none;
+        border-color: var(--td-accent);
+        box-shadow: 0 0 0 3px var(--td-accent-soft);
+      }
+
+      .table-container {
+        overflow-x: auto;
+        border: 1px solid var(--td-border);
+        border-radius: 12px;
+        box-shadow: var(--td-shadow-sm);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+      }
+
+      thead {
+        background: var(--td-accent);
+        color: #fff;
+      }
+
+      th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid var(--td-border);
+        transition: background 0.2s ease, transform 0.2s ease;
+        background: var(--td-surface);
+      }
+
+      tbody tr:hover {
+        background: var(--td-surface-muted);
+      }
+
+      td {
+        padding: 15px;
+        font-size: 14px;
+        color: var(--td-text);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      td:nth-child(1) { width: 15%; }
+      td:nth-child(2) { width: 33%; }
+      td:nth-child(3) { width: 12%; }
+      td:nth-child(4) { width: 20%; }
+      td:nth-child(5) { width: 20%; }
+
+      th:nth-child(1) { width: 15%; }
+      th:nth-child(2) { width: 33%; }
+      th:nth-child(3) { width: 12%; }
+      th:nth-child(4) { width: 20%; }
+      th:nth-child(5) { width: 20%; }
+
+      .no-data-message {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--td-text-muted);
+        font-size: 16px;
+      }
+
+      .role-request-card {
+        border: 1px solid var(--td-border);
+        border-radius: 12px;
+        background: linear-gradient(180deg, var(--td-surface), var(--td-surface-muted));
+        padding: 18px;
+        margin-bottom: 20px;
+        box-shadow: var(--td-shadow-sm);
+      }
+
+      .role-request-title {
+        margin: 0 0 6px;
+        color: var(--td-text);
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .role-request-subtitle {
+        margin: 0 0 12px;
+        color: var(--td-text-muted);
+        font-size: 13px;
+      }
+
+      .role-request-status-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+
+      .role-request-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 600;
+        background: var(--td-accent-soft);
+        color: var(--td-accent);
+      }
+
+      .role-request-badge.pending { background: #fff5e6; color: #9a6700; }
+      .role-request-badge.approved { background: #e9f4ec; color: #1e5631; }
+      .role-request-badge.rejected { background: #fdeaea; color: #b42318; }
+
+      body.dark-mode .role-request-badge.pending { background: #473921; color: #f7ca7b; }
+      body.dark-mode .role-request-badge.approved { background: #1f3a28; color: #8ce7ab; }
+      body.dark-mode .role-request-badge.rejected { background: #462224; color: #f3a6aa; }
+
+      .role-request-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .role-request-field {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--td-border);
+        border-radius: 10px;
+        font-size: 13px;
+        font-family: inherit;
+        background: var(--td-surface);
+        color: var(--td-text);
+      }
+
+      .role-request-field:focus {
+        outline: none;
+        border-color: var(--td-accent);
+        box-shadow: 0 0 0 3px var(--td-accent-soft);
+      }
+
+      .role-request-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .role-request-btn {
+        border: 1px solid transparent;
+        border-radius: 10px;
+        background: var(--td-accent);
+        color: #fff;
+        padding: 10px 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+      }
+
+      .role-request-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 16px rgba(30, 86, 49, 0.2);
+      }
+
+      .role-request-btn:disabled {
+        opacity: 0.65;
+        cursor: default;
+      }
+
+      .role-request-feedback {
+        font-size: 12px;
+        color: var(--td-text-muted);
+      }
+
+      .role-request-feedback.error { color: #b42318; }
+      .role-request-feedback.success { color: #1e5631; }
+
+      body.dark-mode .role-request-feedback.success { color: #78e29f; }
+      body.dark-mode .role-request-feedback.error { color: #f3a6aa; }
+
+      .theme-toggle-btn {
+        border-radius: 10px;
+        min-width: 40px;
+        height: 36px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      body.dark-mode .theme-toggle-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      @media (max-width: 768px) {
+        .page-container {
+          padding: 20px;
+        }
+
+        .header-section h1 {
+          font-size: 22px;
+        }
+
+        .filter-section {
+          flex-direction: column;
+        }
+
+        .search-group,
+        .filter-group {
+          width: 100%;
+          min-width: unset;
+        }
+
+        .role-request-actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        th, td {
+          padding: 12px;
+          font-size: 13px;
+        }
+      }
+    </style>
+
+    <script>
+      try {
+        window.__FORCED_API_BASE__ = window.location.origin;
+        document.addEventListener('DOMContentLoaded', () => {
+          try {
+            Array.from(document.querySelectorAll('body *')).forEach(el => {
+              const s = window.getComputedStyle(el);
+              if (!s) return;
+              if ((s.position === 'fixed' || s.position === 'absolute')) {
+                const r = el.getBoundingClientRect();
+                const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+                const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                if (r.width > vw * 0.4 && r.height > vh * 0.4) {
+                  el.style.pointerEvents = 'none'; el.style.visibility = 'hidden';
+                }
+              }
+            });
+          } catch (e) { /* ignore */ }
+        });
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <script>
+        window.CURRENT_USER = {
+            id: null,
+            name: document.getElementById('teacherName')?.textContent || 'Teacher',
+            role: 'subject_teacher'
+        };
+        window.MESSAGING_PORT = window.MESSAGING_PORT || '3012';
+    </script>
+    <script src="messaging.js?v=20260228"></script>
+    <!-- Realtime Chat Panel -->
+    <div id="chatPanel" class="chat-panel" aria-hidden="true" data-conversation-active="false">
+        <div class="chat-sidebar">
+            <div class="chat-header">
+                <div class="chat-header-top">
+                    <span>Chats</span>
+                    <button id="chatNewBtn" class="chat-action-btn" title="New chat or group">＋</button>
+                    <button id="chatCloseBtn" class="chat-close-btn" title="Close messages" aria-label="Close messages">✕</button>
+                </div>
+                <div class="chat-header-tools">
+                    <input id="chatSearchInput" class="chat-search-input" type="text" placeholder="Search conversation..." />
+                    <div class="chat-filter-row" role="tablist" aria-label="Chat filters">
+                        <button type="button" class="chat-filter-btn active" data-chat-filter="all">All</button>
+                        <button type="button" class="chat-filter-btn" data-chat-filter="unread">Unread</button>
+                        <button type="button" class="chat-filter-btn" data-chat-filter="online">Online</button>
+                    </div>
+                    <button id="chatMarkAllReadBtn" class="chat-mark-read-btn" type="button">Mark all as read</button>
+                </div>
+            </div>
+            <div id="conversationsList" class="conversations-list"></div>
+        </div>
+        <div class="chat-window">
+            <div class="chat-window-header">
+                <button id="chatBackBtn" class="chat-back-btn">← Back</button>
+                <div id="chatWindowTitle">Select a conversation</div>
+                <div class="chat-window-actions">
+                    <button id="chatPinBtn" class="chat-action-btn" type="button" title="Pin conversation">Pin</button>
+                    <button id="chatMuteBtn" class="chat-action-btn" type="button" title="Mute conversation">Mute</button>
+                    <button id="chatAddMemberBtn" class="chat-action-btn" type="button" title="Add members">+Add</button>
+                    <button id="chatDeleteBtn" class="chat-action-btn danger" type="button" title="Delete conversation">Delete</button>
+                    <span id="chatConnectionState" class="chat-connection-state disconnected">Disconnected</span>
+                    <div id="chatWindowStatus" class="user-status">Offline</div>
+                </div>
+            </div>
+            <div id="messagesContainer" class="messages-container">
+                <div class="empty-state">No messages yet. Start the conversation!</div>
+            </div>
+            <div class="chat-input-area">
+                <input id="chatMessageInput" placeholder="Type a message..." />
+                <button id="chatSendBtn" class="btn">Send</button>
+            </div>
+        </div>
+    </div>
+    <!-- Header Bar with Logo and Navigation -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-section">
+          <img src="cnhs_logo.png" alt="School Logo" class="logo" id="schoolLogo" />
+          <div class="logo-text">
+            <h1 id="schoolName">School Enrollment System</h1>
+            <p>School Enrollment System</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="header-icon theme-toggle-btn" id="themeToggleBtn" title="Toggle light/dark mode" aria-label="Toggle light and dark mode">🌙</button>
+
+        <button class="header-icon notification-btn" title="Notifications">
+          🔔
+          <span class="notification-badge" id="notificationBadge">0</span>
+        </button>
+
+        <button class="header-icon settings-btn" title="Settings">⚙️</button>
+        <button class="header-icon chat-btn" id="chatBtn" title="Messages">💬<span class="chat-badge" id="chatBadge" style="display:none">0</span></button>
+
+        <div class="profile-dropdown">
+          <button class="profile-btn" id="profileBtn">
+            <span class="avatar">👤</span>
+            <span class="profile-name" id="teacherName">Teacher</span>
+          </button>
+          <div class="dropdown-menu" id="dropdownMenu">
+            <a href="#" class="dropdown-item">My Profile</a>
+            <a href="#" class="dropdown-item">Account Settings</a>
+            <a href="#" class="dropdown-item" id="checkRoleBtn" title="Check if your role has been updated">🔄 Check for Role Update</a>
+            <hr />
+            <a href="#" class="dropdown-item logout" id="logoutBtn">Logout</a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-container">
+        <div class="header-section">
+          <h1>📚 Enrolled Students</h1>
+          <p>View and manage the list of enrolled students</p>
+        </div>
+
+        <section class="role-request-card" id="roleRequestHub">
+          <h2 class="role-request-title">📝 Role Assignment Request</h2>
+          <p class="role-request-subtitle">Request a role while waiting for admin assignment.</p>
+          <div class="role-request-status-row">
+            <span>Status:</span>
+            <span class="role-request-badge" id="roleRequestStatusBadge">No request yet</span>
+            <span id="roleRequestUpdatedAt" class="role-request-feedback"></span>
+          </div>
+          <form id="roleRequestForm">
+            <div class="role-request-grid">
+              <select id="requestedRole" class="role-request-field" required>
+                <option value="">Select preferred role</option>
+                <option value="subject_teacher">Subject Teacher</option>
+                <option value="adviser">Adviser</option>
+              </select>
+            </div>
+            <textarea id="roleRequestNotes" class="role-request-field" rows="3" maxlength="1000" placeholder="Additional note for admins (optional)" style="margin-top:10px; resize: vertical;"></textarea>
+            <div class="role-request-actions">
+              <button type="submit" class="role-request-btn" id="submitRoleRequestBtn">Submit Request</button>
+              <button type="button" class="role-request-btn" id="refreshRoleRequestBtn" style="background:#3a7d56;">Refresh</button>
+              <span id="roleRequestFeedback" class="role-request-feedback"></span>
+            </div>
+          </form>
+        </section>
+
+        <!-- Search and Filter Section -->
+        <div class="filter-section">
+          <div class="search-group">
+            <input 
+              type="text" 
+              id="studentSearch" 
+              placeholder="Search by student name or LRN..." 
+            />
+          </div>
+          <div class="filter-group">
+            <select id="gradeFilter">
+              <option value="">All Grades</option>
+              <option value="7">Grade 7</option>
+              <option value="8">Grade 8</option>
+              <option value="9">Grade 9</option>
+              <option value="10">Grade 10</option>
+              <option value="11">Grade 11</option>
+              <option value="12">Grade 12</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Students Table -->
+        <div class="table-container">
+          <div id="studentsList">Loading student list...</div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // ========== Navbar Functionality ==========
+      document.getElementById('profileBtn').addEventListener('click', () => {
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.classList.toggle('active');
+      });
+
+      // Close dropdown when clicking elsewhere
+      document.addEventListener('click', (e) => {
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        if (profileDropdown && !profileDropdown.contains(e.target)) {
+          document.getElementById('dropdownMenu').classList.remove('active');
+        }
+      });
+
+      // Logout functionality
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('Are you sure you want to logout?')) {
+          // send users to central auth page so they can choose role again
+          window.location.href = withSchoolParam('auth.html?role=adviser');
+        }
+      });
+
+      // Check for role update button
+      document.getElementById('checkRoleBtn')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        console.log('[Teacher Dashboard] Manual role check requested');
+        const btn = e.target;
+        const originalText = btn.textContent;
+        btn.textContent = '⏳ Checking...';
+        btn.style.opacity = '0.6';
+        
+        try {
+          const role = await probeTeacherRoleOnce();
+          console.log('[Teacher Dashboard] Manual check returned role:', role);
+          
+          if (role) {
+            const normalized = (role || '').toString().toLowerCase().trim();
+            if (normalized === 'adviser') {
+              alert('✓ Adviser role detected! Redirecting to Adviser Dashboard...');
+              window.location.href = withSchoolParam('adviser-dashboard.html');
+            } else if (normalized === 'subject_teacher' || normalized === 'subject') {
+              alert('✓ Subject Teacher role detected! Redirecting to Subject Dashboard...');
+              window.location.href = withSchoolParam('subject-teacher-dashboard.html');
+            } else {
+              alert('✓ Role status: ' + role + '\nNo dashboard change needed.');
+            }
+          } else {
+            alert('No role assigned yet. Please contact your administrator.');
+          }
+        } catch (err) {
+          console.error('[Teacher Dashboard] Error checking role:', err);
+          alert('Error checking role update. Please try again.');
+        } finally {
+          btn.textContent = originalText;
+          btn.style.opacity = '1';
+          document.getElementById('dropdownMenu').classList.remove('active');
+        }
+      });
+
+      // ========== Utility Functions ==========
+      function normalizeString(v) { 
+        return (v || '').toString().toLowerCase(); 
+      }
+
+      function getCurrentTeacherFromStorage() {
+        const candidates = [
+          sessionStorage.getItem('teacherData'),
+          localStorage.getItem('loggedInUser')
+        ];
+
+        for (const raw of candidates) {
+          if (!raw) continue;
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && (parsed.id || parsed.teacher_id || parsed.email)) {
+              return parsed;
+            }
+          } catch (_e) {}
+        }
+
+        return null;
+      }
+
+      function getCurrentTeacherIdentifier() {
+        const teacher = getCurrentTeacherFromStorage();
+        const preferred = [
+          teacher?.id,
+          teacher?.teacher_id,
+          teacher?.email
+        ].map(v => String(v || '').trim()).find(Boolean);
+        return preferred || '';
+      }
+
+      function getCurrentTeacherIdentifiers() {
+        const teacher = getCurrentTeacherFromStorage() || {};
+        const seen = new Set();
+        const values = [teacher.id, teacher.teacher_id, teacher.email]
+          .map(v => String(v || '').trim())
+          .filter(Boolean)
+          .filter(v => {
+            const key = v.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+        return values;
+      }
+
+      let cachedResolvedTeacherIdentifier = '';
+
+      function extractIdentifierFromTeacherPayload(payload) {
+        const teacher = payload?.teacher || payload?.user || payload || {};
+        const value = [teacher?.id, teacher?.teacher_id, teacher?.email]
+          .map(v => String(v || '').trim())
+          .find(Boolean);
+        return value || '';
+      }
+
+      async function resolveTeacherIdentifierFromApi() {
+        if (cachedResolvedTeacherIdentifier) return cachedResolvedTeacherIdentifier;
+
+        const endpoints = [
+          '/api/teacher-auth/profile',
+          '/api/teacher-auth/me',
+          '/api/teacher-auth/session'
+        ];
+
+        for (const endpoint of endpoints) {
+          try {
+            const res = await schoolFetch(endpoint, { cache: 'no-store' });
+            if (!res.ok) continue;
+            const payload = await res.json().catch(() => null);
+            const identifier = extractIdentifierFromTeacherPayload(payload);
+            if (identifier) {
+              cachedResolvedTeacherIdentifier = identifier;
+              return identifier;
+            }
+          } catch (_err) {}
+        }
+
+        return '';
+      }
+
+      function formatRoleRequestTs(value) {
+        if (!value) return '';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return `Updated ${date.toLocaleString()}`;
+      }
+
+      function normalizeRequestedRoleLabel(roleValue) {
+        const normalized = normalizeTeacherRole(roleValue);
+        if (normalized === 'subject_teacher') return 'Subject Teacher';
+        if (normalized === 'adviser') return 'Adviser';
+        return 'Teacher';
+      }
+
+      function applyRoleRequestStatus(request) {
+        const badge = document.getElementById('roleRequestStatusBadge');
+        const updated = document.getElementById('roleRequestUpdatedAt');
+        if (!badge || !updated) return;
+
+        badge.classList.remove('pending', 'approved', 'rejected');
+
+        if (!request) {
+          badge.textContent = 'No request yet';
+          updated.textContent = '';
+          return;
+        }
+
+        const status = String(request.status || 'pending').toLowerCase();
+        const roleLabel = normalizeRequestedRoleLabel(request.requested_role);
+        badge.classList.add(status);
+        badge.textContent = `${status.toUpperCase()} • ${roleLabel}`;
+        updated.textContent = formatRoleRequestTs(request.updated_at || request.created_at);
+      }
+
+      function setRoleRequestFeedback(message, type) {
+        const feedback = document.getElementById('roleRequestFeedback');
+        if (!feedback) return;
+        feedback.classList.remove('error', 'success');
+        if (type === 'error') feedback.classList.add('error');
+        if (type === 'success') feedback.classList.add('success');
+        feedback.textContent = message || '';
+      }
+
+      const TEACHER_THEME_KEY = 'teacherDashboardThemeMode';
+
+      function applyThemeMode(mode, save = true) {
+        const normalized = mode === 'dark' ? 'dark' : 'light';
+        const isDark = normalized === 'dark';
+        document.body.classList.toggle('dark-mode', isDark);
+
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) {
+          btn.textContent = isDark ? '☀️' : '🌙';
+          btn.title = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+          btn.setAttribute('aria-label', btn.title);
+        }
+
+        if (save) {
+          try {
+            localStorage.setItem(TEACHER_THEME_KEY, normalized);
+          } catch (_err) {}
+        }
+      }
+
+      function initThemeMode() {
+        let saved = '';
+        try {
+          saved = String(localStorage.getItem(TEACHER_THEME_KEY) || '').trim().toLowerCase();
+        } catch (_err) {}
+
+        if (saved === 'dark' || saved === 'light') {
+          applyThemeMode(saved, false);
+          return;
+        }
+
+        const prefersDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        applyThemeMode(prefersDark ? 'dark' : 'light', false);
+      }
+
+      function bindThemeToggle() {
+        const btn = document.getElementById('themeToggleBtn');
+        if (!btn || btn.dataset.bound === '1') return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', () => {
+          const currentIsDark = document.body.classList.contains('dark-mode');
+          applyThemeMode(currentIsDark ? 'light' : 'dark', true);
+        });
+      }
+
+      async function loadRoleRequestStatus() {
+        // ensure we have a tenant context before hitting the API
+        if (!activeSchoolCode) {
+          const maybe = detectSchoolCode();
+          if (maybe) activeSchoolCode = maybe;
+        }
+        if (!activeSchoolCode) {
+          setRoleRequestFeedback('School tenant context is required. Include school/tenant in the request.', 'error');
+          applyRoleRequestStatus(null);
+          return;
+        }
+        let identifiers = getCurrentTeacherIdentifiers();
+        if (!identifiers.length) {
+          const fromApi = await resolveTeacherIdentifierFromApi();
+          if (fromApi) identifiers = [fromApi];
+        }
+        if (!identifiers.length) {
+          setRoleRequestFeedback('Teacher session not found.', 'error');
+          applyRoleRequestStatus(null);
+          return;
+        }
+
+        try {
+          let res = null;
+          let payload = null;
+          for (const teacherIdentifier of identifiers) {
+            res = await schoolFetch(`/api/teacher-auth/role-request/${encodeURIComponent(teacherIdentifier)}`, { cache: 'no-store' });
+            payload = await res.json().catch(() => null);
+            if (res.ok) break;
+            if (res.status !== 404) break;
+          }
+
+          if (res && res.status === 404) {
+            const fromApi = await resolveTeacherIdentifierFromApi();
+            if (fromApi && !identifiers.includes(fromApi)) {
+              res = await schoolFetch(`/api/teacher-auth/role-request/${encodeURIComponent(fromApi)}`, { cache: 'no-store' });
+              payload = await res.json().catch(() => null);
+            }
+          }
+
+          if (!res || !res.ok) {
+            throw new Error(payload?.error || `Request failed (${res.status})`);
+          }
+
+          const request = payload?.request || null;
+          applyRoleRequestStatus(request);
+
+          if (request) {
+            const roleField = document.getElementById('requestedRole');
+            const notesField = document.getElementById('roleRequestNotes');
+            if (roleField && request.requested_role) roleField.value = normalizeTeacherRole(request.requested_role);
+            if (notesField) notesField.value = request.notes || '';
+          }
+        } catch (err) {
+          console.error('Failed to load role request status:', err);
+          setRoleRequestFeedback(err?.message || 'Failed to load role request status.', 'error');
+        }
+      }
+
+      async function submitRoleRequest() {
+        // validate school context before sending anything
+        if (!activeSchoolCode) {
+          const maybe = detectSchoolCode();
+          if (maybe) activeSchoolCode = maybe;
+        }
+        if (!activeSchoolCode) {
+          setRoleRequestFeedback('School tenant context is required. Include school/tenant in the request.', 'error');
+          return;
+        }
+        let identifiers = getCurrentTeacherIdentifiers();
+        if (!identifiers.length) {
+          const fromApi = await resolveTeacherIdentifierFromApi();
+          if (fromApi) identifiers = [fromApi];
+        }
+        if (!identifiers.length) {
+          setRoleRequestFeedback('Teacher session not found.', 'error');
+          return;
+        }
+
+        const roleField = document.getElementById('requestedRole');
+        const notesField = document.getElementById('roleRequestNotes');
+        const submitBtn = document.getElementById('submitRoleRequestBtn');
+
+        const requestedRole = normalizeTeacherRole(roleField?.value || '');
+        if (!requestedRole) {
+          setRoleRequestFeedback('Please select a preferred role.', 'error');
+          return;
+        }
+
+        try {
+          if (submitBtn) submitBtn.disabled = true;
+          setRoleRequestFeedback('Submitting request...', null);
+
+          let res = null;
+          let payload = null;
+          for (const teacherIdentifier of identifiers) {
+            console.log('[RoleRequest] trying identifier', teacherIdentifier);
+            res = await schoolFetch('/api/teacher-auth/role-request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                teacher_id: teacherIdentifier,
+                requested_role: requestedRole,
+                notes: String(notesField?.value || '').trim()
+              })
+            });
+            console.log('[RoleRequest] response status', res && res.status);
+            payload = await res.json().catch(() => null);
+            console.log('[RoleRequest] response payload', payload);
+            if (res.ok) break;
+            if (res.status !== 404) break;
+          }
+
+          if (res && res.status === 404) {
+            const fromApi = await resolveTeacherIdentifierFromApi();
+            if (fromApi && !identifiers.includes(fromApi)) {
+              res = await schoolFetch('/api/teacher-auth/role-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  teacher_id: fromApi,
+                  requested_role: requestedRole,
+                  notes: String(notesField?.value || '').trim()
+                })
+              });
+              payload = await res.json().catch(() => null);
+            }
+          }
+
+          if (!res || !res.ok) {
+            throw new Error(payload?.error || `Request failed (${res.status})`);
+          }
+
+          applyRoleRequestStatus(payload?.request || null);
+          setRoleRequestFeedback('Role request submitted successfully.', 'success');
+        } catch (err) {
+          console.error('Failed to submit role request:', err);
+          let msg = err?.message || 'Failed to submit role request.';
+          // if no teacher found, include identifiers for debugging
+          if (msg.toLowerCase().includes('teacher not found')) {
+            msg += '\nIdentifiers used: ' + identifiers.join(', ');
+          }
+          setRoleRequestFeedback(msg, 'error');
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+        }
+      }
+
+      function bindRoleRequestHub() {
+        const form = document.getElementById('roleRequestForm');
+        const refreshBtn = document.getElementById('refreshRoleRequestBtn');
+
+        if (form && form.dataset.bound !== '1') {
+          form.dataset.bound = '1';
+          form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            await submitRoleRequest();
+          });
+        }
+
+        if (refreshBtn && refreshBtn.dataset.bound !== '1') {
+          refreshBtn.dataset.bound = '1';
+          refreshBtn.addEventListener('click', async () => {
+            setRoleRequestFeedback('Refreshing status...', null);
+            await loadRoleRequestStatus();
+            setRoleRequestFeedback('Status refreshed.', 'success');
+          });
+        }
+      }
+
+      let activeSchoolCode = '';
+
+      function detectSchoolCode() {
+        const params = new URLSearchParams(window.location.search || '');
+        const fromQuery = (params.get('school') || params.get('tenant') || params.get('code') || '').trim().toLowerCase();
+        if (fromQuery) return fromQuery;
+
+        const fromStorage = String(
+          localStorage.getItem('sms.selectedSchoolCode') || localStorage.getItem('sms.selectedTenantCode') || ''
+        ).trim().toLowerCase();
+        if (fromStorage) return fromStorage;
+
+        const host = String(window.location.hostname || '').trim().toLowerCase();
+        const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
+        if (localHosts.has(host)) return '';
+
+        const parts = host.split('.').filter(Boolean);
+        if (parts.length >= 3) return String(parts[0] || '').toLowerCase();
+        return '';
+      }
+
+      function withSchoolParam(path) {
+        if (!activeSchoolCode) return path;
+        try {
+          const url = new URL(path, window.location.origin);
+          url.searchParams.set('school', activeSchoolCode);
+          return `${url.pathname}${url.search}${url.hash || ''}`;
+        } catch (_err) {
+          return path;
+        }
+      }
+
+      async function schoolFetch(path, options = {}) {
+        const isApiPath = String(path || '').startsWith('/api/');
+        let url = String(path || '');
+
+        // determine effective school code: prefer activeSchoolCode but fall back to
+        // detecting from query/storage on every request. this guarantees that even if
+        // branding initialization failed, we still honour the URL parameter.
+        const effectiveCode = activeSchoolCode || detectSchoolCode();
+
+        if (isApiPath && effectiveCode) {
+          try {
+            const parsed = new URL(path, window.location.origin);
+            parsed.searchParams.set('school', effectiveCode);
+            url = `${parsed.pathname}${parsed.search}`;
+          } catch (_err) {}
+        }
+
+        const headers = {
+          ...(options.headers || {}),
+          ...(isApiPath && effectiveCode ? { 'x-tenant-code': effectiveCode } : {})
+        };
+
+        return fetch(url, { ...options, headers });
+      }
+
+      async function bootstrapSchoolBranding() {
+        const detected = detectSchoolCode();
+        // always set the active code to whatever we detected from URL/storage so that
+        // subsequent API calls include a tenant parameter even if the branding lookup
+        // fails or returns nothing.  Also persist this detection so future loads know.
+        if (detected) {
+          activeSchoolCode = String(detected).trim().toLowerCase();
+          try {
+            localStorage.setItem('sms.selectedSchoolCode', activeSchoolCode);
+            localStorage.setItem('sms.selectedTenantCode', activeSchoolCode);
+          } catch (_e) {}
+        }
+
+        const endpoint = detected
+          ? `/api/system-health/schools/resolve?code=${encodeURIComponent(detected)}`
+          : '/api/system-health/schools/resolve';
+
+        try {
+          const res = await fetch(endpoint);
+          if (!res.ok) return;
+          const payload = await res.json();
+          if (!payload || !payload.success || !payload.school) return;
+
+          const school = payload.school;
+          activeSchoolCode = String(school.code || detected || activeSchoolCode || '').trim().toLowerCase();
+          if (activeSchoolCode) {
+            localStorage.setItem('sms.selectedSchoolCode', activeSchoolCode);
+            localStorage.setItem('sms.selectedTenantCode', activeSchoolCode);
+          }
+          if (school.id) {
+            localStorage.setItem('sms.selectedSchoolId', String(school.id));
+            localStorage.setItem('sms.selectedTenantId', String(school.id));
+          }
+
+          const schoolName = String(school.name || 'School Management System');
+          const logo = String(school.logoData || '').trim();
+
+          document.title = `${schoolName} - Teacher Dashboard`;
+
+          const schoolNameNode = document.getElementById('schoolName');
+          if (schoolNameNode) schoolNameNode.textContent = schoolName;
+
+          const logoNode = document.getElementById('schoolLogo');
+          if (logoNode && logo) logoNode.setAttribute('src', logo);
+
+          const favicon = document.getElementById('schoolFavicon');
+          if (favicon && logo) favicon.setAttribute('href', logo);
+        } catch (_err) {}
+      }
+
+      // ========== Student Loading & Filtering ==========
+      let allStudents = [];
+      let sectionsMap = {}; // Map section identifiers to section info
+
+      function putSectionMap(key, info) {
+        const normalized = String(key || '').trim();
+        if (!normalized) return;
+        sectionsMap[normalized] = info;
+        sectionsMap[normalized.toLowerCase()] = info;
+      }
+
+      async function fetchSections() {
+        try {
+          const res = await schoolFetch('/api/sections');
+          if (res.ok) {
+            const sections = await res.json();
+            sections.forEach(section => {
+              const info = {
+                code: (section.section_code || '').toString(),
+                name: (section.section_name || '').toString(),
+                adviser: (section.adviser_name || section.adviser || '').toString()
+              };
+
+              const idKey = String(section.id || section.section_id || '').trim();
+              const codeKey = String(section.section_code || section.code || '').trim();
+              const nameKey = String(section.section_name || section.name || '').trim();
+
+              putSectionMap(idKey, info);
+              putSectionMap(codeKey, info);
+              putSectionMap(nameKey, info);
+            });
+
+            // Merge adviser names from adviser-section assignments
+            try {
+              const assignRes = await schoolFetch('/api/adviser-auth/all-assignments/list', { cache: 'no-store' });
+              if (assignRes.ok) {
+                const assignData = await assignRes.json();
+                const assignments = Array.isArray(assignData) ? assignData : (assignData.assignments || []);
+                assignments.forEach(a => {
+                  const adviserName = [a.first_name, a.last_name].filter(Boolean).join(' ').trim() || String(a.adviser_name || '').trim();
+                  if (!adviserName) return;
+
+                  const keys = [
+                    a.section_id,
+                    a.section_code,
+                    a.section_name
+                  ];
+
+                  keys.forEach(raw => {
+                    const key = String(raw || '').trim();
+                    if (!key) return;
+
+                    const existing = sectionsMap[key] || sectionsMap[key.toLowerCase()] || {
+                      code: String(a.section_code || ''),
+                      name: String(a.section_name || ''),
+                      adviser: ''
+                    };
+
+                    const merged = {
+                      code: existing.code || String(a.section_code || ''),
+                      name: existing.name || String(a.section_name || ''),
+                      adviser: adviserName
+                    };
+
+                    putSectionMap(key, merged);
+                  });
+                });
+              }
+            } catch (assignErr) {
+              console.warn('Failed to fetch adviser assignments:', assignErr);
+            }
+
+            // Fallback: derive section adviser names from teacher assignments list
+            try {
+              const teacherRes = await schoolFetch('/api/teacher-auth/list', { cache: 'no-store' });
+              if (teacherRes.ok) {
+                const teacherData = await teacherRes.json();
+                const teachers = Array.isArray(teacherData) ? teacherData : (teacherData.teachers || []);
+
+                teachers.forEach(teacher => {
+                  const adviserName = String(teacher.name || '').trim();
+                  if (!adviserName) return;
+
+                  const assigned = Array.isArray(teacher.assigned_sections) ? teacher.assigned_sections : [];
+                  assigned.forEach(sec => {
+                    const keys = [sec.section_id, sec.section_code, sec.section_name];
+                    keys.forEach(raw => {
+                      const key = String(raw || '').trim();
+                      if (!key) return;
+
+                      const existing = sectionsMap[key] || sectionsMap[key.toLowerCase()] || {
+                        code: String(sec.section_code || ''),
+                        name: String(sec.section_name || ''),
+                        adviser: ''
+                      };
+
+                      const merged = {
+                        code: existing.code || String(sec.section_code || ''),
+                        name: existing.name || String(sec.section_name || ''),
+                        adviser: existing.adviser || adviserName
+                      };
+
+                      putSectionMap(key, merged);
+                    });
+                  });
+                });
+              }
+            } catch (teacherErr) {
+              console.warn('Failed to fetch teacher section assignments:', teacherErr);
+            }
+
+            console.log('Loaded sections:', Object.keys(sectionsMap).length);
+          }
+        } catch (err) {
+          console.warn('Failed to fetch sections:', err);
+        }
+      }
+
+      function resolveSectionInfo(enrollment, data) {
+        const possibleKeys = [
+          enrollment.section_id,
+          enrollment.class_id,
+          enrollment.section_code,
+          enrollment.section_name,
+          enrollment.section,
+          data.section_id,
+          data.sectionId,
+          data.class_id,
+          data.sectionCode,
+          data.section_code,
+          data.section_name,
+          data.section
+        ];
+
+        for (const rawKey of possibleKeys) {
+          const key = String(rawKey || '').trim();
+          if (!key) continue;
+          if (sectionsMap[key]) {
+            return sectionsMap[key];
+          }
+          if (sectionsMap[key.toLowerCase()]) {
+            return sectionsMap[key.toLowerCase()];
+          }
+        }
+
+        return null;
+      }
+
+      function extractStudentInfo(enrollment) {
+        let data = enrollment.enrollment_data || {};
+        if (typeof data === 'string') {
+          try {
+            data = JSON.parse(data);
+          } catch (e) {
+            console.warn('Failed to parse enrollment_data:', e);
+            data = {};
+          }
+        }
+
+        const first = data.firstName || data.firstname || '';
+        const last = data.lastName || data.lastname || '';
+        const fullName = (first + ' ' + last).trim() || 'Unknown';
+        const lrn = (data.lrn || data.LRN || data.lrnNumber || '').toString();
+        const gradeLevel = (data.grade_level || data.gradeLevel || data.grade || '').toString();
+        
+        const resolvedSection = resolveSectionInfo(enrollment, data);
+        const section = (resolvedSection && (resolvedSection.name || resolvedSection.code)) ||
+          enrollment.section_name || enrollment.section || data.section || data.section_name || '';
+        const adviser = (resolvedSection && resolvedSection.adviser) ||
+          enrollment.adviser_name || enrollment.adviser || data.adviser_name || data.adviser || '';
+
+        return { fullName, lrn, section: section.toString(), adviser: adviser.toString(), gradeLevel };
+      }
+
+      function renderStudentTable(studentsToDisplay) {
+        const container = document.getElementById('studentsList');
+
+        if (!studentsToDisplay || studentsToDisplay.length === 0) {
+          container.innerHTML = '<div class="no-data-message">No enrolled students found.</div>';
+          return;
+        }
+
+        const table = document.createElement('table');
+        table.innerHTML = '<thead><tr><th>LRN</th><th>Student Name</th><th>Grade Level</th><th>Section</th><th>Adviser</th></tr></thead>';
+        const tbody = document.createElement('tbody');
+
+        studentsToDisplay.forEach(student => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${(student.lrn || '-').toUpperCase()}</td>
+            <td>${(student.fullName || '').toUpperCase()}</td>
+            <td>${(student.gradeLevel || '-').toUpperCase()}</td>
+            <td>${(student.section || '-').toUpperCase()}</td>
+            <td>${(student.adviser || '-').toUpperCase()}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(tbody);
+        container.innerHTML = '';
+        container.appendChild(table);
+      }
+
+      function applyFilters() {
+        const searchValue = normalizeString(document.getElementById('studentSearch').value);
+        const gradeValue = document.getElementById('gradeFilter').value;
+
+        const filtered = allStudents.filter(student => {
+          if (gradeValue && student.gradeLevel !== gradeValue) {
+            return false;
+          }
+
+          if (searchValue) {
+            const studentSearchText = normalizeString(`${student.fullName} ${student.lrn}`);
+            if (!studentSearchText.includes(searchValue)) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
+        renderStudentTable(filtered);
+      }
+
+      // Check teacher role and redirect if needed. Tries multiple common endpoints and polls for changes.
+      let _rolePollHandle = null;
+      let _lastDetectedRole = null;
+      let _isReloading = false;  // Guard to prevent multiple reload() calls
+
+      function normalizeTeacherRole(roleValue) {
+        const raw = String(roleValue || '').toLowerCase().trim();
+        if (!raw) return '';
+        if (raw === 'adviser' || raw === 'advisor') return 'adviser';
+        if (raw === 'subject teacher' || raw === 'subject' || raw === 'subject_teacher') return 'subject_teacher';
+        return raw;
+      }
+
+      function syncTeacherRoleInStorage(normalizedRole) {
+        try {
+          const teacherDataRaw = sessionStorage.getItem('teacherData');
+          if (teacherDataRaw) {
+            const teacherData = JSON.parse(teacherDataRaw);
+            teacherData.role = normalizedRole;
+            sessionStorage.setItem('teacherData', JSON.stringify(teacherData));
+          }
+        } catch (_) {}
+
+        try {
+          const loggedInRaw = localStorage.getItem('loggedInUser');
+          if (loggedInRaw) {
+            const loggedInUser = JSON.parse(loggedInRaw);
+            loggedInUser.role = normalizedRole;
+            localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+          }
+        } catch (_) {}
+      }
+
+      function redirectByNormalizedRole(normalizedRole) {
+        if (_isReloading) return;
+        _isReloading = true;
+        if (_rolePollHandle) clearInterval(_rolePollHandle);
+
+        if (normalizedRole === 'adviser') {
+          window.location.href = withSchoolParam('adviser-dashboard.html');
+          return;
+        }
+        if (normalizedRole === 'subject_teacher') {
+          window.location.href = withSchoolParam('subject-teacher-dashboard.html');
+          return;
+        }
+        _isReloading = false;
+      }
+      
+      async function probeTeacherRoleOnce() {
+        console.log('[Teacher Dashboard] ===== PROBING FOR ROLE =====');
+        let detectedRole = null;
+        
+        // Get stored email for endpoint calls
+        let email = null;
+        try {
+          const stored = localStorage.getItem('loggedInUser') || sessionStorage.getItem('teacherData');
+          if (stored) {
+            const user = JSON.parse(stored);
+            email = user.email;
+            console.log('[Teacher Dashboard] Found stored email:', email);
+          }
+        } catch (e) {
+          console.warn('[Teacher Dashboard] Error parsing stored user:', e.message);
+        }
+        
+        // **PRIMARY METHOD**: Try fresh fetch from teacher endpoints (don't use sessionStorage)
+        console.log('[Teacher Dashboard] === Attempting fresh API fetches ===');
+        
+        // Try current role endpoint with email
+        if (email) {
+          try {
+            console.log('[Teacher Dashboard] Attempting /api/teacher-auth/current-role/' + encodeURIComponent(email));
+            const res = await schoolFetch(`/api/teacher-auth/current-role/${encodeURIComponent(email)}`, { cache: 'no-store' });
+            console.log('[Teacher Dashboard] Response status:', res.status);
+            
+            if (res.ok) {
+              const payload = await res.json();
+              console.log('[Teacher Dashboard] Response body:', JSON.stringify(payload));
+              
+              if (payload.teacher && payload.teacher.role) {
+                detectedRole = payload.teacher.role;
+                console.log('[Teacher Dashboard] ✅ SUCCESS: Got role from current-role endpoint:', detectedRole);
+                return detectedRole;
+              }
+            } else {
+              console.log('[Teacher Dashboard] Endpoint returned non-OK status: ' + res.status);
+            }
+          } catch (e) {
+            console.warn('[Teacher Dashboard] Error calling current-role endpoint:', e.message);
+          }
+        }
+        
+        // Fallback: Try other auth endpoints
+        console.log('[Teacher Dashboard] === Attempting fallback endpoints ===');
+        const endpoints = [
+          { url: '/api/teacher-auth/profile', desc: 'profile' },
+          { url: '/api/teacher-auth/me', desc: 'me' },
+          { url: '/api/teacher-auth/session', desc: 'session' }
+        ];
+        
+        for (const endpoint of endpoints) {
+          try {
+            console.log('[Teacher Dashboard] Attempting ' + endpoint.url);
+            const res = await schoolFetch(endpoint.url, { cache: 'no-store' });
+            console.log('[Teacher Dashboard] [' + endpoint.desc + '] Response status:', res.status);
+            
+            if (res.ok) {
+              const payload = await res.json();
+              console.log('[Teacher Dashboard] [' + endpoint.desc + '] Response:', JSON.stringify(payload).substring(0, 200));
+              
+              // Check multiple possible field names
+              let role = null;
+              if (payload.teacher && payload.teacher.role) {
+                role = payload.teacher.role;
+              } else if (payload.role) {
+                role = payload.role;
+              } else if (payload.Role) {
+                role = payload.Role;
+              } else if (payload.user_role) {
+                role = payload.user_role;
+              }
+              
+              if (role) {
+                detectedRole = role;
+                console.log('[Teacher Dashboard] ✅ SUCCESS: Got role from ' + endpoint.url + ':', detectedRole);
+                return detectedRole;
+              } else {
+                console.log('[Teacher Dashboard] [' + endpoint.desc + '] No role field in response');
+              }
+            } else {
+              console.log('[Teacher Dashboard] [' + endpoint.desc + '] Non-OK status: ' + res.status);
+            }
+          } catch (e) {
+            console.warn('[Teacher Dashboard] [' + endpoint.desc + '] Error:', e.message);
+          }
+        }
+        
+        console.log('[Teacher Dashboard] ❌ FAILED: Could not get role from any endpoint');
+        console.log('[Teacher Dashboard] Returning null (no role detected)');
+        return null;  // DO NOT DEFAULT TO STALE STORAGE
+      }
+
+      async function startRolePolling() {
+        console.log('[Teacher Dashboard] ========== STARTING ROLE POLLING ==========');
+        
+        // Clear login flag if present
+        const justLoggedIn = sessionStorage.getItem('_justLoggedIn');
+        if (justLoggedIn) {
+          sessionStorage.removeItem('_justLoggedIn');
+          console.log('[Teacher Dashboard] Cleared login flag');
+        }
+        
+        // ALWAYS validate current role - CRITICAL CHECK
+        // Must ensure teacher is on correct dashboard for their ACTUAL role
+        console.log('[Teacher Dashboard] ===== VALIDATING CURRENT ROLE =====');
+        try {
+          const role = await probeTeacherRoleOnce();
+          console.log('[Teacher Dashboard] === ROLE VALIDATION RESULT ===');
+          console.log('[Teacher Dashboard] Raw role value:', role);
+          console.log('[Teacher Dashboard] Role type:', typeof role);
+          console.log('[Teacher Dashboard] Role is truthy:', !!role);
+          
+          if (role) {
+            const normalized = normalizeTeacherRole(role);
+            syncTeacherRoleInStorage(normalized);
+            console.log('[Teacher Dashboard] === ROLE NORMALIZATION ===');
+            console.log('[Teacher Dashboard] Normalized role:', normalized);
+            console.log('[Teacher Dashboard] Checking if role === "adviser":', normalized === 'adviser');
+            console.log('[Teacher Dashboard] Checking if role is subject variation:', 
+              normalized === 'subject teacher' || normalized === 'subject' || normalized === 'subject_teacher');
+            
+            // REDIRECT IF ROLE DOESN'T MATCH CURRENT DASHBOARD
+            if (normalized === 'adviser') {
+              console.log('[🔴 CRITICAL] ADVISER ROLE DETECTED - REDIRECTING TO ADVISER DASHBOARD');
+              window.location.href = withSchoolParam('adviser-dashboard.html');
+              return;
+            }
+            if (normalized === 'subject_teacher') {
+              console.log('[🔴 CRITICAL] SUBJECT TEACHER ROLE DETECTED - REDIRECTING TO SUBJECT TEACHER DASHBOARD');
+              window.location.href = withSchoolParam('subject-teacher-dashboard.html');
+              return;
+            }
+            
+            // Role exists and is teacher (or null) - teacher-dashboard is correct
+            _lastDetectedRole = normalized || null;
+            console.log('[✅ VALID] Teacher-dashboard is correct for role:', _lastDetectedRole);
+          } else {
+            console.log('[⚠️  WARNING] No role returned from probe - role is null/undefined');
+            console.log('[⚠️  WARNING] Teacher might not be logged in or session might be expired');
+            _lastDetectedRole = null;
+          }
+        } catch (e) { 
+          console.error('[🔴 ERROR] Error validating role:', e);
+          _lastDetectedRole = null;
+        }
+        
+        // Now start continuous polling to detect role CHANGES while on this dashboard
+        console.log('[Teacher Dashboard] ===== STARTING CONTINUOUS POLLING =====');
+        console.log('[Teacher Dashboard] Initial baseline role:', _lastDetectedRole);
+        console.log('[Teacher Dashboard] Will poll every 5 seconds for role changes...');
+        
+        _rolePollHandle = setInterval(async () => {
+          try {
+            // If we're already reloading, don't fire again
+            if (_isReloading) {
+              console.log('[Teacher Dashboard] Already reloading, skipping poll cycle');
+              return;
+            }
+            
+            const role = await probeTeacherRoleOnce();
+            
+            if (!role) {
+              console.log('[Teacher Dashboard] Poll: No role returned');
+              return;
+            }
+            
+            const normalized = normalizeTeacherRole(role);
+            syncTeacherRoleInStorage(normalized);
+            console.log('[Teacher Dashboard] Poll result - Role:', normalized, '| Last:', _lastDetectedRole);
+            
+            // Check if role changed
+            if (normalized !== _lastDetectedRole) {
+              console.log('[Teacher Dashboard] ROLE CHANGED from', _lastDetectedRole, 'to', normalized);
+              
+              if (normalized === 'adviser') {
+                console.log('[Teacher Dashboard] NEW ADVISER ROLE DETECTED - Redirecting');
+                redirectByNormalizedRole(normalized);
+              } else if (normalized === 'subject_teacher') {
+                console.log('[Teacher Dashboard] NEW SUBJECT ROLE DETECTED - Redirecting');
+                redirectByNormalizedRole(normalized);
+              } else {
+                // Role changed but not to adviser or subject, stay on teacher dashboard
+                _lastDetectedRole = normalized;
+              }
+            }
+          } catch (e) { 
+            console.error('[Teacher Dashboard] Error in polling cycle:', e);
+          }
+        }, 5000);
+        
+        console.log('[Teacher Dashboard] Polling started with 5-second interval');
+      }
+
+      async function loadEnrollments() {
+        console.log('[Teacher Dashboard] loadEnrollments invoked');
+        try {
+          // Load sections first
+          await fetchSections();
+
+          const res = await schoolFetch('/api/enrollments');
+          const data = await res.json();
+          const container = document.getElementById('studentsList');
+          
+          if (!Array.isArray(data) || data.length === 0) {
+            container.innerHTML = '<div class="no-data-message">No enrolled students found.</div>';
+            return;
+          }
+
+          allStudents = data.map(en => extractStudentInfo(en));
+          renderStudentTable(allStudents);
+
+          const searchInput = document.getElementById('studentSearch');
+          const gradeFilter = document.getElementById('gradeFilter');
+
+          if (searchInput) {
+            searchInput.addEventListener('input', applyFilters);
+          }
+
+          if (gradeFilter) {
+            gradeFilter.addEventListener('change', applyFilters);
+          }
+
+        } catch (err) {
+          console.error('Teacher dashboard load error:', err);
+          document.getElementById('studentsList').innerHTML = '<div class="no-data-message">Failed to load enrolled students. Please try again later.</div>';
+        }
+      }
+
+      window.addEventListener('load', async () => {
+        initThemeMode();
+        bindThemeToggle();
+        await bootstrapSchoolBranding();
+        bindRoleRequestHub();
+        await loadRoleRequestStatus();
+        console.log('[Teacher Dashboard] Page loaded, starting role polling...');
+        console.log('[Teacher Dashboard] localStorage.loggedInUser:', localStorage.getItem('loggedInUser'));
+        console.log('[Teacher Dashboard] sessionStorage.teacherData:', sessionStorage.getItem('teacherData'));
+        
+        try {
+          startRolePolling();
+          console.log('[Teacher Dashboard] Role polling started');
+        } catch (err) {
+          console.error('[Teacher Dashboard] Error starting role polling:', err);
+        }
+        
+        try {
+          loadEnrollments();
+          console.log('[Teacher Dashboard] Enrollments loading started');
+        } catch (err) {
+          console.error('[Teacher Dashboard] Error loading enrollments:', err);
+        }
+      });
+
+      // Also add DOMContentLoaded as fallback
+      document.addEventListener('DOMContentLoaded', async () => {
+        console.log('[Teacher Dashboard] DOMContentLoaded fired');
+        initThemeMode();
+        bindThemeToggle();
+        bindRoleRequestHub();
+        if (!activeSchoolCode) {
+          await bootstrapSchoolBranding();
+        }
+        if (!_rolePollHandle) {
+          console.log('[Teacher Dashboard] Role polling not started yet, starting now...');
+          try {
+            startRolePolling();
+          } catch (err) {
+            console.error('[Teacher Dashboard] Error starting role polling on DOMContentLoaded:', err);
+          }
+        }
+        // ensure student list also loads if load event was missed
+        try {
+          loadEnrollments();
+          console.log('[Teacher Dashboard] Enrollments loading started via DOMContentLoaded');
+        } catch (err) {
+          console.error('[Teacher Dashboard] Error loading enrollments on DOMContentLoaded:', err);
+        }
+      });
+    </script>
+  </body>
+</html>
+

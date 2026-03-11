@@ -1,0 +1,78 @@
+{
+  "createdAt": "2026-02-28T13:09:43.603Z",
+  "type": "developer-dashboard-snapshot",
+  "tables": [
+    {
+      "table": "admin_login_otps",
+      "count": 3
+    },
+    {
+      "table": "admin_notifications",
+      "count": 0
+    },
+    {
+      "table": "admin_sessions",
+      "count": 6
+    },
+    {
+      "table": "admin_settings",
+      "count": 1
+    },
+    {
+      "table": "admins",
+      "count": 9
+    },
+    {
+      "table": "adviser_section_assignments",
+      "count": 0
+    },
+    {
+      "table": "advisers",
+      "count": 0
+    },
+    {
+      "table": "backup_logs",
+      "count": 4
+    },
+    {
+      "table": "backup_policies",
+      "count": 2
+    },
+    {
+      "table": "chat_messages",
+      "count": 7
+    },
+    {
+      "table": "classes",
+      "count": 0
+    },
+    {
+      "table": "electives",
+      "count": 0
+    },
+    {
+      "table": "enrollments",
+      "count": 3
+    },
+    {
+      "table": "enrollments_backup",
+      "count": 2
+    },
+    {
+      "table": "feedback",
+      "count": 35
+    },
+    {
+      "table": "grades",
+      "count": 0
+    },
+    {
+      "table": "guidance_messages",
+      "count": 0
+    },
+    {
+      "table": "guidance_requests",
+      "count": 0
+    }
+  ]
+}

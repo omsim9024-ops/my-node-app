@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Enrollment System</title>
+    <link rel="icon" id="school-favicon" href="cnhs_logo (2).png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <style>
+        
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-container">
+            <a href="#home" class="nav-logo">
+                <svg class="logo-icon" width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/>
+                </svg>
+                <span id="school-short-name">SMS</span>
+            </a>
+            
+            <button class="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
+                <span class="hamburger"></span>
+            </button>
+            
+            <ul id="nav-menu" class="nav-menu hidden" role="menubar">
+                <li role="none"><a href="#home" class="nav-link active" role="menuitem">Home</a></li>
+                <li role="none"><a href="#about" class="nav-link" role="menuitem">About</a></li>
+                <li role="none"><a href="#school-info" class="nav-link" role="menuitem">School Info</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main id="main-content" class="container">
+        <!-- Home Section -->
+        <section id="home" class="section hero-section active">
+            <div class="hero-background"></div>
+            <div class="hero-content">
+                <img id="school-logo" src="cnhs_logo.png" alt="School Logo" class="school-logo">
+                <h1 id="school-name-main">School Enrollment System</h1>
+                <p id="school-location-main" class="location">Philippines</p>
+                <p id="school-tagline-main" class="tagline">Center Stage of Education Performance</p>
+                <div class="hero-buttons">
+                    <a href="auth.html?role=student" class="btn btn-primary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        Get Started
+                    </a>
+                    <script>
+                    (function(){
+                        const detectQuick = () => {
+                            try {
+                                const params = new URLSearchParams(window.location.search||'');
+                                let code = (params.get('school')||'').trim().toLowerCase();
+                                if (/^\d+$/.test(code)) code = '';
+                                if (!code) {
+                                    code = String(localStorage.getItem('sms.selectedSchoolCode')||
+                                                  localStorage.getItem('sms.selectedTenantCode')||'').trim().toLowerCase();
+                                }
+                                if (!code) code = 'default-school';
+                                return code;
+                            } catch (_){ return 'default-school'; }
+                        };
+                        const school = detectQuick();
+                        try { localStorage.setItem('sms.selectedSchoolCode', school); localStorage.setItem('sms.selectedTenantCode', school); } catch(_e){}
+                        document.querySelectorAll('a[href*="auth.html"]').forEach(a=>{
+                            if (!/[?&]school=/.test(a.href)) {
+                                const sep = a.href.includes('?') ? '&' : '?';
+                                a.href += sep + 'school=' + encodeURIComponent(school);
+                            }
+                            a.addEventListener('click', () => {
+                                if (!/[?&]school=/.test(a.href)) {
+                                    const sep = a.href.includes('?') ? '&' : '?';
+                                    a.href += sep + 'school=' + encodeURIComponent(school);
+                                }
+                            });
+                        });
+                    })();
+                    </script>
+                    <button class="btn btn-secondary" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                        </svg>
+                        Learn More
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="section about-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 id="about-title">About Us</h2>
+                    <div class="header-line"></div>
+                </div>
+                
+                <div id="about-grid-content" class="about-grid">
+                    <div class="about-card">
+                        <div class="card-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
+                            </svg>
+                        </div>
+                        <h3>History</h3>
+                        <p>Compostela National High School traces its roots to 1966 as Compostela High School, initially operating at Compostela Central Elementary School. In 1969, it acquired its current 5-hectare site and was nationalized in 1972, becoming Compostela National High School. The school has grown significantly, adding new buildings and facilities over the decades, including a two-story building in 1999 and another in 2008.</p>
+                    </div>
+                    
+                    <div class="about-card">
+                        <div class="card-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <h3>DepEd Mission</h3>
+                        <p>To protect and promote the right of every Filipino to quality, equitable, culture-based, and complete basic education where students learn in a child-friendly, gender-sensitive, safe, and motivating environment. We aim to develop teachers and learners who are globally competitive and committed to building a just and humane society.</p>
+                    </div>
+                    
+                    <div class="about-card">
+                        <div class="card-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        <h3>DepEd Vision</h3>
+                        <p>We dream of Filipinos who passionately love their country and whose values and competencies enable them to realize their full potential and contribute meaningfully to building the nation. As a learner-centered public institution, the Department of Education continuously improves itself to better serve its stakeholders.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- School Info Section -->
+        <section id="school-info" class="section school-info-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 id="school-info-title">School Information</h2>
+                    <div class="header-line"></div>
+                </div>
+                
+                <div id="school-info-grid-content" class="info-grid">
+                    <div class="info-card">
+                        <div class="card-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"/>
+                            </svg>
+                        </div>
+                        <h3>Key Information</h3>
+                        <ul>
+                            <li><strong>Established:</strong> 1966</li>
+                            <li><strong>School Type:</strong> Public National High School</li>
+                            <li><strong>Grades Offered:</strong> 7-12 (Junior & Senior High)</li>
+                            <li><strong>School ID:</strong> <span id="school-id-value">N/A</span></li>
+                            <li><strong>Curriculum:</strong> K-12 Basic Education Program</li>
+                            <li><strong>Office Hours:</strong> Monday-Friday, 7:30 AM - 5:00 PM</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="card-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                            </svg>
+                        </div>
+                        <h3>Contact Details</h3>
+                        <ul>
+                            <li><strong>Address:</strong> Purok 7, Brgy. Ngan, Compostela, Davao de Oro</li>
+                            <li><strong>Phone:</strong> (084) 821-1025</li>
+                            <li><strong>Email:</strong> compostelanhs@yahoo.com</li>
+                            <li><strong>Facebook:</strong> <a href="https://www.facebook.com/CompostelaNHSOfficial" target="_blank">CompostelaNHSOfficial</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="card-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        <h3>Core Values</h3>
+                        <ul>
+                            <li><strong>Maka-Diyos:</strong> God-fearing individuals with strong faith</li>
+                            <li><strong>Maka-Tao:</strong> Respect for human dignity and rights</li>
+                            <li><strong>Makakalikasan:</strong> Environmental stewardship and conservation</li>
+                            <li><strong>Makabansa:</strong> Patriotism and civic responsibility</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="card-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                            </svg>
+                        </div>
+                        <h3>Facilities</h3>
+                        <ul>
+                            <li>Classrooms (Grades 7-12)</li>
+                            <li>Science and Computer Laboratories</li>
+                            <li>School Library with Learning Resources</li>
+                            <li>Speech and Computer Laboratories</li>
+                            <li>Auditorium and Covered Court</li>
+                            <li>Sports Facilities and Grounds</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <h4>
+                    <svg class="footer-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/>
+                    </svg>
+                    <span id="school-name-footer">School Enrollment System</span>
+                </h4>
+                <p id="school-tagline-footer">Center Stage of Education Performance</p>
+            </div>
+            <div class="footer-content">
+                <h4>
+                    <svg class="footer-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Quick Links
+                </h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#school-info">School Info</a></li>
+                </ul>
+            </div>
+            <div class="footer-content">
+                <h4>
+                    <svg class="footer-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                    Contact Us
+                </h4>
+                <p id="school-contact-footer">Email: compostelanhs@yahoo.com<br>Phone: (084) 821-1025</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p id="school-copyright">&copy; 2026 Compostela National High School. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function detectSchoolCode() {
+            try {
+                const existing = new URLSearchParams(window.location.search || '');
+                let existingSchool = String(existing.get('school') || '').trim().toLowerCase();
+                if (/^\d+$/.test(existingSchool)) { existingSchool = ''; existing.delete('school'); }
+                if (!existingSchool) {
+                    let derived = existingSchool;
+                    if (!derived) {
+                        derived = String(localStorage.getItem('sms.selectedSchoolCode') || localStorage.getItem('sms.selectedTenantCode') || '').trim().toLowerCase();
+                    }
+                    if (!derived) {
+                        const h = String(window.location.hostname || '').trim().toLowerCase();
+                        const localHosts = new Set(['localhost','127.0.0.1','::1']);
+                        if (!localHosts.has(h)) {
+                            const parts = h.split('.').filter(Boolean);
+                            if (parts.length >= 3) derived = String(parts[0] || '').toLowerCase();
+                        }
+                    }
+                    if (!derived) derived = 'default-school';
+                    existing.set('school', derived);
+                    const newUrl = `${window.location.pathname}?${existing.toString()}${window.location.hash || ''}`;
+                    window.history.replaceState(null, '', newUrl);
+                }
+            } catch (_e) {}
+
+            const params = new URLSearchParams(window.location.search || '');
+            const fromQuery = (params.get('school') || params.get('tenant') || params.get('code') || '').trim().toLowerCase();
+            if (fromQuery) return fromQuery;
+
+            const host = String(window.location.hostname || '').trim().toLowerCase();
+            const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
+            if (localHosts.has(host)) return '';
+
+            const parts = host.split('.').filter(Boolean);
+            if (parts.length >= 3) return String(parts[0] || '').toLowerCase();
+            return '';
+        }
+
+        function applySchoolTheme(branding) {
+            const theme = branding && typeof branding === 'object' ? branding : {};
+            const root = document.body;
+
+            const mappings = [
+                ['brand900', '--brand-900'],
+                ['brand700', '--brand-700'],
+                ['brand600', '--brand-600'],
+                ['accent', '--accent'],
+                ['gold', '--gold']
+            ];
+
+            mappings.forEach(([key, variable]) => {
+                const value = String(theme[key] || '').trim();
+                if (value) {
+                    root.style.setProperty(variable, value);
+                }
+            });
+
+            const primary = String(theme.primary || '').trim();
+            const secondary = String(theme.secondary || '').trim();
+            if (primary) root.style.setProperty('--brand-700', primary);
+            if (secondary) root.style.setProperty('--brand-600', secondary);
+        }
+
+        function appendSchoolParamToLinks(code) {
+            if (!code) return;
+            const targets = document.querySelectorAll('a[href$=".html"], a[href*=".html?"]');
+            targets.forEach((anchor) => {
+                const href = anchor.getAttribute('href') || '';
+                if (!href || href.startsWith('#')) return;
+                try {
+                    const url = new URL(href, window.location.origin);
+                    url.searchParams.set('school', code);
+                    anchor.setAttribute('href', `${url.pathname}${url.search}${url.hash || ''}`);
+                } catch (_err) {}
+            });
+        }
+
+        function setSchoolFavicon(logoValue, schoolCode) {
+            const baseFallback = 'logo.png';
+            const raw = String(logoValue || '').trim();
+            const isDataUrl = /^data:/i.test(raw);
+
+            const cacheSuffix = `school=${encodeURIComponent(String(schoolCode || 'default').toLowerCase())}&t=${Date.now()}`;
+            const finalHref = raw
+                ? (isDataUrl ? raw : `${raw}${raw.includes('?') ? '&' : '?'}${cacheSuffix}`)
+                : `${baseFallback}?${cacheSuffix}`;
+
+            const ensureLink = (relValue) => {
+                let link = document.querySelector(`link[rel="${relValue}"]`);
+                if (!link) {
+                    link = document.createElement('link');
+                    link.setAttribute('rel', relValue);
+                    document.head.appendChild(link);
+                }
+                link.setAttribute('href', finalHref);
+                link.setAttribute('type', isDataUrl ? 'image/png' : 'image/png');
+                return link;
+            };
+
+            ensureLink('icon');
+            ensureLink('shortcut icon');
+        }
+
+        function applySchoolPageContent(content) {
+            const pageContent = content && typeof content === 'object' ? content : {};
+            const setText = (id, value) => {
+                const el = document.getElementById(id);
+                const text = String(value || '').trim();
+                if (el && text) el.textContent = text;
+            };
+
+            const setHtml = (id, value) => {
+                const el = document.getElementById(id);
+                const html = String(value || '');
+                if (el && html.trim()) el.innerHTML = html;
+            };
+
+            setText('school-tagline-main', pageContent.heroTagline);
+            setText('about-title', pageContent.aboutTitle);
+            setHtml('about-grid-content', pageContent.aboutCardsHtml);
+
+            setText('school-info-title', pageContent.schoolInfoTitle);
+            setHtml('school-info-grid-content', pageContent.schoolInfoCardsHtml);
+
+            setText('school-tagline-footer', pageContent.footerTagline);
+            setHtml('school-contact-footer', pageContent.contactHtml);
+            setText('school-copyright', pageContent.copyrightText);
+        }
+
+        function applyPreviewPortalContentIfPresent() {
+            const params = new URLSearchParams(window.location.search || '');
+            const preview = String(params.get('preview') || '').trim();
+            if (preview !== '1' && preview.toLowerCase() !== 'true') return;
+
+            try {
+                const raw = localStorage.getItem('sms.portalPreviewDraft');
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return;
+                applySchoolPageContent(parsed);
+            } catch (_err) {}
+        }
+
+        async function bootstrapSchoolBranding() {
+            const schoolCode = detectSchoolCode();
+            const endpoint = schoolCode
+                ? `/api/system-health/schools/resolve?code=${encodeURIComponent(schoolCode)}`
+                : '/api/system-health/schools/resolve';
+
+            const response = await fetch(endpoint);
+            if (!response.ok) return null;
+            const payload = await response.json();
+            if (!payload || !payload.success || !payload.school) return null;
+
+            const school = payload.school;
+
+            // respect query param if it was "default-school" so we don't
+            // discard the literal value when the server returns a numeric id
+            const effectiveCode = (schoolCode === 'default-school')
+                ? 'default-school'
+                : String(school.code || schoolCode || '').trim().toLowerCase();
+            if (effectiveCode) {
+                localStorage.setItem('sms.selectedTenantCode', effectiveCode);
+                localStorage.setItem('sms.selectedSchoolCode', effectiveCode);
+            }
+            if (school.id) {
+                localStorage.setItem('sms.selectedTenantId', String(school.id));
+                localStorage.setItem('sms.selectedSchoolId', String(school.id));
+            }
+
+            document.title = `${school.name || 'School Management System'}`;
+
+            const shortName = String(school.schoolId || school.code || school.name || 'SMS').slice(0, 18);
+            const schoolName = String(school.name || 'School Management System');
+            const schoolLocation = String(school.location || 'Philippines');
+
+            const shortNode = document.getElementById('school-short-name');
+            if (shortNode) shortNode.textContent = shortName;
+
+            const mainName = document.getElementById('school-name-main');
+            if (mainName) mainName.textContent = schoolName;
+
+            const footerName = document.getElementById('school-name-footer');
+            if (footerName) footerName.textContent = schoolName;
+
+            const locationNode = document.getElementById('school-location-main');
+            if (locationNode) locationNode.textContent = schoolLocation;
+
+            const schoolIdNode = document.getElementById('school-id-value');
+            if (schoolIdNode) schoolIdNode.textContent = school.schoolId || school.code || 'N/A';
+
+            const logoNode = document.getElementById('school-logo');
+            if (logoNode && school.logoData) {
+                logoNode.src = school.logoData;
+            }
+
+            setSchoolFavicon(school.logoData || '', effectiveCode);
+            applySchoolPageContent(school.branding && school.branding.pageContent ? school.branding.pageContent : {});
+            applyPreviewPortalContentIfPresent();
+
+            applySchoolTheme(school.branding || {});
+            appendSchoolParamToLinks(effectiveCode);
+
+            return school;
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await bootstrapSchoolBranding();
+            } catch (_err) {}
+
+            // Navigation toggle functionality
+            const navToggle = document.querySelector('.nav-toggle');
+            const navMenu = document.querySelector('.nav-menu');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            // Toggle navigation menu
+            navToggle.addEventListener('click', function() {
+                navMenu.classList.toggle('open');
+                navMenu.classList.toggle('hidden');
+                
+                // Update ARIA attributes
+                const isExpanded = navMenu.classList.contains('open');
+                navToggle.setAttribute('aria-expanded', isExpanded);
+            });
+            
+            // Close menu when clicking on a link
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navMenu.classList.remove('open');
+                    navMenu.classList.add('hidden');
+                    navToggle.setAttribute('aria-expanded', 'false');
+                    
+                    // Update active state
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!navToggle.contains(event.target) && !navMenu.contains(event.target)) {
+                    navMenu.classList.remove('open');
+                    navMenu.classList.add('hidden');
+                    navToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Update active navigation on scroll
+            window.addEventListener('scroll', function() {
+                let current = '';
+                const sections = document.querySelectorAll('section');
+                
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (pageYOffset >= (sectionTop - 200)) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').slice(1) === current) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+            
+            // Navbar background on scroll
+            const navbar = document.querySelector('.navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.style.background = 'rgba(30, 86, 49, 0.98)';
+                    navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.15)';
+                } else {
+                    navbar.style.background = 'rgba(30, 86, 49, 0.98)';
+                    navbar.style.boxShadow = '0 4px 30px rgba(0, 0, 0, 0.15)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

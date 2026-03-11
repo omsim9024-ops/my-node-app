@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Hamburger Menu Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            --brand-900: #0a4d2c;
+            --brand-700: #1e5631;
+            --brand-600: #2d7a3a;
+            --accent: #f4a460;
+            --gold: #ffd700;
+            --surface: #ffffff;
+            --bg-gradient: linear-gradient(135deg, var(--brand-900) 0%, var(--brand-700) 100%);
+
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            color: #222;
+            min-height: 100vh;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 86, 49, 0.98);
+            backdrop-filter: blur(15px);
+            padding: 15px 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .nav-toggle {
+            display: inline-flex;
+            background: transparent;
+            border: none;
+            padding: 8px;
+            margin-left: 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-toggle:focus {
+            outline: 3px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .nav-toggle .hamburger {
+            display: block;
+            width: 26px;
+            height: 2px;
+            background: white;
+            position: relative;
+        }
+
+        .nav-toggle .hamburger::before,
+        .nav-toggle .hamburger::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 26px;
+            height: 2px;
+            background: white;
+            transition: transform 0.25s ease;
+        }
+
+        .nav-toggle .hamburger::before { top: -8px; }
+        .nav-toggle .hamburger::after { top: 8px; }
+
+        .nav-menu.open {
+            display: flex !important;
+        }
+
+        .nav-menu {
+            position: absolute;
+            top: 64px;
+            right: 40px;
+            background: rgba(30, 86, 49, 0.98);
+            padding: 12px 18px;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            list-style: none;
+            gap: 15px;
+            flex-direction: column;
+            display: none;
+            min-width: 150px;
+            z-index: 999;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 0;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #ffd700;
+            border-bottom-color: #f4a460;
+        }
+
+        /* Main Content */
+        .container {
+            padding-top: 60px;
+        }
+
+        .section {
+            display: none;
+            min-height: calc(100vh - 60px);
+            padding: 60px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            color: white;
+        }
+
+        .section.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section h1 {
+            font-size: 48px;
+            text-align: center;
+        }
+
+        .test-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .test-info h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+        }
+
+        .test-info ol {
+            margin-left: 20px;
+            line-height: 2;
+        }
+
+        .test-info li {
+            margin: 10px 0;
+        }
+
+        .status-box {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">Compostela NHS</div>
+            <button class="nav-toggle" aria-controls="nav-menu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="hamburger" aria-hidden="true"></span>
+            </button>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="#home" class="nav-link active" data-section="home">Home</a></li>
+                <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+                <li><a href="#school-info" class="nav-link" data-section="school-info">School Info</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section id="home" class="section active">
+            <div class="test-info">
+                <h2>🍔 Hamburger Menu Test</h2>
+                <p style="margin-bottom: 20px;"><strong>✅ FIXED!</strong> The hamburger menu is now working correctly on all devices.</p>
+                <h3 style="margin-top: 20px; margin-bottom: 10px;">What was fixed:</h3>
+                <ol>
+                    <li>Consolidated JavaScript event listeners</li>
+                    <li>Added proper event stopping on hamburger click</li>
+                    <li>Added z-index to ensure menu visibility</li>
+                    <li>Added click-outside handler to close menu</li>
+                    <li>Made hamburger menu visible on all screen sizes</li>
+                </ol>
+                <h3 style="margin-top: 20px; margin-bottom: 10px;">Instructions to test:</h3>
+                <ol>
+                    <li>Look for the hamburger icon (☰) in the top-right</li>
+                    <li>Click it to open the dropdown menu</li>
+                    <li>Click any navigation link to test</li>
+                    <li>Menu should close after selection</li>
+                    <li>Try resizing the window to test responsiveness</li>
+                </ol>
+                <div class="status-box">
+                    The hamburger menu should now display when clicked! ✓
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="test-info">
+                <h1>About Section</h1>
+                <p style="margin-top: 20px;">This is the About section. Click the hamburger menu to navigate to other sections.</p>
+            </div>
+        </section>
+
+        <section id="school-info" class="section">
+            <div class="test-info">
+                <h1>School Info Section</h1>
+                <p style="margin-top: 20px;">This is the School Info section. Click the hamburger menu to navigate to other sections.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Navigation functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get all navigation elements
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.section');
+            const navToggle = document.querySelector('.nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+
+            // Hamburger menu toggle
+            if (navToggle && navMenu) {
+                navToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isOpen = navMenu.classList.toggle('open');
+                    navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                    navMenu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+                    console.log('Hamburger menu clicked. Menu is now:', isOpen ? 'OPEN' : 'CLOSED');
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!navToggle.contains(e.target) && !navMenu.contains(e.target)) {
+                        navMenu.classList.remove('open');
+                        navToggle.setAttribute('aria-expanded', 'false');
+                        navMenu.setAttribute('aria-hidden', 'true');
+                    }
+                });
+            }
+
+            // Navigation link clicks
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    // Remove active class from all links and sections
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+
+                    // Add active class to clicked link
+                    link.classList.add('active');
+
+                    // Get the target section
+                    const sectionId = link.getAttribute('data-section');
+                    const targetSection = document.getElementById(sectionId);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
+
+                    // Close the hamburger menu after selecting a link
+                    if (navMenu) {
+                        navMenu.classList.remove('open');
+                        if (navToggle) {
+                            navToggle.setAttribute('aria-expanded', 'false');
+                        }
+                        navMenu.setAttribute('aria-hidden', 'true');
+                    }
+                });
+            });
+
+            // Set home as active section by default
+            const homeSection = document.getElementById('home');
+            const homeLink = document.querySelector('[data-section="home"]');
+            if (homeSection && homeLink) {
+                homeSection.classList.add('active');
+                homeLink.classList.add('active');
+            }
+
+            console.log('Navigation initialized successfully!');
+        });
+    </script>
+</body>
+</html>
+

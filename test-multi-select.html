@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Select Test - Teacher Role Assignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            background-color: white;
+            cursor: pointer;
+        }
+        select[multiple] {
+            min-height: 150px;
+        }
+        select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+        .button-group {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        .btn-secondary {
+            background-color: #ddd;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background-color: #ccc;
+        }
+        .output {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            border-left: 4px solid #4CAF50;
+        }
+        .output h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .output pre {
+            background: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            color: #1976d2;
+            border-left: 4px solid #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Multi-Select Test - Teacher Role Assignment</h1>
+        
+        <div class="info">
+            <strong>Instructions:</strong> Select multiple sections and click "Test Submit" to see the data that would be sent to the API.
+        </div>
+
+        <div class="form-group">
+            <label for="testSelect">Select Sections (Multi-select) <span style="color: red;">*</span></label>
+            <select id="testSelect" multiple size="5">
+                <option value="">-- Select Sections (hold Ctrl/Cmd to select multiple) --</option>
+                <option value="10">Grade 7A</option>
+                <option value="11">Grade 7B</option>
+                <option value="12">Grade 8A</option>
+                <option value="13">Grade 8B</option>
+                <option value="14">Grade 9A</option>
+                <option value="15">Grade 9B</option>
+                <option value="16">Grade 10A</option>
+                <option value="17">Grade 10B</option>
+            </select>
+            <small style="color: #666; margin-top: 8px; display: block;">
+                You can select multiple sections by holding Ctrl (Windows) or Cmd (Mac) and clicking
+            </small>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-primary" onclick="testSubmit()">Test Submit</button>
+            <button class="btn-secondary" onclick="clearSelection()">Clear Selection</button>
+        </div>
+
+        <div id="output" style="display: none;" class="output">
+            <h3>Selected Values:</h3>
+            <pre id="outputContent"></pre>
+        </div>
+    </div>
+
+    <script>
+        function testSubmit() {
+            const selectElement = document.getElementById('testSelect');
+            
+            // Get all selected section IDs (multi-select support)
+            const selectedSections = Array.from(selectElement.selectedOptions || [])
+                .map(opt => opt.value)
+                .filter(val => val !== ''); // Filter out empty values
+
+            console.log('Selected sections:', selectedSections);
+
+            if (selectedSections.length === 0) {
+                alert('❌ Please select at least one section');
+                return;
+            }
+
+            // Show the output
+            const output = document.getElementById('output');
+            const outputContent = document.getElementById('outputContent');
+            
+            const result = {
+                teacher_id: 1,
+                role: 'Adviser',
+                sections: selectedSections.map(s => parseInt(s)),
+                school_year_id: 2025,
+                message: 'This data would be sent to: PUT /api/teacher-auth/assign-role'
+            };
+
+            outputContent.textContent = JSON.stringify(result, null, 2);
+            output.style.display = 'block';
+
+            // Scroll to output
+            setTimeout(() => {
+                output.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+            console.log('✓ Test successful! Check console for details.');
+            console.log('Payload:', result);
+        }
+
+        function clearSelection() {
+            const selectElement = document.getElementById('testSelect');
+            selectElement.value = '';
+            Array.from(selectElement.options).forEach(opt => opt.selected = false);
+            document.getElementById('output').style.display = 'none';
+            console.log('Selection cleared');
+        }
+
+        // Test the functionality on page load
+        console.log('Multi-select test page loaded');
+        console.log('Select element:', document.getElementById('testSelect'));
+        console.log('Multiple attribute:', document.getElementById('testSelect').hasAttribute('multiple'));
+    </script>
+</body>
+</html>
+

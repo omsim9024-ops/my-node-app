@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Portal</title>
+    <link rel="icon" id="schoolFavicon" href="cnhs_logo (2).png" type="image/png" />
+    
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="auth.css">
+</head>
+<body>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Main Auth Container -->
+    <div class="auth-container">
+        
+        <!-- Branding Header (Visible on Desktop) -->
+        <div class="brand-header">
+            <img id="schoolLogo" src="cnhs_logo (2).png" alt="School Logo" class="brand-logo">
+            <div class="brand-text">
+                <h1 id="schoolName">Compostela National High School</h1>
+                <p id="schoolTagline" style="font-style: italic;">"Center Stage of Education Performance"</p>
+            </div>
+        </div>
+
+        <!-- Auth Card -->
+        <div class="auth-card">
+            
+            <!-- Role Selector (Segmented Control) -->
+            <div class="role-selector" data-pos="1">
+                <button class="role-btn active" data-role="student">Student</button>
+                <button class="role-btn" data-role="teacher">Teacher</button>
+                <button class="role-btn" data-role="admin">Admin</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="register">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <div class="form-header">
+                    <h2 id="loginHeading">Student Login</h2>
+                    <p id="loginSubtitle">Access your dashboard</p>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="loginEmail" class="form-input" placeholder=" " required autocomplete="username">
+                    <label class="form-label">Email Address</label>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="loginPassword" class="form-input" placeholder=" " required autocomplete="current-password">
+                    <label class="form-label">Password</label>
+                    <button type="button" class="toggle-password" onclick="togglePassword('loginPassword', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" name="remember">
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                    <a href="#" class="link-forgot">Forgot Password?</a>
+                </div>
+
+                <!-- OTP Section (Hidden by default) -->
+                <div id="otpGroup" class="input-group hidden">
+                    <input type="text" id="otpCode" class="form-input" placeholder=" " maxlength="6" inputmode="numeric">
+                    <label class="form-label">6-Digit Code</label>
+                </div>
+                <button type="button" id="otpVerifyBtn" class="btn-primary hidden" style="margin-bottom: 15px;">Verify Code</button>
+
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text">Login</span>
+                    <div class="spinner hidden"></div>
+                </button>
+
+                <p class="form-footer">Don’t have an account? <a href="#" class="toggle-form" data-tab="register">Create one</a></p>
+            </form>
+
+            <!-- Registration Form -->
+            <form id="registerForm" class="auth-form">
+                <div class="form-header">
+                    <h2 id="registerHeading">Create Account</h2>
+                    <p id="registerSubtitle">Join our community</p>
+                </div>
+
+                <div class="form-row">
+                    <div class="input-group">
+                        <input type="text" id="regFirstName" class="form-input" placeholder=" " required>
+                        <label class="form-label">First Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="regLastName" class="form-input" placeholder=" " required>
+                        <label class="form-label">Last Name</label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <input type="email" id="regEmail" class="form-input" placeholder=" " required>
+                    <label class="form-label">Email Address</label>
+                </div>
+
+                <!-- Dynamic Fields -->
+                <div id="familySchoolGroup" class="input-group hidden">
+                    <input type="text" id="regStudentID" class="form-input" placeholder=" " maxlength="12" inputmode="numeric">
+                    <label class="form-label">LRN (Optional)</label>
+                </div>
+
+                <div id="regCodeGroup" class="input-group hidden">
+                    <input type="text" id="regCode" class="form-input" placeholder=" ">
+                    <label class="form-label">Teacher Registration Code</label>
+                </div>
+
+                <div id="adviserIdGroup" class="input-group hidden">
+                    <input type="text" id="regAdviserId" class="form-input" placeholder=" ">
+                    <label class="form-label">Teacher ID (Optional)</label>
+                </div>
+
+                <div id="departmentGroup" class="input-group hidden">
+                    <select id="regDepartment" class="form-select">
+                        <option value="">Select Department</option>
+                        <option value="JHS">JHS</option>
+                        <option value="SHS">SHS</option>
+                    </select>
+                </div>
+
+                <div id="adminRoleGroup" class="input-group hidden">
+                    <select id="adminRoleSelect" class="form-select">
+                        <option value="">Select Admin Role</option>
+                        <option value="admin">Admin</option>
+                        <option value="guidance">Guidance</option>
+                            <option value="master">Master Teacher</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="regPassword" class="form-input" placeholder=" " required>
+                    <label class="form-label">Password</label>
+                    <button type="button" class="toggle-password" onclick="togglePassword('regPassword', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="regConfirmPassword" class="form-input" placeholder=" " required>
+                    <label class="form-label">Confirm Password</label>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" name="agreeTerms" required>
+                        <span class="checkmark"></span>
+                        I agree to terms
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <span class="btn-text">Register</span>
+                    <div class="spinner hidden"></div>
+                </button>
+
+                <p class="form-footer">Already have an account? <a href="#" class="toggle-form" data-tab="login">Login</a></p>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+</body>
+</html>

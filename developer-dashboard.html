@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Dashboard | School Enrollment System</title>
+    <link rel="stylesheet" href="developer-dashboard.css">
+    <script src="developer-auth.js"></script>
+    <script>
+        if (typeof window.requireDeveloperAuth === 'function') {
+            window.requireDeveloperAuth({ redirectTo: 'developer-signin.html' });
+        }
+    </script>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-brand">
+            <div class="brand-row">
+                <h1>Developer Dashboard</h1>
+                <span class="topbar-badge">DEV MODE</span>
+            </div>
+            <p>Monitoring, security, diagnostics, and control center</p>
+            <div class="topbar-status">
+                <span id="nav-server-chip" class="status-chip"><i></i>Server: Checking</span>
+                <span id="nav-db-chip" class="status-chip"><i></i>DB: Checking</span>
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <button id="mobile-menu-btn" type="button">Menu</button>
+            <button id="sidebar-toggle-btn" type="button">Toggle Sidebar</button>
+            <button id="theme-toggle-btn" type="button">Light Theme</button>
+            <button id="refresh-btn" type="button">Refresh Data</button>
+            <button id="developerLogoutBtn" type="button">Log Out</button>
+            <span id="last-updated" class="muted">Loading...</span>
+        </div>
+    </header>
+
+    <div class="dashboard-shell">
+        <button id="sidebar-overlay" class="sidebar-overlay" type="button" aria-label="Close menu"></button>
+        <aside class="sidebar" aria-label="Dashboard navigation">
+            <div class="sidebar-header">
+                <div class="sidebar-avatar">💻</div>
+                <div>
+                    <strong>Engineering Console</strong>
+                    <p>System Management Suite</p>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a class="sidebar-link active" href="#section-health"><span>🖥</span><span>System Health</span></a>
+                <a class="sidebar-link" href="#section-analytics"><span>📈</span><span>Real-Time Analytics</span></a>
+                <a class="sidebar-link" href="#section-security"><span>🛡️</span><span>Security Panel</span></a>
+                <a class="sidebar-link" href="#section-database"><span>🗄</span><span>Database Management</span></a>
+                <a class="sidebar-link" href="#section-debug"><span>🧾</span><span>Error & Debug Console</span></a>
+                <a class="sidebar-link" href="#section-activity"><span>👥</span><span>User Activity Tracker</span></a>
+                <a class="sidebar-link" href="#section-controls"><span>⚙️</span><span>System Controls</span></a>
+                <a class="sidebar-link" href="#section-api"><span>🌐</span><span>API Monitoring</span></a>
+                <a class="sidebar-link" href="#section-performance"><span>🧠</span><span>Performance Insights</span></a>
+                <a class="sidebar-link" href="#section-tenants"><span>🏫</span><span>Multi-School Tenants</span></a>
+                <a class="sidebar-link" href="#section-version"><span>🧩</span><span>Version Control Panel</span></a>
+                <a class="sidebar-link" href="#section-actions"><span>📟</span><span>Action Result</span></a>
+            </nav>
+            <div class="sidebar-footer">
+                <span>Tip: Use section menu to focus one module at a time.</span>
+            </div>
+        </aside>
+
+    <main class="page">
+        <section id="section-health" class="panel dashboard-section" aria-labelledby="health-title">
+            <div class="panel-header">
+                <h2 id="health-title">🖥 1. System Health Monitoring</h2>
+            </div>
+            <div id="system-health-grid" class="metric-grid"></div>
+            <div id="system-health-details" class="health-details mt-1">
+                <div class="health-details-grid">
+                    <section class="health-card">
+                        <h3>Mini Trend</h3>
+                        <div class="chart-wrap compact-chart">
+                            <canvas id="health-mini-chart" height="120"></canvas>
+                        </div>
+                    </section>
+                    <section class="health-card">
+                        <h3>Alerts</h3>
+                        <ul id="health-alerts-list" class="list"></ul>
+                    </section>
+                    <section class="health-card">
+                        <h3>Quick Actions</h3>
+                        <div class="quick-actions-grid">
+                            <button id="health-refresh-btn" type="button">Refresh Health Data</button>
+                            <button id="health-open-api-btn" type="button">Open API Monitoring</button>
+                            <button id="health-open-debug-btn" type="button">Open Debug Console</button>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-analytics" class="panel dashboard-section" aria-labelledby="analytics-title">
+            <div class="panel-header">
+                <h2 id="analytics-title">📊 2. Real-Time Analytics</h2>
+            </div>
+            <div id="realtime-analytics-grid" class="metric-grid"></div>
+            <div class="chart-wrap mt-1">
+                <canvas id="analytics-chart" height="90"></canvas>
+            </div>
+        </section>
+
+        <section id="section-security" class="panel dashboard-section" aria-labelledby="security-title">
+            <div class="panel-header">
+                <h2 id="security-title">🔐 3. Security Panel</h2>
+            </div>
+            <div id="security-overview-grid" class="metric-grid security-metric-grid"></div>
+            <div class="security-layout">
+                <article class="security-block">
+                    <h3>Login Attempt Logs</h3>
+                    <ul id="login-attempt-logs" class="list security-scroll"></ul>
+                </article>
+                <article class="security-block">
+                    <h3>Suspicious Activity</h3>
+                    <ul id="suspicious-activity-list" class="list security-scroll"></ul>
+                    <h3 class="mt-half">IP Address Tracking</h3>
+                    <ul id="ip-tracking-list" class="list security-scroll"></ul>
+                </article>
+                <article class="security-block">
+                    <h3>Token/Session Monitoring</h3>
+                    <div id="session-monitoring" class="info-box"></div>
+                    <h3 class="mt-half">Role Permissions</h3>
+                    <ul id="role-permission-list" class="list security-scroll"></ul>
+                </article>
+            </div>
+        </section>
+
+        <section id="section-database" class="panel dashboard-section" aria-labelledby="db-title">
+            <div class="panel-header">
+                <h2 id="db-title">🗄 4. Database Management</h2>
+                <div class="inline-actions">
+                    <button id="backup-db-btn" type="button">Backup Database</button>
+                    <button id="restore-db-btn" type="button">Restore Backup</button>
+                </div>
+            </div>
+            <div id="db-overview-grid" class="metric-grid section-metric-grid"></div>
+            <div class="section-layout two-col-layout">
+                <article class="section-block">
+                    <h3>Table Viewer</h3>
+                    <div class="table-wrap panel-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Table Viewer</th>
+                                    <th>Record Count</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="db-table-body"></tbody>
+                        </table>
+                    </div>
+                </article>
+                <article class="section-block">
+                    <h3>Query Runner (Restricted & Safe Mode)</h3>
+                    <textarea id="safe-query-input" rows="5" placeholder="SELECT * FROM students LIMIT 20"></textarea>
+                    <div class="inline-actions mt-half">
+                        <button id="run-query-btn" type="button">Run Safe Query</button>
+                    </div>
+                    <pre id="query-result">{}</pre>
+                </article>
+            </div>
+        </section>
+
+        <section id="section-debug" class="panel dashboard-section" aria-labelledby="debug-title">
+            <div class="panel-header">
+                <h2 id="debug-title">📁 5. Error & Debug Console</h2>
+            </div>
+            <div id="debug-overview-grid" class="metric-grid section-metric-grid"></div>
+            <div class="section-layout two-col-layout">
+                <article class="section-block">
+                    <h3>System/API Error Logs</h3>
+                    <ul id="error-log-list" class="list panel-scroll"></ul>
+                </article>
+                <article class="section-block">
+                    <h3>Console Output Viewer</h3>
+                    <pre id="console-output">[]</pre>
+                    <h3 class="mt-half">Stack Trace Viewer (Developer Only)</h3>
+                    <pre id="stack-trace-output">[]</pre>
+                </article>
+            </div>
+        </section>
+
+        <section id="section-activity" class="panel dashboard-section" aria-labelledby="user-activity-title">
+            <div class="panel-header">
+                <h2 id="user-activity-title">👥 6. User Activity Tracker</h2>
+            </div>
+            <div id="activity-overview-grid" class="metric-grid section-metric-grid"></div>
+            <div class="section-layout two-col-layout">
+                <article class="section-block">
+                    <h3>Last Login per User</h3>
+                    <ul id="last-login-list" class="list panel-scroll"></ul>
+                </article>
+                <article class="section-block">
+                    <h3>Session Duration, Device & Browser, Most Active Users</h3>
+                    <div id="session-duration-box" class="info-box"></div>
+                    <ul id="device-browser-list" class="list panel-scroll"></ul>
+                    <ul id="most-active-users-list" class="list panel-scroll"></ul>
+                </article>
+            </div>
+        </section>
+
+        <section id="section-controls" class="panel dashboard-section" aria-labelledby="controls-title">
+            <div class="panel-header">
+                <h2 id="controls-title">⚙ 7. System Controls</h2>
+            </div>
+            <div id="controls-overview-grid" class="metric-grid section-metric-grid"></div>
+            <div class="section-layout two-col-layout">
+                <article class="section-block">
+                    <h3>Control Actions</h3>
+                    <div id="controls-status-box" class="info-box"></div>
+                    <div class="controls-grid">
+                        <button id="maintenance-toggle-btn" type="button">Toggle Maintenance Mode</button>
+                        <button id="logout-all-btn" type="button">Force Logout All Users</button>
+                        <button id="clear-cache-btn" type="button">Clear System Cache</button>
+                        <button id="reset-otp-btn" type="button">Reset OTP System</button>
+                    </div>
+                </article>
+                <article class="section-block">
+                    <h3>Enable/Disable Features</h3>
+                    <div id="feature-flags" class="flags-grid"></div>
+                    <button id="save-flags-btn" type="button" class="mt-half">Save Feature Flags</button>
+                </article>
+            </div>
+        </section>
+
+        <section id="section-api" class="panel dashboard-section" aria-labelledby="api-monitoring-title">
+            <div class="panel-header">
+                <h2 id="api-monitoring-title">🌐 8. API Monitoring</h2>
+            </div>
+            <div class="two-column">
+                <div>
+                    <h3>API Response Time Graph</h3>
+                    <div class="chart-wrap">
+                        <canvas id="response-chart" height="95"></canvas>
+                    </div>
+                    <div id="api-monitor-summary" class="info-box mt-half"></div>
+                </div>
+                <div>
+                    <h3>Endpoint Usage Breakdown</h3>
+                    <ul id="endpoint-usage-list" class="list"></ul>
+                    <div class="chart-wrap mt-half">
+                        <canvas id="endpoint-chart" height="130"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-performance" class="panel dashboard-section" aria-labelledby="perf-title">
+            <div class="panel-header">
+                <h2 id="perf-title">🧠 9. Performance Insights</h2>
+            </div>
+            <div id="performance-grid" class="metric-grid"></div>
+        </section>
+
+        <section id="section-tenants" class="panel dashboard-section" aria-labelledby="tenant-title">
+            <div class="panel-header">
+                <h2 id="tenant-title">🏫 10. Multi-School Tenant Management</h2>
+            </div>
+            <p class="section-subtitle">Manage schools in three steps: choose a school, review details, then create, update, or remove.</p>
+            <div id="tenant-feedback" class="tenant-feedback" role="status" aria-live="polite"></div>
+            <div id="tenant-overview-grid" class="metric-grid section-metric-grid"></div>
+            <div class="school-workspace-layout">
+                <aside class="section-block school-explorer">
+                    <h3>1) Choose a School</h3>
+                    <p class="muted">Click any school to load its details into the form.</p>
+                    <label class="field-label" for="school-search-input">Search schools</label>
+                    <input id="school-search-input" type="text" placeholder="Type name, code, location, or status">
+                    <ul id="school-list" class="list panel-scroll"></ul>
+                </aside>
+                <div class="school-main-layout">
+                    <article class="section-block">
+                        <h3>2) School Details</h3>
+                        <p id="tenant-selection-hint" class="muted">Select a school from the list to edit, or enter details below to add a new school.</p>
+                        <div id="tenant-current-box" class="info-box"></div>
+                        <div class="tenant-form-grid two-columns-grid mt-half">
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-code-input">School Code <span class="required-indicator">*</span></label>
+                                <input id="tenant-code-input" type="text" placeholder="e.g. ccessc">
+                                <small class="field-help">Unique code used in school portal links.</small>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-school-id-input">School ID</label>
+                                <input id="tenant-school-id-input" type="text" placeholder="e.g. 934738">
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-name-input">School Name <span class="required-indicator">*</span></label>
+                                <input id="tenant-name-input" type="text" placeholder="e.g. Compostela National High School">
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-domain-input">Domain (Optional)</label>
+                                <input id="tenant-domain-input" type="text" placeholder="e.g. ccessc.school.edu">
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-location-input">Location</label>
+                                <input id="tenant-location-input" type="text" placeholder="City / Municipality">
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-status-select">Status</label>
+                                <select id="tenant-status-select">
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-logo-input">School Logo</label>
+                                <input id="tenant-logo-input" type="file" accept="image/*">
+                                <small class="field-help">Max size: 1024 KB.</small>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label" for="tenant-branding-input">Branding JSON</label>
+                                <input id="tenant-branding-input" type="text" placeholder='e.g. {"primary":"#1d4ed8"}'>
+                                <small class="field-help">Optional UI theme override for this school.</small>
+                            </div>
+                        </div>
+                        <div class="inline-actions mt-half">
+                            <button id="tenant-new-btn" type="button" class="btn-secondary">New School Form</button>
+                            <button id="tenant-create-btn" type="button">Create New School</button>
+                            <button id="tenant-update-btn" type="button" class="btn-secondary">Save Changes</button>
+                            <button id="tenant-delete-btn" type="button" class="btn-danger">Delete School</button>
+                        </div>
+                        <div id="tenant-create-progress" class="tenant-create-progress" role="status" aria-live="polite" aria-hidden="true">
+                            <div class="tenant-create-progress-head">
+                                <span id="tenant-create-progress-label">Creating school tenant…</span>
+                                <span id="tenant-create-progress-percent">0%</span>
+                            </div>
+                            <div class="tenant-create-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="School creation progress">
+                                <div id="tenant-create-progress-fill" class="tenant-create-progress-fill"></div>
+                            </div>
+                        </div>
+                        <div id="tenant-delete-progress" class="tenant-delete-progress" role="status" aria-live="polite" aria-hidden="true">
+                            <div class="tenant-delete-progress-head">
+                                <span id="tenant-delete-progress-label">Processing school deletion…</span>
+                                <span id="tenant-delete-progress-percent">0%</span>
+                            </div>
+                            <div class="tenant-delete-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="School deletion progress">
+                                <div id="tenant-delete-progress-fill" class="tenant-delete-progress-fill"></div>
+                            </div>
+                        </div>
+                        <small class="field-help">3) Use Create for a new school, Save Changes for selected school updates, and Delete only when needed.</small>
+                    </article>
+
+                    <article class="section-block">
+                        <h3>School Admins Management</h3>
+                        <div class="tenant-form-grid two-columns-grid">
+                            <!-- inputs for creating a new admin account -->
+                    <input id="school-admin-name-input" type="text" placeholder="Full name" />
+                    <input id="school-admin-email-input" type="email" placeholder="Email address" />
+                    <input id="school-admin-password-input" type="password" placeholder="Password (min 8)" />
+                    <select id="school-admin-role-select">
+                        <option value="admin">Admin</option>
+                        <option value="master">Master</option>
+                        <option value="guidance">Guidance</option>
+                    </select>
+                    <input id="school-admin-permissions-input" type="text" placeholder='Permissions JSON (e.g. {"reports":true})'>
+                    <button id="school-admin-assign-btn" type="button">Create Admin</button>
+                        </div>
+                        <p class="field-help">The account created here will become the school's tenant-specific admin. Only this admin (and not global admins) may log in via the unified auth page for that school.</p>
+                        <div class="table-wrap panel-scroll mt-half">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Last Login</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="school-admins-body"></tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    <article class="section-block">
+                        <h3>School Usage Analytics</h3>
+                        <div id="school-analytics-grid" class="metric-grid"></div>
+                        <h3 class="mt-half">Data Separation (Multi-Tenant Security)</h3>
+                        <div id="school-security-box" class="info-box"></div>
+                    </article>
+
+                    <article class="section-block">
+                        <h3>System-Wide Controls (Per School)</h3>
+                        <div class="controls-grid">
+                            <button id="school-backup-btn" type="button">Backup School</button>
+                            <button id="school-restore-btn" type="button">Restore School</button>
+                            <button id="school-force-logout-btn" type="button">Force Logout School</button>
+                            <button id="school-reset-otp-btn" type="button">Reset OTP School</button>
+                            <button id="school-switch-btn" type="button">Quick Switch to School</button>
+                        </div>
+                        <h3 class="mt-half">Enable/Disable Modules Per School</h3>
+                        <div class="flags-grid" id="school-modules-grid"></div>
+                        <button id="school-save-modules-btn" type="button" class="mt-half">Save School Modules</button>
+                    </article>
+
+                    <article class="section-block">
+                        <h3>Multi-School Monitoring</h3>
+                        <div class="table-wrap panel-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>School</th>
+                                        <th>Status</th>
+                                        <th>Alerts</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="school-monitoring-body"></tbody>
+                            </table>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-version" class="panel dashboard-section" aria-labelledby="version-title">
+            <div class="panel-header">
+                <h2 id="version-title">💡 Bonus: System Version Control Panel</h2>
+            </div>
+            <div class="two-column">
+                <div id="version-box" class="info-box"></div>
+                <div>
+                    <h3>Patch Notes Viewer</h3>
+                    <ul id="patch-notes-list" class="list"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-actions" class="panel dashboard-section" aria-labelledby="action-result-title">
+            <div class="panel-header">
+                <h2 id="action-result-title">Action Result</h2>
+            </div>
+            <pre id="action-result">{}</pre>
+        </section>
+    </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="developer-dashboard.js"></script>
+</body>
+</html>
+
+
