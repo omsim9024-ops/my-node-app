@@ -13,7 +13,7 @@ async function ensureGuidanceTables() {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS guidance_requests (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id INT REFERENCES students(id) ON DELETE CASCADE,
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
                 reason TEXT NOT NULL,
                 preferred_date DATE,
                 preferred_time TIME,
@@ -45,7 +45,7 @@ async function ensureGuidanceTables() {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS student_risk_flags (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                student_id INT REFERENCES students(id) ON DELETE CASCADE,
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
                 risk_type VARCHAR(100) NOT NULL,
                 description TEXT,
                 is_active BOOLEAN DEFAULT true,
@@ -60,7 +60,7 @@ async function ensureGuidanceTables() {
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 guidance_request_id INT REFERENCES guidance_requests(id) ON DELETE CASCADE,
                 guidance_counselor_id INT,
-                student_id INT REFERENCES students(id) ON DELETE CASCADE,
+                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
                 session_date DATE NOT NULL,
                 session_time TIME,
                 session_location VARCHAR(255),
@@ -222,7 +222,7 @@ router.post('/requests', async (req, res) => {
             (student_id, reason, preferred_date, preferred_time, message, status)
             VALUES (?, ?, ?, ?, ?, 'Pending')`, [student_id, reason, preferred_date, preferred_time, message]);
 
-        console.log('[Guidance API] ✅ Guidance request created:', rows[0].id);
+        console.log('[Guidance API] ✅ Guidance request created:', result.insertId)
         res.json({ success: true, request: rows[0] });
     } catch (err) {
         console.error('[Guidance API] Error creating request:', err);
@@ -378,7 +378,7 @@ router.get('/risk-flags', async (req, res) => {
                 s.last_name,
                 s.grade_level,
                 sc.section_name,
-                e.enrollment_data->>'track' as track
+                JSON_UNQUOTE(JSON_EXTRACT(e.enrollment_data, '$.track'))
             FROM student_risk_flags srf
             JOIN students s ON srf.student_id = s.id
             LEFT JOIN sections sc ON s.section_id = sc.id

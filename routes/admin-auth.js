@@ -1100,6 +1100,7 @@ router.put('/:adminId/settings', requireAdminAuth, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.requireAdminAuth = requireAdminAuth;
 
 
 

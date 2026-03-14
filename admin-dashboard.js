@@ -3382,6 +3382,12 @@ function setupSidebarNavigationFallback() {
                         }
                     }
                 }
+
+                if (sectionId === 'activity-log') {
+                    if (typeof loadActivityLog === 'function') {
+                        loadActivityLog();
+                    }
+                }
             } catch (_err) {}
         };
 
@@ -11807,6 +11813,22 @@ async function apiFetch(path, opts = {}, timeout = 4000) {
     if (API_BASE) candidates.push(API_BASE);
     if (BACKEND_ORIGIN) candidates.push(BACKEND_ORIGIN);
 
+    // When frontend is served from localhost but the backend runs on another local port,
+    // try several common development ports to avoid stale-port issues.
+    try {
+        const host = String(window.location.hostname || '').trim().toLowerCase();
+        const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+        if (isLocalhost) {
+            // Try a wider range of local dev backend ports so the frontend can connect even if the server moved.
+            const commonPorts = [3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009, 3010];
+            commonPorts.forEach((p) => {
+                candidates.push(`http://${host}:${p}`);
+            });
+        }
+    } catch (_err) {
+        // ignore
+    }
+
     const unique = [];
     const seen = new Set();
     for (const c of candidates) {
@@ -13183,9 +13205,180 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Activity log loader
+async function loadActivityLog() {
+    const tbody = document.getElementById('activityLogTableBody');
+    const messageEl = document.getElementById('activityLogMessage');
+    let loadingTimeout;
+    if (messageEl) {
+        messageEl.textContent = 'Loading activity log…';
+        messageEl.style.color = '#666';
+        loadingTimeout = setTimeout(() => {
+            messageEl.textContent = 'Still loading activity log…';
+            messageEl.style.color = '#666';
+        }, 6000);
+    }
+    if (!tbody) {
+        if (loadingTimeout) clearTimeout(loadingTimeout);
+        return;
+    }
+
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px; text-align:center; color:#999;">Loading activity log...</td></tr>';
+
+    try {
+        const url = withSchoolParam('/api/audit/logs?limit=100');
+        console.log('[loadActivityLog] Requesting', url);
+        const res = await apiFetch(url);
+        if (!res.ok) {
+            const text = await res.text();
+            const msg = `Failed to load activity log (${res.status})`;
+            if (loadingTimeout) clearTimeout(loadingTimeout);
+            tbody.innerHTML = `<tr><td colspan="5" style="padding:40px; text-align:center; color:#c00;">${msg}</td></tr>`;
+            if (messageEl) {
+                messageEl.textContent = msg;
+                messageEl.style.color = '#c00';
+            }
+            console.error('[loadActivityLog] API error', res.status, text);
+            return;
+        }
+
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+            const msg = 'No activity recorded yet.';
+            if (loadingTimeout) clearTimeout(loadingTimeout);
+            tbody.innerHTML = `<tr><td colspan="5" style="padding:40px; text-align:center; color:#666;">${msg}</td></tr>`;
+            if (messageEl) {
+                messageEl.textContent = msg;
+                messageEl.style.color = '#666';
+            }
+            return;
+        }
+
+        if (messageEl) {
+            messageEl.textContent = `Showing ${data.length} entries`;
+            messageEl.style.color = '#666';
+        }
+
+        const rows = data.map((entry) => {
+            const when = entry.created_at ? new Date(entry.created_at).toLocaleString() : '--';
+            const user = entry.admin_id ? `Admin #${entry.admin_id}` : (entry.user_id ? `User #${entry.user_id}` : 'System');
+            const role = entry.user_role ? ` (${escapeHtml(entry.user_role)})` : '';
+            const action = escapeHtml(String(entry.action || ''));
+            let details = '';
+            try {
+                if (entry.details) {
+                    const parsed = typeof entry.details === 'string' ? JSON.parse(entry.details) : entry.details;
+                    details = typeof parsed === 'object' ? JSON.stringify(parsed) : String(parsed);
+                }
+            } catch (_err) {
+                details = String(entry.details || '');
+            }
+            details = escapeHtml(details || '');
+            const ip = escapeHtml(String(entry.ip_address || ''));
+
+            return `
+                <tr>
+                  <td style="padding:10px;">${escapeHtml(when)}</td>
+                  <td style="padding:10px;">${escapeHtml(user)}${escapeHtml(role)}</td>
+                  <td style="padding:10px;">${action}</td>
+                  <td style="padding:10px;">${details}</td>
+                  <td style="padding:10px;">${ip}</td>
+                </tr>`;
+        });
+
+        tbody.innerHTML = rows.join('');
+        if (loadingTimeout) clearTimeout(loadingTimeout);
+    } catch (err) {
+        const msg = 'Error loading activity log.';
+        if (loadingTimeout) clearTimeout(loadingTimeout);
+        console.error('[loadActivityLog] Error:', err);
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:40px; text-align:center; color:#c00;">${msg}</td></tr>`;
+        if (messageEl) {
+            messageEl.textContent = msg;
+            messageEl.style.color = '#c00';
+        }
+    }
 }
 
-// End of file (no trailing stubs)
+// Wire refresh button after DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    const refreshBtn = document.getElementById('refreshActivityLogBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadActivityLog);
+    }
 
+    // If the activity log section is already active on load, populate it.
+    const activeSection = document.querySelector('.section.active');
+    if (activeSection && activeSection.id === 'activity-log') {
+        setTimeout(() => loadActivityLog(), 50);
+    }
 
+    // Attach global UI interaction auditing (clicks and form submissions).
+    setupUiAuditLogging();
+});
 
+function setupUiAuditLogging() {
+    const throttle = (fn, delay) => {
+        let last = 0;
+        return (...args) => {
+            const now = Date.now();
+            if (now - last < delay) return;
+            last = now;
+            fn(...args);
+        };
+    };
+
+    const recordUiAction = throttle((action, details) => {
+        try {
+            if (!action) return;
+            // Fire-and-forget; failures are non-critical
+            apiFetch(withSchoolParam('/api/audit/track'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, details })
+            }).catch(() => {});
+        } catch (_) {}
+    }, 800);
+
+    document.addEventListener('click', (event) => {
+        try {
+            const target = event.target.closest('button, a, input[type="button"], input[type="submit"], [role="button"]');
+            if (!target) return;
+            if (target.closest('.activity-log-table')) return; // ignore log UI itself
+
+            const label = String(target.getAttribute('data-audit-action') || target.textContent || target.getAttribute('aria-label') || target.id || target.name || '').trim();
+            if (!label) return;
+
+            const action = `click:${target.tagName.toLowerCase()}`;
+            const details = {
+                label: label.slice(0, 80),
+                id: target.id || null,
+                classes: target.className || null,
+                href: target.getAttribute('href') || null
+            };
+            recordUiAction(action, details);
+        } catch (_e) {
+            // ignore
+        }
+    }, true);
+
+    document.addEventListener('submit', (event) => {
+        try {
+            const form = event.target;
+            if (!form || form.tagName !== 'FORM') return;
+            const name = String(form.getAttribute('data-audit-action') || form.getAttribute('name') || form.id || '').trim();
+            const action = `submit:form`;
+            const details = {
+                form: name || null,
+                id: form.id || null,
+                classes: form.className || null
+            };
+            recordUiAction(action, details);
+        } catch (_e) {
+            // ignore
+        }
+    }, true);
+}
+
+}

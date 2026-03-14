@@ -248,6 +248,28 @@ async function initializeDatabase() {
             console.warn('MySQL init: failed to create admin_settings table', err.code || err.message);
         }
 
+        // audit logs table
+        try {
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS audit_logs (
+                    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                    tenant_id INT NULL,
+                    admin_id INT NULL,
+                    user_id INT NULL,
+                    user_role VARCHAR(100) NULL,
+                    action VARCHAR(255) NOT NULL,
+                    details TEXT NULL,
+                    ip_address VARCHAR(100) NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    INDEX idx_audit_tenant (tenant_id),
+                    INDEX idx_audit_admin (admin_id),
+                    INDEX idx_audit_created_at (created_at)
+                )
+            `);
+        } catch (err) {
+            console.warn('MySQL init: failed to create audit_logs table', err.code || err.message);
+        }
+
         // backup policy and logs tables
         try {
             await pool.query(`

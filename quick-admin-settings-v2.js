@@ -252,6 +252,21 @@
   }
 
   async function apiCall(path, method, body) {
+    // Prefer the shared apiFetch helper for resilient port selection and tenant handling.
+    if (typeof apiFetch === 'function') {
+      const url = withSchoolParam(path);
+      const opts = {
+        method,
+        ...(body ? { body: JSON.stringify(body) } : {})
+      };
+      const res = await apiFetch(url, opts);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
+      }
+      return data;
+    }
+
     const school = detectSchoolCode();
     const url = new URL(path, window.location.origin);
     if (school) url.searchParams.set('school', school);
@@ -345,6 +360,7 @@
           <button class="qas2-tab" data-qas2-tab="portal">Portal</button>
           <button class="qas2-tab" data-qas2-tab="backup">Backup</button>
           <button class="qas2-tab" data-qas2-tab="archived">Archived</button>
+          <button class="qas2-tab" data-qas2-tab="activity">Activity Log</button>
         </div>
         <div class="qas2-body">
           <section class="qas2-content active" data-qas2-panel="account">
@@ -430,6 +446,33 @@
               </div>
             </div>
           </section>
+          <section class="qas2-content" data-qas2-panel="activity">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
+              <div>
+                <div style="font-size:16px;font-weight:700;">Activity Log</div>
+                <div id="qas2ActivityLogMessage" style="font-size:12px;color:#666;">Loading activity log…</div>
+              </div>
+              <button type="button" class="btn btn-secondary" id="qas2RefreshActivityLogBtn">Refresh</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="qas2-backup-table" style="width:100%;border-collapse:collapse;background:#fff;">
+                <thead style="background:#f8f9fa;border-bottom:2px solid #dee2e6;">
+                  <tr>
+                    <th style="padding:10px;text-align:left;font-weight:600;">Time</th>
+                    <th style="padding:10px;text-align:left;font-weight:600;">User</th>
+                    <th style="padding:10px;text-align:left;font-weight:600;">Action</th>
+                    <th style="padding:10px;text-align:left;font-weight:600;">Details</th>
+                    <th style="padding:10px;text-align:left;font-weight:600;">IP</th>
+                  </tr>
+                </thead>
+                <tbody id="qas2ActivityLogTableBody">
+                  <tr>
+                    <td colspan="5" style="padding:40px;text-align:center;color:#999;">Loading activity log...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
         </div>
         <div class="qas2-status" id="qas2Status">Ready</div>
         <div class="qas2-footer">
@@ -451,6 +494,9 @@
     });
     if (tab === 'archived') {
       renderArchivedStudentsPanel();
+    }
+    if (tab === 'activity') {
+      loadActivityLogPanel();
     }
   }
 
@@ -502,6 +548,62 @@
         </div>
       `;
     }).join('');
+  }
+
+  async function loadActivityLogPanel() {
+    const messageEl = document.getElementById('qas2ActivityLogMessage');
+    const tbody = document.getElementById('qas2ActivityLogTableBody');
+    if (!messageEl || !tbody) return;
+
+    messageEl.textContent = 'Loading activity log…';
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:40px; text-align:center; color:#999;">Loading activity log...</td></tr>';
+
+    try {
+      const data = await apiCall('/api/audit/logs?limit=100', 'GET');
+      if (!Array.isArray(data) || data.length === 0) {
+        const msg = 'No activity recorded yet.';
+        messageEl.textContent = msg;
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:40px; text-align:center; color:#666;">${msg}</td></tr>`;
+        return;
+      }
+
+      messageEl.textContent = `Showing ${data.length} entries`;
+
+      const rows = data.map((entry) => {
+        const when = entry.created_at ? new Date(entry.created_at).toLocaleString() : '--';
+        const user = entry.admin_id ? `Admin #${entry.admin_id}` : (entry.user_id ? `User #${entry.user_id}` : 'System');
+        const role = entry.user_role ? ` (${String(entry.user_role || '').replace(/</g, '&lt;')})` : '';
+        const action = String(entry.action || '').replace(/</g, '&lt;');
+        let details = '';
+        try {
+          if (entry.details) {
+            const parsed = typeof entry.details === 'string' ? JSON.parse(entry.details) : entry.details;
+            details = typeof parsed === 'object' ? JSON.stringify(parsed) : String(parsed);
+          }
+        } catch (_err) {
+          details = String(entry.details || '');
+        }
+        details = String(details || '').replace(/</g, '&lt;');
+        const ip = String(entry.ip_address || '').replace(/</g, '&lt;');
+
+        return `
+          <tr>
+            <td style="padding:10px;">${when.replace(/</g, '&lt;')}</td>
+            <td style="padding:10px;">${user.replace(/</g, '&lt;')}${role}</td>
+            <td style="padding:10px;">${action}</td>
+            <td style="padding:10px;">${details}</td>
+            <td style="padding:10px;">${ip}</td>
+          </tr>`;
+      }).join('');
+
+      tbody.innerHTML = rows;
+    } catch (err) {
+      const message = err && err.message ? String(err.message) : 'Error loading activity log.';
+      const display = message || 'Error loading activity log.';
+      messageEl.textContent = display;
+      tbody.innerHTML = `<tr><td colspan="5" style="padding:40px; text-align:center; color:#c00;">${display}</td></tr>`;
+      console.error('[QuickAdminSettings] loadActivityLogPanel error', err);
+    }
   }
 
   function openPanel() {
@@ -975,6 +1077,14 @@
         } catch (err) {
           notify(err && err.message ? err.message : 'Failed to restore student', 'error');
         }
+      });
+    }
+
+    const refreshActBtn = document.getElementById('qas2RefreshActivityLogBtn');
+    if (refreshActBtn && refreshActBtn.dataset.qas2Bound !== '1') {
+      refreshActBtn.dataset.qas2Bound = '1';
+      refreshActBtn.addEventListener('click', async () => {
+        await loadActivityLogPanel();
       });
     }
 

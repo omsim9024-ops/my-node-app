@@ -2126,6 +2126,142 @@ window.fetch = (resource, options = {}) => {
     return nativeFetch(resource, options);
 };
 
+function withSchoolParam(path) {
+    let code = activeSchoolCode || detectSchoolCode();
+    if (!code) return path;
+    try {
+        const url = new URL(path, window.location.origin);
+        url.searchParams.set('school', code);
+        return `${url.pathname}${url.search}${url.hash || ''}`;
+    } catch (_err) {
+        return path;
+    }
+}
+
+function trackUserAction(action, details) {
+    if (!action) return;
+
+    const throttle = (() => {
+        let last = 0;
+        return (fn, ms) => {
+            const now = Date.now();
+            if (now - last < ms) return;
+            last = now;
+            fn();
+        };
+    })();
+
+    const actor = (() => {
+        try {
+            const stored = localStorage.getItem('studentData') || localStorage.getItem('adminData') || localStorage.getItem('teacherData') || localStorage.getItem('adviserData');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                return {
+                    id: parsed?.id || parsed?.student_id || null,
+                    role: parsed?.role || null,
+                    name: parsed?.name || `${parsed?.firstName || ''} ${parsed?.lastName || ''}`.trim() || null
+                };
+            }
+        } catch (_e) {
+        }
+        return null;
+    })();
+
+    const payload = {
+        action,
+        details: {
+            ...details,
+            actor
+        }
+    };
+
+    const sendAuditEvent = async () => {
+        try {
+            const url = withSchoolParam('/api/audit/track');
+            const body = JSON.stringify(payload);
+            const headers = { 'Content-Type': 'application/json' };
+
+            // Try common local dev ports in case the backend is running on a different one.
+            const host = window.location.hostname;
+            const candidatePorts = [window.location.port || '', '3000','3001','3002','3003','3004','3005','3006','3007','3008','3009','3010'];
+            const tried = new Set();
+
+            for (const port of candidatePorts) {
+                const p = String(port || '').trim();
+                const key = p || 'default';
+                if (tried.has(key)) continue;
+                tried.add(key);
+
+                const base = p ? `${window.location.protocol}//${host}:${p}` : `${window.location.protocol}//${host}`;
+                const endpoint = `${base}${url}`;
+
+                try {
+                    const resp = await fetch(endpoint, {
+                        method: 'POST',
+                        headers,
+                        credentials: 'include',
+                        body
+                    });
+                    if (resp.ok) return;
+                    // If it returned an explicit client/server error, we assume backend reached.
+                    if (resp.status >= 400 && resp.status < 600) return;
+                } catch (_err) {
+                    // try next port
+                }
+            }
+        } catch (_err) {
+            // ignore
+        }
+    };
+
+    throttle(() => { sendAuditEvent(); }, 800);
+}
+
+
+function setupStudentDashboardAuditLogging() {
+    document.addEventListener('click', (event) => {
+        try {
+            const target = event.target.closest('button, a, input[type="button"], input[type="submit"], [role="button"]');
+            if (!target) return;
+            if (target.closest('.audit-log') || target.closest('.activity-log')) return;
+
+            const label = String(target.getAttribute('data-audit-action') || target.textContent || target.getAttribute('aria-label') || target.id || target.name || '').trim();
+            if (!label) return;
+
+            const action = `click:${target.tagName.toLowerCase()}`;
+            const details = {
+                label: label.slice(0, 80),
+                id: target.id || null,
+                classes: target.className || null,
+                href: target.getAttribute('href') || null
+            };
+
+            trackUserAction(action, details);
+        } catch (_e) {
+        }
+    }, true);
+
+    document.addEventListener('submit', (event) => {
+        try {
+            const form = event.target;
+            if (!form || form.tagName !== 'FORM') return;
+            const name = String(form.getAttribute('data-audit-action') || form.getAttribute('name') || form.id || '').trim();
+            const details = {
+                form: name || null,
+                id: form.id || null,
+                classes: form.className || null
+            };
+            trackUserAction('submit:form', details);
+        } catch (_e) {
+        }
+    }, true);
+}
+
+// initialize audit logging once the DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    setupStudentDashboardAuditLogging();
+});
+
 // Global variable to store active school year
 window.activeSchoolYear = null;
 

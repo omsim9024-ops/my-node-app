@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -24,6 +22,7 @@ const teacherAuthRouter = require('./routes/teacher-auth');
 const registrationCodesRouter = require('./routes/registration-codes');
 const electivesRouter = require('./routes/electives');
 const guidanceRouter = require('./routes/guidance');
+const auditRouter = require('./routes/audit');
 const systemHealthRouter = require('./routes/system-health');
 const backupsRouter = require('./routes/backups');
 const messagingPreferencesRouter = require('./routes/messaging-preferences');
@@ -32,9 +31,10 @@ const { tenantContextMiddleware, resolveTenantForRequest, hasExplicitTenantHint 
 const { dbContextMiddleware } = require('./db-context');
 const { tenantDataRoutingMiddleware } = require('./middleware/tenant-db-routing');
 const { getTenantDataPool } = require('./services/tenant-db-manager');
+const { recordAuditLog, parseAdminIdFromBearerToken } = require('./routes/audit');
 
 const app = express();
-const PORT = process.env.SERVER_PORT || 3000;
+
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 function validateRequiredEnvironment() {
@@ -80,6 +80,76 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(dbContextMiddleware);
 app.use(tenantContextMiddleware);
+
+// Audit logging middleware: captures all API interactions for traceability
+function sanitizeBodyForAudit(body) {
+    if (!body || typeof body !== 'object') return body;
+    const redacted = {};
+    const sensitiveKeys = new Set(['password', 'password_confirmation', 'pwd', 'token', 'authToken', 'adminAuthToken', 'otp', 'otpCode', 'secret']);
+    Object.keys(body).forEach((key) => {
+        try {
+            if (sensitiveKeys.has(key.toLowerCase())) {
+                redacted[key] = '<redacted>';
+            } else {
+                const val = body[key];
+                if (typeof val === 'object' && val !== null) {
+                    redacted[key] = sanitizeBodyForAudit(val);
+                } else {
+                    redacted[key] = val;
+                }
+            }
+        } catch (_err) {
+            redacted[key] = '<error>'; // fail safe
+        }
+    });
+    return redacted;
+}
+
+function auditLoggerMiddleware(req, res, next) {
+    const startTime = Date.now();
+
+    res.on('finish', () => {
+        try {
+            if (!req.originalUrl || !req.originalUrl.startsWith('/api/')) return;
+            // Avoid recursive logging of the audit endpoint itself
+            if (req.originalUrl.startsWith('/api/audit')) return;
+
+            const tenantId = Number(req.tenantId || req.tenant?.id || 0) || null;
+            const adminId = (req.authAdmin && req.authAdmin.id) ? Number(req.authAdmin.id) : parseAdminIdFromBearerToken(req);
+            const role = req.authAdmin ? String(req.authAdmin.role || '') : null;
+
+            const action = `${req.method} ${req.path}`;
+            const status = res.statusCode || 0;
+            const durationMs = Date.now() - startTime;
+            const ip = String(req.headers['x-forwarded-for'] || req.ip || req.connection?.remoteAddress || '').split(',')[0].trim();
+
+            const details = {
+                resource: req.path,
+                status,
+                durationMs,
+                query: req.query || {},
+                params: req.params || {},
+                body: sanitizeBodyForAudit(req.body || {}),
+                userAgent: String(req.headers['user-agent'] || ''),
+            };
+
+            recordAuditLog({
+                tenantId,
+                adminId: adminId || null,
+                userRole: role || null,
+                action,
+                details,
+                ip: ip || null
+            });
+        } catch (err) {
+            console.error('[AuditLogger] failed to record audit log', err);
+        }
+    });
+
+    next();
+}
+
+app.use(auditLoggerMiddleware);
 
 function requireExplicitTenantContext(req, res, next) {
     if (!hasExplicitTenantHint(req)) {
@@ -141,6 +211,8 @@ app.use('/api/adviser-dashboard', requireExplicitTenantContext, tenantDataRoutin
 app.use('/api/teacher-auth', requireExplicitTenantContext, tenantDataRoutingMiddleware, teacherAuthRouter);
 app.use('/api/registration-codes', requireExplicitTenantContext, tenantDataRoutingMiddleware, registrationCodesRouter);
 app.use('/api/guidance', requireExplicitTenantContext, tenantDataRoutingMiddleware, guidanceRouter);
+// Audit route should work without forcing an explicit tenant hint (fall back to default tenant)
+app.use('/api/audit', tenantDataRoutingMiddleware, auditRouter);
 app.use('/api/system-health', systemHealthRouter);
 app.use('/api/backups', requireExplicitTenantContext, tenantDataRoutingMiddleware, backupsRouter);
 app.use('/api/messaging-preferences', requireExplicitTenantContext, tenantDataRoutingMiddleware, messagingPreferencesRouter);
@@ -629,7 +701,11 @@ function startServerOnPort(startPort, maxAttempts = 5) {
     tryListen();
 }
 
-startServerOnPort(process.env.SERVER_PORT || PORT, 6);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
 
 // expose messaging internals for other modules (e.g. group notifications)
 module.exports = {

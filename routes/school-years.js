@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('../db');
 const { resolveTenantForRequest } = require('../middleware/tenant-context');
+const { recordAuditLog, parseAdminIdFromBearerToken } = require('./audit');
 const router = express.Router();
 
 async function resolveTenantId(req, res) {
@@ -114,6 +115,19 @@ router.post('/', async (req, res) => {
             [rows.insertId, tenantId]
         );
 
+        // Audit log: record that a new school year was created
+        try {
+            await recordAuditLog({
+                tenantId,
+                adminId: parseAdminIdFromBearerToken(req),
+                action: 'create_school_year',
+                details: { school_year, start_date, end_date },
+                ip: req.headers['x-forwarded-for'] || req.ip || null
+            });
+        } catch (_err) {
+            // do not block the response if audit logging fails
+        }
+
         res.status(201).json({
             success: true,
             message: 'School year created successfully',
@@ -161,6 +175,19 @@ router.put('/:id/activate', async (req, res) => {
             [id, tenantId]
         );
         
+        // Audit log: school year activation
+        try {
+            await recordAuditLog({
+                tenantId,
+                adminId: parseAdminIdFromBearerToken(req),
+                action: 'activate_school_year',
+                details: { school_year_id: id },
+                ip: req.headers['x-forwarded-for'] || req.ip || null
+            });
+        } catch (_err) {
+            // ignore audit log failures
+        }
+
         res.json({
             success: true,
             message: 'School year activated successfully',
@@ -234,6 +261,19 @@ router.put('/:id', async (req, res) => {
             [id, tenantId]
         );
         
+        // Audit log: update to an existing school year
+        try {
+            await recordAuditLog({
+                tenantId,
+                adminId: parseAdminIdFromBearerToken(req),
+                action: 'update_school_year',
+                details: { school_year: school_year || null, start_date: start_date || null, end_date: end_date || null, id },
+                ip: req.headers['x-forwarded-for'] || req.ip || null
+            });
+        } catch (_err) {
+            // ignore audit logging errors
+        }
+
         res.json({
             success: true,
             message: 'School year updated successfully',
@@ -274,6 +314,19 @@ router.delete('/:id', async (req, res) => {
             [id, tenantId]
         );
         
+        // Audit log: deleted school year
+        try {
+            await recordAuditLog({
+                tenantId,
+                adminId: parseAdminIdFromBearerToken(req),
+                action: 'delete_school_year',
+                details: { id },
+                ip: req.headers['x-forwarded-for'] || req.ip || null
+            });
+        } catch (_err) {
+            // ignore audit logging errors
+        }
+
         res.json({
             success: true,
             message: 'School year deleted successfully',

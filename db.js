@@ -17,5 +17,3 @@ const dbProxy = new Proxy({}, {
 });
 
 module.exports = dbProxy;
-
-
