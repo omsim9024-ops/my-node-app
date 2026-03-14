@@ -105,6 +105,13 @@ async function resolveTenantScopeColumn(dbPool, tableName) {
 }
 
 async function backfillBackupTenantIds(dbPool) {
+    // If the admins table doesn't exist yet, skip backfill (schema may still be initializing)
+    try {
+        await dbPool.query('SELECT 1 FROM admins LIMIT 1');
+    } catch (_err) {
+        return;
+    }
+
     await dbPool.query(`
         UPDATE backup_policies bp
         LEFT JOIN admins a ON a.id = bp.admin_id

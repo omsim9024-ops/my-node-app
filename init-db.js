@@ -13,8 +13,8 @@ async function tableExists(tableName) {
     return Array.isArray(rows) && rows.length > 0;
 }
 
-async function runSqlFileIfMissing(tableName, sqlFileRelativePath) {
-    if (await tableExists(tableName)) return;
+async function runSqlFileIfMissing(tableName, sqlFileRelativePath, force = false) {
+    if (!force && (await tableExists(tableName))) return;
 
     const sqlPath = path.join(__dirname, sqlFileRelativePath);
     if (!fs.existsSync(sqlPath)) return;
@@ -26,6 +26,13 @@ async function runSqlFileIfMissing(tableName, sqlFileRelativePath) {
         .map((stmt) => stmt.trim())
         .filter((stmt) => stmt && !stmt.startsWith('--'));
 
+    // Temporarily disable FK checks to avoid ordering issues in fresh databases.
+    try {
+        await pool.query('SET FOREIGN_KEY_CHECKS = 0');
+    } catch (err) {
+        console.warn('MySQL init: failed to disable foreign key checks:', err.code || err.message);
+    }
+
     for (const stmt of statements) {
         try {
             await pool.query(stmt);
@@ -34,6 +41,12 @@ async function runSqlFileIfMissing(tableName, sqlFileRelativePath) {
             // but log so we can diagnose issues in production.
             console.warn('MySQL init: SQL file statement failed', err.code || err.message);
         }
+    }
+
+    try {
+        await pool.query('SET FOREIGN_KEY_CHECKS = 1');
+    } catch (err) {
+        console.warn('MySQL init: failed to re-enable foreign key checks:', err.code || err.message);
     }
 }
 
@@ -79,12 +92,20 @@ async function initializeDatabase() {
             console.log('Database client is MySQL; performing MySQL-specific initialization.');
 
             // Run MySQL schema file if core tables are missing (e.g., on a fresh Railway database).
-            await runSqlFileIfMissing('students', 'schema-mysql.sql');
+            const requiredTables = ['students', 'admins', 'enrollments', 'school_years'];
+            const missing = [];
+            for (const t of requiredTables) {
+                if (!(await tableExists(t))) missing.push(t);
+            }
+            if (missing.length) {
+                console.log('MySQL init: missing tables detected, applying schema file:', missing.join(', '));
+                await runSqlFileIfMissing('students', 'schema-mysql.sql', true);
+            }
 
-        // bootstrap multi-tenant support in a backward-compatible way
-        try {
-            await pool.query(`
-                CREATE TABLE IF NOT EXISTS tenants (
+            // bootstrap multi-tenant support in a backward-compatible way
+            try {
+                await pool.query(`
+                    CREATE TABLE IF NOT EXISTS tenants (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     code VARCHAR(80) NOT NULL UNIQUE,
                     name VARCHAR(255) NOT NULL,

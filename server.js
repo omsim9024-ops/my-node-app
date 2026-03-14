@@ -59,7 +59,14 @@ app.disable('x-powered-by');
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin) return callback(null, true);
-        if (ALLOWED_ORIGINS.length === 0 && !IS_PRODUCTION) return callback(null, true);
+        // If no allowed origins are configured, allow all origins (useful for quick deploys).
+        // In production, you should explicitly set ALLOWED_ORIGINS to a comma-separated list.
+        if (ALLOWED_ORIGINS.length === 0) {
+            if (IS_PRODUCTION) {
+                console.warn('[CORS] No ALLOWED_ORIGINS configured; allowing all origins.');
+            }
+            return callback(null, true);
+        }
         if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
         return callback(new Error('CORS origin denied'));
     },
@@ -191,8 +198,25 @@ app.use((req, res, next) => {
 // Serve static files (HTML, CSS, JS)
 app.use(express.static(__dirname));
 
-// Initialize database on startup
-initializeDatabase();
+// Initialize database on startup (must complete before backup scheduler starts)
+async function start() {
+    try {
+        await initializeDatabase();
+    } catch (err) {
+        console.error('Critical: database initialization failed:', err);
+        process.exit(1);
+        return;
+    }
+
+    // Run backup scheduler only after database schema is ready enough to support it.
+    if (typeof backupsRouter.initializeBackupScheduler === 'function') {
+        backupsRouter.initializeBackupScheduler().catch((err) => {
+            console.error('Failed to initialize backup scheduler:', err);
+        });
+    }
+}
+
+start();
 
 // API Routes
 app.use('/api/teachers', requireExplicitTenantContext, tenantDataRoutingMiddleware, teachersRouter);
