@@ -13,7 +13,7 @@ async function ensureGuidanceTables() {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS guidance_requests (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+                student_id INT NOT NULL,
                 reason TEXT NOT NULL,
                 preferred_date DATE,
                 preferred_time TIME,
@@ -28,11 +28,25 @@ async function ensureGuidanceTables() {
                 completed_at TIMESTAMP NULL
             )
         `);
+
+        // Add FK constraints only when parent tables exist (avoid startup failures during migrations)
+        try {
+            await pool.query(`
+                ALTER TABLE guidance_requests
+                ADD CONSTRAINT fk_guidance_requests_student
+                    FOREIGN KEY (student_id)
+                    REFERENCES students(id)
+                    ON DELETE CASCADE
+            `);
+        } catch (_err) {
+            // ignore: constraint may already exist or parent table may not yet exist
+        }
+
         // guidance_messages table (if missing) — lightweight schema to avoid future errors
         await pool.query(`
             CREATE TABLE IF NOT EXISTS guidance_messages (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                guidance_request_id INT REFERENCES guidance_requests(id) ON DELETE CASCADE,
+                guidance_request_id INT NOT NULL,
                 sender_id INT,
                 sender_type VARCHAR(32),
                 message_content TEXT,
@@ -41,11 +55,24 @@ async function ensureGuidanceTables() {
                 read_at TIMESTAMP NULL
             )
         `);
+
+        try {
+            await pool.query(`
+                ALTER TABLE guidance_messages
+                ADD CONSTRAINT fk_guidance_messages_request
+                    FOREIGN KEY (guidance_request_id)
+                    REFERENCES guidance_requests(id)
+                    ON DELETE CASCADE
+            `);
+        } catch (_err) {
+            // ignore
+        }
+
         // student_risk_flags table — for tracking at-risk students
         await pool.query(`
             CREATE TABLE IF NOT EXISTS student_risk_flags (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+                student_id INT NOT NULL,
                 risk_type VARCHAR(100) NOT NULL,
                 description TEXT,
                 is_active BOOLEAN DEFAULT true,
@@ -54,13 +81,26 @@ async function ensureGuidanceTables() {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `);
+
+        try {
+            await pool.query(`
+                ALTER TABLE student_risk_flags
+                ADD CONSTRAINT fk_student_risk_flags_student
+                    FOREIGN KEY (student_id)
+                    REFERENCES students(id)
+                    ON DELETE CASCADE
+            `);
+        } catch (_err) {
+            // ignore
+        }
+
         // guidance_sessions table — for scheduling and tracking guidance sessions
         await pool.query(`
             CREATE TABLE IF NOT EXISTS guidance_sessions (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                guidance_request_id INT REFERENCES guidance_requests(id) ON DELETE CASCADE,
+                guidance_request_id INT NOT NULL,
                 guidance_counselor_id INT,
-                FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+                student_id INT NOT NULL,
                 session_date DATE NOT NULL,
                 session_time TIME,
                 session_location VARCHAR(255),
@@ -70,6 +110,30 @@ async function ensureGuidanceTables() {
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `);
+
+        try {
+            await pool.query(`
+                ALTER TABLE guidance_sessions
+                ADD CONSTRAINT fk_guidance_sessions_request
+                    FOREIGN KEY (guidance_request_id)
+                    REFERENCES guidance_requests(id)
+                    ON DELETE CASCADE
+            `);
+        } catch (_err) {
+            // ignore
+        }
+
+        try {
+            await pool.query(`
+                ALTER TABLE guidance_sessions
+                ADD CONSTRAINT fk_guidance_sessions_student
+                    FOREIGN KEY (student_id)
+                    REFERENCES students(id)
+                    ON DELETE CASCADE
+            `);
+        } catch (_err) {
+            // ignore
+        }
     } catch (err) {
         console.error('[Guidance API] Error ensuring guidance tables exist:', err);
     }

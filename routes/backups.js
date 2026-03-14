@@ -135,45 +135,74 @@ async function normalizeBackupTenantColumns(dbPool) {
 }
 
 async function ensureBackupTables(dbPool = pool) {
-    await dbPool.query(`
-        CREATE TABLE IF NOT EXISTS backup_policies (
-            admin_id INT PRIMARY KEY,
-            tenant_id INT NULL,
-            enabled TINYINT(1) DEFAULT 0,
-            interval_hours INT DEFAULT 24,
-            retention_count INT DEFAULT 30,
-            scope_json LONGTEXT NOT NULL,
-            last_run_at DATETIME NULL,
-            next_run_at DATETIME NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-            INDEX idx_backup_policies_tenant (tenant_id),
-            CONSTRAINT fk_backup_policies_admin
-                FOREIGN KEY (admin_id) REFERENCES admins(id)
-                ON DELETE CASCADE
-        )
-    `);
+    // Create tables required for backups. Foreign keys are added separately to avoid
+    // startup failures if the referenced tables do not yet exist.
+    try {
+        await dbPool.query(`
+            CREATE TABLE IF NOT EXISTS backup_policies (
+                admin_id INT PRIMARY KEY,
+                tenant_id INT NULL,
+                enabled TINYINT(1) DEFAULT 0,
+                interval_hours INT DEFAULT 24,
+                retention_count INT DEFAULT 30,
+                scope_json LONGTEXT NOT NULL,
+                last_run_at DATETIME NULL,
+                next_run_at DATETIME NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_backup_policies_tenant (tenant_id)
+            )
+        `);
+    } catch (err) {
+        console.warn('[Backups] failed to create backup_policies table', err.code || err.message);
+    }
 
-    await dbPool.query(`
-        CREATE TABLE IF NOT EXISTS backup_logs (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            admin_id INT NOT NULL,
-            tenant_id INT NULL,
-            file_name VARCHAR(255) NOT NULL,
-            file_path TEXT NOT NULL,
-            file_size BIGINT DEFAULT 0,
-            status VARCHAR(20) DEFAULT 'success',
-            trigger_type VARCHAR(20) DEFAULT 'manual',
-            scope_json LONGTEXT,
-            error_message TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_backup_logs_tenant (tenant_id),
-            INDEX idx_backup_logs_admin_created (admin_id, created_at),
-            CONSTRAINT fk_backup_logs_admin
-                FOREIGN KEY (admin_id) REFERENCES admins(id)
+    try {
+        await dbPool.query(`
+            CREATE TABLE IF NOT EXISTS backup_logs (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                admin_id INT NOT NULL,
+                tenant_id INT NULL,
+                file_name VARCHAR(255) NOT NULL,
+                file_path TEXT NOT NULL,
+                file_size BIGINT DEFAULT 0,
+                status VARCHAR(20) DEFAULT 'success',
+                trigger_type VARCHAR(20) DEFAULT 'manual',
+                scope_json LONGTEXT,
+                error_message TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_backup_logs_tenant (tenant_id),
+                INDEX idx_backup_logs_admin_created (admin_id, created_at)
+            )
+        `);
+    } catch (err) {
+        console.warn('[Backups] failed to create backup_logs table', err.code || err.message);
+    }
+
+    // Add FK constraints if possible (safe to ignore failures when parent tables are missing)
+    try {
+        await dbPool.query(`
+            ALTER TABLE backup_policies
+            ADD CONSTRAINT fk_backup_policies_admin
+                FOREIGN KEY (admin_id)
+                REFERENCES admins(id)
                 ON DELETE CASCADE
-        )
-    `);
+        `);
+    } catch (_err) {
+        // ignore
+    }
+
+    try {
+        await dbPool.query(`
+            ALTER TABLE backup_logs
+            ADD CONSTRAINT fk_backup_logs_admin
+                FOREIGN KEY (admin_id)
+                REFERENCES admins(id)
+                ON DELETE CASCADE
+        `);
+    } catch (_err) {
+        // ignore
+    }
 
     if (!(await tableHasColumn(dbPool, 'backup_policies', 'tenant_id'))) {
         await dbPool.query('ALTER TABLE backup_policies ADD COLUMN tenant_id INT NULL AFTER admin_id');

@@ -31,6 +31,25 @@ const dbConfig = {
   queueLimit: 0
 };
 
+// Railway internal hostnames (like mysql.railway.internal) only resolve when running inside
+// Railway's network. When running locally, fall back to localhost and use local credentials.
+if (process.env.NODE_ENV !== 'production' && typeof dbConfig.host === 'string') {
+  const hostLower = dbConfig.host.toLowerCase();
+  if (hostLower.endsWith('.railway.internal') || hostLower === 'mysql.railway.internal') {
+    console.warn('[DB] Detected Railway internal host, switching to local MySQL for local development.');
+    dbConfig.host = '127.0.0.1';
+
+    // Prefer local development creds if provided, to avoid using Railway passwords on local MySQL.
+    const localUser = process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_USER;
+    const localPassword = process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD;
+    const localDatabase = process.env.DB_NAME || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE;
+
+    if (localUser) dbConfig.user = localUser;
+    if (localPassword) dbConfig.password = localPassword;
+    if (localDatabase) dbConfig.database = localDatabase;
+  }
+}
+
 const missing = [];
 if (!dbConfig.user) missing.push('DB_USER or MYSQLUSER');
 if (!dbConfig.password) missing.push('DB_PASSWORD or MYSQLPASSWORD');

@@ -701,11 +701,10 @@ function startServerOnPort(startPort, maxAttempts = 5) {
     tryListen();
 }
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const PORT = process.env.PORT || process.env.SERVER_PORT || 3000;
 
+// Use the startup helper that can retry on EADDRINUSE if the port is already in use.
+startServerOnPort(PORT);
 
 // expose messaging internals for other modules (e.g. group notifications)
 module.exports = {

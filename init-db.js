@@ -1,4 +1,6 @@
 const pool = require('./db');
+const fs = require('fs');
+const path = require('path');
 
 async function tableExists(tableName) {
     const [rows] = await pool.query(
@@ -9,6 +11,30 @@ async function tableExists(tableName) {
         [tableName]
     );
     return Array.isArray(rows) && rows.length > 0;
+}
+
+async function runSqlFileIfMissing(tableName, sqlFileRelativePath) {
+    if (await tableExists(tableName)) return;
+
+    const sqlPath = path.join(__dirname, sqlFileRelativePath);
+    if (!fs.existsSync(sqlPath)) return;
+
+    const raw = fs.readFileSync(sqlPath, 'utf8');
+    // Split statements on semicolon at end of line, ignoring comments.
+    const statements = raw
+        .split(/;\s*\n/)
+        .map((stmt) => stmt.trim())
+        .filter((stmt) => stmt && !stmt.startsWith('--'));
+
+    for (const stmt of statements) {
+        try {
+            await pool.query(stmt);
+        } catch (err) {
+            // some statements may fail if already applied; ignore non-fatal errors
+            // but log so we can diagnose issues in production.
+            console.warn('MySQL init: SQL file statement failed', err.code || err.message);
+        }
+    }
 }
 
 async function tableHasColumn(tableName, columnName) {
@@ -46,12 +72,14 @@ async function initializeDatabase() {
         throw err;
     }
 
-    // If the environment indicates we are using MySQL, we assume the
-    // schema is managed externally (e.g. via phpMyAdmin) and skip the
-    // PostgreSQL-specific DDL.  This prevents syntax errors such as
-    // SERIAL/JSONB in a MySQL server.
-    if ((process.env.DB_CLIENT || '').toLowerCase().includes('mysql')) {
-        console.log('Database client is MySQL; performing MySQL-specific initialization.');
+// If the environment indicates we are using MySQL, we run a MySQL-specific initialization.
+        // This includes applying the MySQL schema file (when needed) and then running some compatibility
+        // adjustments for tenant columns / helper columns.
+        if ((process.env.DB_CLIENT || '').toLowerCase().includes('mysql')) {
+            console.log('Database client is MySQL; performing MySQL-specific initialization.');
+
+            // Run MySQL schema file if core tables are missing (e.g., on a fresh Railway database).
+            await runSqlFileIfMissing('students', 'schema-mysql.sql');
 
         // bootstrap multi-tenant support in a backward-compatible way
         try {
