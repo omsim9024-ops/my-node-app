@@ -49,13 +49,26 @@ function cacheKeyForConfig(config) {
     ].join('|');
 }
 
+function getEnvDbConfigDefaults() {
+    // Similar behavior to db-control.js: support both DB_* and MYSQL_* env var naming.
+    const host = String(process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.DB_HOST || 'localhost').trim();
+    const port = toNumber(process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT || 3306);
+    const user = String(process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.DB_USER || 'root').trim();
+    const password = String(process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '').trim();
+    const database = String(process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME || '').trim();
+
+    return { host, port, user, password, database };
+}
+
 function buildPoolConfigFromTenant(tenant) {
+    const defaults = getEnvDbConfigDefaults();
+
     return {
-        host: String(tenant.dbHost || process.env.DB_HOST || 'localhost').trim(),
-        port: toNumber(tenant.dbPort, toNumber(process.env.DB_PORT, 3306)),
-        user: String(tenant.dbUser || process.env.DB_USER || 'root').trim(),
-        password: process.env.DB_PASSWORD || '',
-        database: String(tenant.dbName || '').trim(),
+        host: String(tenant.dbHost || defaults.host || 'localhost').trim(),
+        port: toNumber(tenant.dbPort, defaults.port || 3306),
+        user: String(tenant.dbUser || defaults.user || '').trim(),
+        password: String(defaults.password || '').trim(),
+        database: String(tenant.dbName || defaults.database || '').trim(),
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0
@@ -115,11 +128,20 @@ async function getTenantDataPool(tenantLike) {
     }
 
     const tenantPool = mysql.createPool(poolConfig);
-    await tenantPool.query('SELECT 1');
-    tenantPoolCache.set(key, tenantPool);
 
+    try {
+        await tenantPool.query('SELECT 1');
+    } catch (err) {
+        // If we can't connect to the tenant database (e.g., access denied, missing user),
+        // fall back to the control pool so the app continues to work.
+        console.warn('[TenantDB] Unable to connect to tenant database, falling back to control DB:', err.code || err.message);
+        return null;
+    }
+
+    tenantPoolCache.set(key, tenantPool);
     return tenantPool;
 }
+
 
 module.exports = {
     getTenantById,
