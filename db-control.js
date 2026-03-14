@@ -50,6 +50,14 @@ if (process.env.NODE_ENV !== 'production' && typeof dbConfig.host === 'string') 
   }
 }
 
+// Log the derived DB config (excluding password) for easier troubleshooting.
+console.log('[DB] attempting connection to', {
+  host: dbConfig.host,
+  port: dbConfig.port,
+  user: dbConfig.user,
+  database: dbConfig.database
+});
+
 const missing = [];
 if (!dbConfig.user) missing.push('DB_USER or MYSQLUSER');
 if (!dbConfig.password) missing.push('DB_PASSWORD or MYSQLPASSWORD');

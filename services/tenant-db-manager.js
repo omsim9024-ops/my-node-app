@@ -49,13 +49,60 @@ function cacheKeyForConfig(config) {
     ].join('|');
 }
 
+function parseDatabaseUrl(urlString) {
+    if (!urlString) return null;
+    try {
+        const url = new URL(urlString);
+        return {
+            host: url.hostname,
+            port: Number(url.port || 3306),
+            user: url.username,
+            password: url.password,
+            database: url.pathname ? url.pathname.replace(/^\//, '') : ''
+        };
+    } catch (_err) {
+        return null;
+    }
+}
+
 function getEnvDbConfigDefaults() {
-    // Similar behavior to db-control.js: support both DB_* and MYSQL_* env var naming.
-    const host = String(process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.DB_HOST || 'localhost').trim();
-    const port = toNumber(process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT || 3306);
-    const user = String(process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.DB_USER || 'root').trim();
-    const password = String(process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '').trim();
-    const database = String(process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME || '').trim();
+    // Similar behavior to db-control.js: support both DB_* and MYSQL_* env var naming,
+    // plus optional URL-style credentials (Railway's DATABASE_URL / MYSQL_URL).
+    const urlConfig = parseDatabaseUrl(process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.RAILWAY_DATABASE_URL);
+
+    const host = String(
+        urlConfig?.host ||
+        process.env.MYSQLHOST || process.env.MYSQL_HOST ||
+        process.env.DB_HOST ||
+        'localhost'
+    ).trim();
+    const port = toNumber(
+        urlConfig?.port ||
+        process.env.MYSQLPORT || process.env.MYSQL_PORT ||
+        process.env.DB_PORT ||
+        3306
+    );
+    const user = String(
+        urlConfig?.user ||
+        process.env.MYSQLUSER || process.env.MYSQL_USER ||
+        process.env.MYSQL_ROOT_USER ||
+        process.env.DB_USER ||
+        'root'
+    ).trim();
+    const password = String(
+        urlConfig?.password ||
+        process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD ||
+        process.env.MYSQL_ROOT_PASSWORD ||
+        process.env.RAILWAY_DATABASE_PASSWORD ||
+        process.env.DB_PASSWORD ||
+        ''
+    ).trim();
+    const database = String(
+        urlConfig?.database ||
+        process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE ||
+        process.env.DB_NAME ||
+        ''
+    ).trim();
 
     return { host, port, user, password, database };
 }
@@ -63,11 +110,17 @@ function getEnvDbConfigDefaults() {
 function buildPoolConfigFromTenant(tenant) {
     const defaults = getEnvDbConfigDefaults();
 
+    // If the tenant record includes a secret reference, try to resolve it from env vars
+    let tenantPassword = defaults.password;
+    if (!tenantPassword && tenant.dbSecretRef) {
+        tenantPassword = process.env[tenant.dbSecretRef] || tenantPassword;
+    }
+
     return {
         host: String(tenant.dbHost || defaults.host || 'localhost').trim(),
         port: toNumber(tenant.dbPort, defaults.port || 3306),
         user: String(tenant.dbUser || defaults.user || '').trim(),
-        password: String(defaults.password || '').trim(),
+        password: String(tenantPassword || '').trim(),
         database: String(tenant.dbName || defaults.database || '').trim(),
         waitForConnections: true,
         connectionLimit: 10,
@@ -134,7 +187,9 @@ async function getTenantDataPool(tenantLike) {
     } catch (err) {
         // If we can't connect to the tenant database (e.g., access denied, missing user),
         // fall back to the control pool so the app continues to work.
+        const { host, port, database, user } = poolConfig;
         console.warn('[TenantDB] Unable to connect to tenant database, falling back to control DB:', err.code || err.message);
+        console.warn(`[TenantDB] attempted: host=${host}, port=${port}, database=${database}, user=${user}`);
         return null;
     }
 
