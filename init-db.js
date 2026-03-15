@@ -20,9 +20,12 @@ async function runSqlFileIfMissing(tableName, sqlFileRelativePath, force = false
     if (!fs.existsSync(sqlPath)) return;
 
     const raw = fs.readFileSync(sqlPath, 'utf8');
-    // Split statements on semicolon at end of line, ignoring comments.
-    const statements = raw
-        .split(/;\s*\n/)
+    // Normalize CRLF to LF so splitting is consistent on all platforms.
+    const normalized = raw.replace(/\r\n/g, '\n');
+
+    // Split on semicolons and run each statement.
+    const statements = normalized
+        .split(';')
         .map((stmt) => stmt.trim())
         .filter((stmt) => stmt && !stmt.startsWith('--'));
 
@@ -33,13 +36,15 @@ async function runSqlFileIfMissing(tableName, sqlFileRelativePath, force = false
         console.warn('MySQL init: failed to disable foreign key checks:', err.code || err.message);
     }
 
+    let executed = 0;
     for (const stmt of statements) {
         try {
             await pool.query(stmt);
+            executed++;
         } catch (err) {
             // some statements may fail if already applied; ignore non-fatal errors
             // but log so we can diagnose issues in production.
-            console.warn('MySQL init: SQL file statement failed', err.code || err.message);
+            console.warn('MySQL init: SQL file statement failed:', err.code || err.message, '\n  stmt:', stmt.split('\n')[0]);
         }
     }
 
@@ -47,6 +52,20 @@ async function runSqlFileIfMissing(tableName, sqlFileRelativePath, force = false
         await pool.query('SET FOREIGN_KEY_CHECKS = 1');
     } catch (err) {
         console.warn('MySQL init: failed to re-enable foreign key checks:', err.code || err.message);
+    }
+
+    console.log(`MySQL init: executed ${executed} statements from schema file ${sqlFileRelativePath}`);
+
+    // Verify key tables exist after applying schema. If not, stop early so we can fix the issue.
+    const requiredAfter = ['students', 'admins', 'enrollments', 'school_years'];
+    const missingAfter = [];
+    for (const t of requiredAfter) {
+        if (!(await tableExists(t))) missingAfter.push(t);
+    }
+
+    if (missingAfter.length > 0) {
+        console.error('MySQL init: schema file did not create required tables:', missingAfter.join(', '));
+        throw new Error('Failed to initialize database schema. Please check schema-mysql.sql and deployment file access.');
     }
 }
 
@@ -66,6 +85,70 @@ async function ensureTenantColumn(tableName) {
     if (await tableHasColumn(tableName, 'tenant_id')) return true;
     await pool.query(`ALTER TABLE \`${tableName}\` ADD COLUMN tenant_id INT NULL`);
     return true;
+}
+
+// Ensure core tables exist with minimal schema to allow app to function.
+async function ensureCoreTables() {
+    const statements = [
+        `
+        CREATE TABLE IF NOT EXISTS school_years (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            school_year VARCHAR(50) UNIQUE NOT NULL,
+            start_date DATE NOT NULL,
+            end_date DATE NOT NULL,
+            is_active BOOLEAN DEFAULT false,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+        `,
+        `
+        CREATE TABLE IF NOT EXISTS admins (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(255) NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            role VARCHAR(50) NOT NULL,
+            account_status VARCHAR(20) DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        `,
+        `
+        CREATE TABLE IF NOT EXISTS students (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            tenant_id INT NOT NULL DEFAULT 0,
+            student_id VARCHAR(50) UNIQUE NOT NULL,
+            first_name VARCHAR(100) NOT NULL,
+            last_name VARCHAR(100) NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            password VARCHAR(255),
+            grade_level VARCHAR(50),
+            account_status VARCHAR(20) DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_students_tenant (tenant_id)
+        )
+        `,
+        `
+        CREATE TABLE IF NOT EXISTS enrollments (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            enrollment_id VARCHAR(50) UNIQUE NOT NULL,
+            student_id INT NOT NULL,
+            enrollment_data JSON,
+            status VARCHAR(20) DEFAULT 'Pending',
+            enrollment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_enroll_student (student_id),
+            FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+        )
+        `
+    ];
+
+    for (const stmt of statements) {
+        try {
+            await pool.query(stmt);
+        } catch (err) {
+            console.warn('MySQL init: core table creation failed (non-fatal):', err.code || err.message);
+        }
+    }
 }
 
 // Initialize database tables
@@ -99,6 +182,10 @@ async function initializeDatabase() {
             }
             if (missing.length) {
                 console.log('MySQL init: missing tables detected, applying schema file:', missing.join(', '));
+
+                // Ensure minimal core tables exist so the app can respond.
+                await ensureCoreTables();
+
                 await runSqlFileIfMissing('students', 'schema-mysql.sql', true);
             }
 

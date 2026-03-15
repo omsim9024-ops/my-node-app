@@ -208,18 +208,21 @@ async function start() {
         return;
     }
 
-    // Run backup scheduler only after database schema is ready enough to support it.
+    // Initialize backup scheduler after schema is ready.
     if (typeof backupsRouter.initializeBackupScheduler === 'function') {
         backupsRouter.initializeBackupScheduler().catch((err) => {
             console.error('Failed to initialize backup scheduler:', err);
         });
     }
-}
 
-start();
+    // Only start accepting HTTP requests once DB schema is ready.
+    startServerOnPort(PORT);
+}
 
 // API Routes
 app.use('/api/teachers', requireExplicitTenantContext, tenantDataRoutingMiddleware, teachersRouter);
+
+start();
 app.use('/api/students', requireExplicitTenantContext, tenantDataRoutingMiddleware, studentsRouter);
 app.use('/api/classes', requireExplicitTenantContext, tenantDataRoutingMiddleware, classesRouter);
 app.use('/api/grades', requireExplicitTenantContext, tenantDataRoutingMiddleware, gradesRouter);

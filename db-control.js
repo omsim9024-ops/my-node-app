@@ -18,14 +18,19 @@ function parseDatabaseUrl(urlString) {
   }
 }
 
-const urlConfig = parseDatabaseUrl(process.env.MYSQL_URL || process.env.DATABASE_URL || process.env.RAILWAY_DATABASE_URL);
+const urlConfig = parseDatabaseUrl(
+  process.env.MYSQL_URL ||
+  process.env.DATABASE_URL ||
+  process.env.RAILWAY_DATABASE_URL ||
+  process.env.RAILWAY_MYSQL_URL
+);
 
 const dbConfig = {
-  host: urlConfig?.host || process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.DB_HOST || 'localhost',
-  user: urlConfig?.user || process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.DB_USER || '',
-  password: urlConfig?.password || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '',
-  database: urlConfig?.database || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.DB_NAME || '',
-  port: Number(urlConfig?.port || process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.DB_PORT || 3306),
+  host: urlConfig?.host || process.env.MYSQLHOST || process.env.MYSQL_HOST || process.env.RAILWAY_MYSQL_HOST || process.env.DB_HOST || 'localhost',
+  user: urlConfig?.user || process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.RAILWAY_MYSQL_USER || process.env.DB_USER || '',
+  password: urlConfig?.password || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.RAILWAY_MYSQL_PASSWORD || process.env.DB_PASSWORD || '',
+  database: urlConfig?.database || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || process.env.RAILWAY_MYSQL_DATABASE || process.env.DB_NAME || '',
+  port: Number(urlConfig?.port || process.env.MYSQLPORT || process.env.MYSQL_PORT || process.env.RAILWAY_MYSQL_PORT || process.env.DB_PORT || 3306),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
