@@ -123,6 +123,7 @@ async function ensureCoreTables() {
             password VARCHAR(255),
             grade_level VARCHAR(50),
             account_status VARCHAR(20) DEFAULT 'active',
+            registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_students_tenant (tenant_id)
         )
@@ -149,7 +150,17 @@ async function ensureCoreTables() {
             console.warn('MySQL init: core table creation failed (non-fatal):', err.code || err.message);
         }
     }
+
+    // Ensure required columns exist on students for the app.
+    try {
+        if (!(await tableHasColumn('students', 'registration_date'))) {
+            await pool.query('ALTER TABLE students ADD COLUMN registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
+        }
+    } catch (err) {
+        console.warn('MySQL init: failed to add students.registration_date column:', err.code || err.message);
+    }
 }
+
 
 // Initialize database tables
 async function initializeDatabase() {
